@@ -48,8 +48,7 @@
 - feature/T12-chat-send-message
 - feature/T13-upload-avatar
 - fix/T14-i18n-bug
-**Format:**
-type/TrelloID-description
+- **Format:** type/TrelloID-description
 
 ---
 
