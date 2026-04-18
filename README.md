@@ -26,9 +26,12 @@
 
 ---
 
-### 4. 🌱 Feature Branches
-- Created from `dev` (latest version)  
-- One branch per feature  
+### 4. 🌱 Feature Branches  
+- One branch per feature
+- Created from latest version of `dev`
+- git checkout dev
+  git pull origin dev
+  git checkout -b feature/T12-chat-send-message
 
 ---
 
@@ -55,8 +58,13 @@
 ### 8. 💬 Commit Messages
 - feat(T12): implement websocket message handler
 - feat(T13): add avatar upload endpoint
+- **Format:** type(TrelloID): short description 
 
 ---
 
 ### 9. 🔀 Pull Requests
-- [T12] Chat - send message backend
+- Title : [T12] Chat - send message backend
+- Description:
+  - What was done
+  - How to test
+  - Screenshoots (if necessary)
