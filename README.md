@@ -12,7 +12,7 @@
 - Production branch  
 - Only **stable and tested** versions  
 - Pull Request required before merge
-- *2 approvals required**
+- **2 approvals required**
 - Approvals reset if new commits are pushed
 - **Force push not allowed**  
 
@@ -22,7 +22,7 @@
 - Development branch  
 - Default branch  
 - Pull Request required before merge  
-- *2 approvals required**
+- **2 approvals required**
 - Approvals reset if new commits are pushed
 - **Force push not allowed**  
 
