@@ -11,8 +11,9 @@
 ### 2. 🌿 Main Branch (`main`)
 - Production branch  
 - Only **stable and tested** versions  
-- Pull Request required before merge  
-- At least **1 approval required**  
+- Pull Request required before merge
+- *2 approvals required**
+- Approvals reset if new commits are pushed
 - **Force push not allowed**  
 
 ---
@@ -21,7 +22,8 @@
 - Development branch  
 - Default branch  
 - Pull Request required before merge  
-- Approval **not mandatory**  
+- *2 approvals required**
+- Approvals reset if new commits are pushed
 - **Force push not allowed**  
 
 ---
@@ -30,8 +32,8 @@
 - One branch per feature
 - Created from latest version of `dev`
 - git checkout dev
-  git pull origin dev
-  git checkout -b feature/T12-chat-send-message
+- git pull origin dev
+- git checkout -b feature/T12-chat-send-message
 
 ---
 
