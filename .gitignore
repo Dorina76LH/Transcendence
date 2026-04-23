@@ -1,0 +1,22 @@
+# Entorno
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Django
+db.sqlite3
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Archivos de pruebas o temporales
+*.swp
+*.swo
