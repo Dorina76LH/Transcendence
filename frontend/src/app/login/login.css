@@ -1,0 +1,24 @@
+.Profile {
+	display: flex;
+    justify-content: center;
+    align-items: center;
+	padding: 1rem;
+}
+
+h1{
+		text-align: center;
+		font-size: 2.5rem;
+		margin-top: 1.5rem;
+		margin-bottom: 1.5rem;
+}
+
+h2 {
+	text-align: center;
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.navbar .nav-link {
+  color: #000000 !important;
+}
