@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # --- DATABASE: PostgreSQL ---
+  db:
+    image: postgres:16
+    container_name: transcendence_db
+    restart: always
+    # Loads DB credentials (POSTGRES_DB, USER, PASSWORD) from your local .env file
+    env_file: .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # --- CACHE / MESSAGE BROKER: Redis ---
+  # Essential for Django Channels (Live Chat) to pass messages between users
+  redis:
+    image: redis:7
+    container_name: transcendence_redis
+    # No volume needed usually for dev, but it keeps the chat "layer" running
+
+  # --- BACKEND: Django (Daphne/ASGI) ---
+  backend:
+    build: ./backend
+    container_name: transcendence_backend
+    # Maps your local code to the container for "Live Reload" during development
+    volumes:
+      - ./backend:/usr/src/app
+    ports:
+      - "8000:8000"
+    env_file: .env
+    # Ensures the database and redis are ready before starting Django
+    depends_on:
+      - db
+      - redis
+    # Using daphne instead of runserver to support WebSockets (Live Chat)
+    # Note: 'core.asgi:application' refers to your project_name/asgi.py file
+    command: daphne -b 0.0.0.0 -p 8000 core.asgi:application
+
+  # --- DATABASE GUI: PGAdmin ---
+  # Web interface to manage your database (Check if messages are stored, etc.)
+  # Access it at http://localhost:5050
+  # --- DATABASE GUI: PGAdmin ---
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: transcendence_pgadmin
+    environment:
+      # We now use variables from the .env file instead of hardcoded strings
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+# --- PERSISTENCE ---
+# Named volume to ensure data isn't lost when containers are stopped
+volumes:
+  postgres_data:

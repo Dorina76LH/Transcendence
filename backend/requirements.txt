@@ -1,0 +1,13 @@
+# --- CORE FRAMEWORK ---
+django                  # The main web framework
+djangorestframework     # Toolkit for building Web APIs (to talk with Angular)
+django-cors-headers     # Handles Cross-Origin Resource Sharing (CORS) for Angular connectivity
+
+# --- REAL-TIME / CHAT (WebSockets) ---
+django-channels         # Extends Django to handle WebSockets and long-running connections
+channels-redis          # Redis backing store for Django Channels
+daphne                  # ASGI server to run the project with WebSocket support
+
+# --- DATABASE & ENVIRONMENT ---
+psycopg2-binary         # PostgreSQL database adapter for Python
+django-environ          # Allows reading variables from the .env file

@@ -1,0 +1,45 @@
+# --- PYTHON ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# --- CONFIGURATION & SECRETS ---
+# Never commit the .env file to Git! 
+# It contains passwords and secret keys.
+.env
+.env.local
+
+# --- DJANGO ---
+# Local database for testing (not used in our Docker setup but good to ignore)
+db.sqlite3
+# Uploaded user files and collected static files
+media/
+static/
+staticfiles/
+
+# --- DOCKER & DATABASE ---
+# Persistent data directory for PostgreSQL
+.docker-data/
+# If you ever use a local dump or log for Postgres
+*.sql
+*.dump
+
+# --- LOGS & DIAGNOSTICS ---
+*.log
+# Django Channels / Daphne logs
+daphne.log
+
+# --- IDEs & EDITORS ---
+# VS Code, PyCharm, and Vim swap files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- SYSTEM FILES ---
+.DS_Store
+Thumbs.db
