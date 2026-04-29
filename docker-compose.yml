@@ -1,0 +1,58 @@
+services:
+  # --- REVERSE PROXY ---
+  nginx:
+    build: ./infra/nginx
+    container_name: transcendence_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx/conf.d:/etc/nginx/conf.d
+      - ./infra/nginx/ssl:/etc/nginx/ssl
+    networks:
+      - gateway
+    restart: always
+
+  # --- FRONTEND ---
+  frontend:
+    build: ./frontend
+    container_name: transcendence_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - gateway
+    tty: true
+
+  # --- BACKEND ---
+  backend:
+    build: ./backend
+    container_name: transcendence_backend
+    env_file: .env
+    volumes:
+      - ./backend:/app
+    networks:
+      - gateway
+      - internal
+    depends_on:
+      - db
+
+  # --- DATABASE ---
+  db:
+    image: postgres:16
+    container_name: db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - internal
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+networks:
+  gateway: # Trafic Web (Nginx <-> Front/Back)
+  internal: # Trafic Privé (Back <-> DB/Vault)
+
+volumes:
+  postgres_data:
