@@ -1,72 +1,20 @@
-# Transcendence
+# Transcendence - Infrastructure
 
-## 📌 Git & Trello Rules
+## Utilisation du Makefile
 
-### 1. 🧩 Tools
-- **Trello** → task management & progress tracking  
-- **Git** → source code & versioning  
+Le projet se pilote entièrement via le Makefile à la racine pour simplifier la gestion de Docker.
 
----
-
-### 2. 🌿 Main Branch (`main`)
-- Production branch  
-- Only **stable and tested** versions  
-- Pull Request required before merge
-- **2 approvals required**
-- Approvals reset if new commits are pushed
-- **Force push not allowed**  
+| Commande     | Action                                                                 |
+| :----------- | :--------------------------------------------------------------------- |
+| `make`       | Vérifie les dépendances, build et lance les containers.                |
+| `make down`  | Arrête et supprime les containers.                                     |
+| `make re`    | Redémarre proprement toute l'infrastructure (down + all).              |
+| `make clean` | Arrête tout et nettoie complètement le cache Docker (`prune -af`). A utiliser avec précaution    |
 
 ---
 
-### 3. 🟡 Dev Branch (`dev`)
-- Development branch  
-- Default branch  
-- Pull Request required before merge  
-- **2 approvals required**
-- Approvals reset if new commits are pushed
-- **Force push not allowed**  
+## Notes techniques
 
----
-
-### 4. 🌱 Feature Branches  
-- One branch per feature
-- Created from latest version of `dev`
-- git checkout dev
-- git pull origin dev
-- git checkout -b feature/T12-chat-send-message
-
----
-
-### 5. 🔗 Rule
-> **1 Trello card = 1 branch = 1 PR**
-
----
-
-### 6. 📋 Trello Cards
-- #T12 - Chat: send message backend
-- #T13 - Upload avatar
-- #T14 - i18n setup
-
----
-
-### 7. 🌿 Git Branch Naming
-- feature/T12-chat-send-message
-- feature/T13-upload-avatar
-- fix/T14-i18n-bug
-- **Format:** type/TrelloID-description
-
----
-
-### 8. 💬 Commit Messages
-- feat(T12): implement websocket message handler
-- feat(T13): add avatar upload endpoint
-- **Format:** type(TrelloID): short description 
-
----
-
-### 9. 🔀 Pull Requests
-- Title : [T12] Chat - send message backend
-- Description:
-  - What was done
-  - How to test
-  - Screenshoots (if necessary)
+1. **Vérification auto** : Le Makefile exécute `./infra/tools/check_deps.sh` à chaque lancement pour vérifier Docker et le fichier `.env`.
+2. **Logs** : Pour voir ce qui se passe dans les containers : `docker compose logs -f`.
+3. **Variables** : N'oubliez pas de créer votre `.env` local à partir du `.env.example`.
