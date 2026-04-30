@@ -1,5 +1,5 @@
 # Use the official Python image as a parent image
-FROM python:3
+FROM python:3.12-slim
 
 # Prevents Python from buffering stdout and stderr, 
 # ensuring logs are sent straight to the terminal in real-time.
@@ -30,7 +30,7 @@ EXPOSE 8000
 RUN chmod +x /usr/src/app/entrypoint.sh
 
 # This script will run every time the container starts
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+ENTRYPOINT ["sh","/usr/src/app/entrypoint.sh"]
 
 # The CMD is now passed as an argument to the entrypoint
 CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "core.asgi:application"]
