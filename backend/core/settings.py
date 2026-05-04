@@ -27,16 +27,29 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
-# Application definition
+#? ----------------------------------------------------------------------------
+#? Application definition
+#? ----------------------------------------------------------------------------
 
 INSTALLED_APPS = [
+    
+    # django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # other apps
+    'rest_framework',
+    'corsheaders',
+    'channels',
+
+    # personnal apps
+    "apps.users",
+    "apps.api",
+    "apps.chat",
 ]
 
 MIDDLEWARE = [
@@ -110,20 +123,26 @@ USE_I18N = True
 
 USE_TZ = True
 
+#? ----------------------------------------------------------------------------
+#? CustomUser model
+#? ----------------------------------------------------------------------------
+#&  -  must be set before first migration
+#& Must be defined before running any migrations
+AUTH_USER_MODEL = 'apps.users.User'
 
-# CustonmUser model -  must be set before first migration
-# Must be defined before running any migrations
-AUTH_USER_MODEL = 'users.User'
-
-# Media files (user uploads like avatars)
-# MEDIA_URL : the public URL to access media files (media/avatars/photo.jpg)
-# MEDIA_ROOT : the absolute path on disk where files are stored
+#? ----------------------------------------------------------------------------
+#? Media files (user uploads like avatars)
+#? ----------------------------------------------------------------------------
+#& MEDIA_URL : the public URL to access media files (media/avatars/photo.jpg)
+#& MEDIA_ROOT : the absolute path on disk where files are stored
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-# STATIC_URL : the public URL to access static files
-# STATIC_ROOT : the folder where 'collectstatic' gathers all static files
+#? ----------------------------------------------------------------------------
+#? Static files (CSS, JavaScript, Images)
+#? ----------------------------------------------------------------------------
+#& https://docs.djangoproject.com/en/6.0/howto/static-files/
+#& STATIC_URL : the public URL to access static files
+#& STATIC_ROOT : the folder where 'collectstatic' gathers all static files
 STATIC_URL = 'static/'
 STATIC_ROOT_ROOT = BASE_DIR / 'static'
