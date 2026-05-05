@@ -1,5 +1,4 @@
-version: '3.8'
-
+#version: '3.8'
 services:
   # --- DATABASE: PostgreSQL ---
   db:
@@ -12,6 +11,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # --- CACHE / MESSAGE BROKER: Redis ---
   # Essential for Django Channels (Live Chat) to pass messages between users
@@ -32,16 +36,19 @@ services:
     env_file: .env
     # Ensures the database and redis are ready before starting Django
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy   # ← attend que postgres soit vraiment prêt
+      redis:
+        condition: service_started
     # Using daphne instead of runserver to support WebSockets (Live Chat)
     # Note: 'core.asgi:application' refers to your project_name/asgi.py file
-    command: daphne -b 0.0.0.0 -p 8000 core.asgi:application
+    command: >
+      sh -c "python manage.py migrate &&
+             daphne -b 0.0.0.0 -p 8000 core.asgi:application"
 
   # --- DATABASE GUI: PGAdmin ---
   # Web interface to manage your database (Check if messages are stored, etc.)
   # Access it at http://localhost:5050
-  # --- DATABASE GUI: PGAdmin ---
   pgadmin:
     image: dpage/pgadmin4
     container_name: transcendence_pgadmin
@@ -52,7 +59,8 @@ services:
     ports:
       - "5050:80"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 # --- PERSISTENCE ---
 # Named volume to ensure data isn't lost when containers are stopped

@@ -37,9 +37,45 @@ ALLOWED_HOSTS = []
 #? Application definition
 #? ----------------------------------------------------------------------------
 
+JAZZMIN_SETTINGS = {
+    "site_title": "Transcendence Admin",
+    "site_header": "Transcendence",
+    "site_brand": "Transcendence",
+    "welcome_sign": "Welcome to Transcendence",
+    "theme": "darkly",  # ← thème bleu/sombre sympa
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-primary",
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": False,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
+    "button_classes": {
+        "primary": "btn-primary",
+    }
+}
+
 INSTALLED_APPS = [
     
     # django apps
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -61,8 +97,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware'
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -172,7 +209,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 #& STATIC_ROOT : the folder where 'collectstatic' gathers all static files
 
 STATIC_URL = 'static/'
-STATIC_ROOT_ROOT = BASE_DIR / 'static'
+STATIC_ROOT = BASE_DIR / 'static'
 
 #? ----------------------------------------------------------------------------
 #? CORS configuration

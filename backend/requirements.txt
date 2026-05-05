@@ -14,3 +14,5 @@ django-environ          # Allows reading variables from the .env file
 
 djangorestframework-simplejwt # JWT authentication for angular
 Pillow  # image procesing for avatars
+django-jazzmin # for admin page
+whitenoise  # serves static files with daphne/asgi
