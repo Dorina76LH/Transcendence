@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
+#& for jwt
+from datetime import timedelta
+
+#& module python standard permettant d'acceder aux variables locales
+import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -43,6 +49,8 @@ INSTALLED_APPS = [
 
     # other apps
     'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'channels',
 
@@ -53,6 +61,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware'
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -81,14 +90,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+#? ----------------------------------------------------------------------------
+#? Database
+#? ----------------------------------------------------------------------------
 
-# Database
+#& ENGINE : replace sqlite3 with psotgres (connexion by psycop2 -> requirements docker)
+#& os : permet de lire les variables d'environnement locales dans .env
+#& NAME     : nom de la base de donnees
+#& USER     : utilisateur (admin ?)
+#& PASSWORD : mot de passe
+#& HOST     : nom du conteneur postgresgl dans docker compose
+#& PORT     : port standard postgresql
+
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': 'db',
+        'PORT' : '5432'
     }
 }
 
@@ -128,15 +151,18 @@ USE_TZ = True
 #? ----------------------------------------------------------------------------
 #&  -  must be set before first migration
 #& Must be defined before running any migrations
-AUTH_USER_MODEL = 'apps.users.User'
+
+AUTH_USER_MODEL = 'users.User'
 
 #? ----------------------------------------------------------------------------
 #? Media files (user uploads like avatars)
 #? ----------------------------------------------------------------------------
 #& MEDIA_URL : the public URL to access media files (media/avatars/photo.jpg)
 #& MEDIA_ROOT : the absolute path on disk where files are stored
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
 
 #? ----------------------------------------------------------------------------
 #? Static files (CSS, JavaScript, Images)
@@ -144,5 +170,79 @@ MEDIA_ROOT = BASE_DIR / 'media'
 #& https://docs.djangoproject.com/en/6.0/howto/static-files/
 #& STATIC_URL : the public URL to access static files
 #& STATIC_ROOT : the folder where 'collectstatic' gathers all static files
+
 STATIC_URL = 'static/'
 STATIC_ROOT_ROOT = BASE_DIR / 'static'
+
+#? ----------------------------------------------------------------------------
+#? CORS configuration
+#? ----------------------------------------------------------------------------
+#& Allows Angular (localhost:4200) to communicate with Django API (localhost:8000)
+#& Without this , the browser blocks all cross-origin requests.
+#& CORSL_ALLOW_CREDENTIALS  : allows cookies and auth headers to be sent cross-origin
+
+#TODO ajouter a la liste autorise http://transcendence.com en prod
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200" #& dev
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+#? ----------------------------------------------------------------------------
+#? DRF (Django REST Framework) configuration
+#? ----------------------------------------------------------------------------
+#& DRF is a toolkit that transforms Django views into a REST API
+#& JWT (JSON Web Token) is used for authentication instead of session
+#& Angular sends the token in every request header to prove its identity
+
+REST_FRAMEWORK = {
+
+    #& use JWT authentication instead of Django's default session authentication
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+
+    #& by default, only authenticated users can access the API
+    'DEFAULT_PERMISSION_CLASSES':[
+        'rest_framework_permissions.IsAuthenticated',
+    ],
+}
+
+#? ----------------------------------------------------------------------------
+#? JWT (JSON Web Token) configuration
+#? ----------------------------------------------------------------------------
+#& ACCESS_TOKEN  : short-lived token sent with every API request (5 min)
+#& REFRESH_TOKEN : long-lived token used to get a new access token (1 day)
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  #& token expires is 5 minutes
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1) ,    #& token expires in 1 day
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+#? ----------------------------------------------------------------------------
+#? Django Channels configuration
+#? ----------------------------------------------------------------------------
+#& Channels extends Django to handle WebSockets and long-running connexions
+#& WebSockets are required for the live chat feature
+#& ASGI application replaces the default WSGI application
+
+ASGI_APPLICATION = 'core.asgi.application'
+
+#? ----------------------------------------------------------------------------
+#? Channel Layers configuration
+#? ----------------------------------------------------------------------------
+#& Redis is used as a message broker between WebSocket connections
+#& When a user A sends a message, Redis broadcasts it to all connected users
+#& Host 'redis' refers to the Redis container name in docker compose
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels-redis.core.RedisChanelLayer',
+        'CONFIG': {
+            'hosts':[('redis', 6379)],
+        },
+    },
+}

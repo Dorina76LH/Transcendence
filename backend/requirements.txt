@@ -11,3 +11,6 @@ daphne                  # ASGI server to run the project with WebSocket support
 # --- DATABASE & ENVIRONMENT ---
 psycopg2-binary         # PostgreSQL database adapter for Python
 django-environ          # Allows reading variables from the .env file
+
+djangorestframework-simplejwt # JWT authentication for angular
+Pillow  # image procesing for avatars
