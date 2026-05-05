@@ -12,3 +12,9 @@ main.Settings {
   align-items: center;
   padding: 1rem;
 }
+
+.Profile {
+  padding-top: 80px; /* Pour éviter que le header fixe ne cache le contenu */
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}

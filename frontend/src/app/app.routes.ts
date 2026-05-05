@@ -1,11 +1,12 @@
 import { Routes } from '@angular/router';
 import { ProfileComponent } from './profile/profile.component';
 import { HomeComponent } from './home/home.component';
-import { SettingsComponent } from './settings';
-import { LanguageComponent } from './languages';
+import { SettingsComponent } from './settings/settings.component';
+import { LanguageComponent } from './languages/language.components';
 import { ChatComponent } from './chat/chat.component';
 import { LoginComponent } from './login';
-import { RegisterComponent } from './register';
+import { RegisterComponent } from './register/register.component';
+import { ProfileSettingsComponent } from './profile_settings';
 
 export const routes: Routes = [
 	{path: '', component: HomeComponent},
@@ -14,5 +15,6 @@ export const routes: Routes = [
 	{path: 'languages', component: LanguageComponent},
 	{path: 'chat', component:ChatComponent},
 	{path: 'login', component:LoginComponent},
-	{path: 'register', component:RegisterComponent}
+	{path: 'register', component:RegisterComponent},
+	{path: 'profile-settings', component:ProfileSettingsComponent}
 ];

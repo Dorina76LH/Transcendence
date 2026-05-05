@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-home',
-  imports: [RouterLink],
+  selector: 'app-chat',
+  imports: [RouterLink, FormsModule, CommonModule],
   template: `
 <header>
   <nav class="navbar navbar-expand-lg navbar-dark d-none d-lg-block" style="z-index: 2000;">
@@ -11,12 +13,12 @@ import { RouterLink } from '@angular/router';
       <a routerLink="/" class="nav-link">
         <strong>TRANSCENDENCE</strong>
       </a>
-      <button class="navbar-toggler" type="button" data-mdb-collapse-init data-mdb-target="#navbarExample01"
-        aria-controls="navbarExample01" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-mdb-collapse-init data-mdb-target="#navbar"
+        aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
         <i class="fas fa-bars"></i>
       </button>
-      <div class="collapse navbar-collapse" id="navbarExample01">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <div class="collapse navbar-collapse" id="navbar">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
           <li class="nav-item active">
             <a routerLink="/profile" class="nav-link">
               Profile
@@ -38,17 +40,52 @@ import { RouterLink } from '@angular/router';
   </nav>
 </header>
 <main class="main">
-  <div class="content">
-    <div class="left-side">
-      <h1>Welcome inside of the chat page</h1>
-      <h2>This page is still in progress, but at least it is here.</h2>
-      <h3>Here is a zone where you can write, so that at least you are talking to yourself :</h3>
-      <div class="TextZone">
-        <form method="post">
-          <h3>
-            <label>Your text here</label> : <input type="text" name="texte">
-          </h3>
-        </form>
+  <div class="container-fluid h-100">
+    <div class="row h-100">
+
+      <!-- left column, friend list -->
+      <div class="col-2 border-end border-secondary d-flex flex-column py-3">
+        <button class="btn d-flex align-items-center mb-3 w-100" (click)="selectFriend('Friend 1')">
+          <div class="rounded-circle bg-secondary me-2" style="width:40px;height:40px;"></div>
+          <h5 class="mb-0">Friend 1</h5>
+        </button>
+        <button class="btn d-flex align-items-center mb-3 w-100" (click)="selectFriend('Friend 2')">
+          <div class="rounded-circle bg-secondary me-2" style="width:40px;height:40px;"></div>
+          <h5 class="mb-0">Friend 2</h5>
+        </button>
+        <button class="btn d-flex align-items-center mb-3 w-100" (click)="selectFriend('Friend 3')">
+          <div class="rounded-circle bg-secondary me-2" style="width:40px;height:40px;"></div>
+          <h5 class="mb-0">Friend 3</h5>
+        </button>
+      </div>
+
+      <!-- whole column for the chat, on the middle -->
+      <div class="col d-flex flex-column py-3">
+        <h5 class="border-bottom border-secondary pb-2">
+          {{ selectedFriend ? 'Chat with ' + selectedFriend : 'Select a friend' }}
+        </h5>
+
+        <!-- msg zone display -->
+        <div class="flex-grow-1 overflow-auto mb-2">
+          <div *ngFor="let msg of messages">
+            {{ msg }}
+          </div>
+        </div>
+
+        <!-- text input for chat -->
+        <div class="d-flex gap-2">
+          <input
+            class="form-control border-secondary"
+            [(ngModel)]="inputMessage"
+            (keyup.enter)="sendMessage()"
+            placeholder="Your message ...">
+          <button class="btn btn-primary" (click)="sendMessage()">Send</button>
+        </div>
+      </div>
+      <!-- Friends selected output on the right -->
+      <div class="col-2 border-start border-secondary py-3">
+        <h5>Chatting with :</h5>
+        <div class="py-2">{{ selectedFriend || '...' }}</div>
       </div>
     </div>
   </div>
@@ -56,6 +93,44 @@ import { RouterLink } from '@angular/router';
 styleUrl: './chat.css'
 })
 export class ChatComponent {
+  selectedFriend = '';
 
+  selectFriend(name: string) {
+    this.selectedFriend = name;
+  }
+
+  private socket!: WebSocket;
+  messages: string[] = [];
+  inputMessage = '';
+
+  ngOnInit() {
+    this.socket = new WebSocket('ws://localhost:8000/ws/chat/');
+    this.socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      this.messages.push(data.message);
+    };
+  }
+  sendMessage() {
+  const messageToSend = this.inputMessage.trim();
+  if (messageToSend && this.selectedFriend) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      const payload = {
+        message: messageToSend,
+        to: this.selectedFriend,
+        timestamp: new Date().toISOString()
+      };
+      this.socket.send(JSON.stringify(payload));
+      this.messages.push(`Moi : ${messageToSend}`);
+      this.inputMessage = '';
+    } else {
+      alert("Connection lost. Can't send the message.");
+    }
+  } else if (!this.selectedFriend) {
+    alert("Choose a friend first.");
+  }
+}
+  ngOnDestroy() {
+    this.socket.close();
+  }
 }
 

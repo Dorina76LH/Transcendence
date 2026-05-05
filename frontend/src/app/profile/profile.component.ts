@@ -11,12 +11,12 @@ import { RouterLink } from '@angular/router';
       <a routerLink="/" class="nav-link">
         <strong>TRANSCENDENCE</strong>
       </a>
-      <button class="navbar-toggler" type="button" data-mdb-collapse-init data-mdb-target="#navbarExample01"
-        aria-controls="navbarExample01" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-mdb-collapse-init data-mdb-target="#navbar"
+        aria-controls="navbar" aria-expanded="true" aria-label="Toggle navigation">
         <i class="fas fa-bars"></i>
       </button>
-      <div class="collapse navbar-collapse" id="navbarExample01">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <div class="collapse navbar-collapse" id="navbar">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
           <li class="nav-item active">
             <a routerLink="/profile" class="nav-link">
               Profile

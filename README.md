@@ -1,72 +1,59 @@
 # Transcendence
 
-## 📌 Git & Trello Rules
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
 
-### 1. 🧩 Tools
-- **Trello** → task management & progress tracking  
-- **Git** → source code & versioning  
+## Development server
 
----
+To start a local development server, run:
 
-### 2. 🌿 Main Branch (`main`)
-- Production branch  
-- Only **stable and tested** versions  
-- Pull Request required before merge
-- **2 approvals required**
-- Approvals reset if new commits are pushed
-- **Force push not allowed**  
+```bash
+ng serve
+```
 
----
+Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
-### 3. 🟡 Dev Branch (`dev`)
-- Development branch  
-- Default branch  
-- Pull Request required before merge  
-- **2 approvals required**
-- Approvals reset if new commits are pushed
-- **Force push not allowed**  
+## Code scaffolding
 
----
+Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
 
-### 4. 🌱 Feature Branches  
-- One branch per feature
-- Created from latest version of `dev`
-- git checkout dev
-- git pull origin dev
-- git checkout -b feature/T12-chat-send-message
+```bash
+ng generate component component-name
+```
 
----
+For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
 
-### 5. 🔗 Rule
-> **1 Trello card = 1 branch = 1 PR**
+```bash
+ng generate --help
+```
 
----
+## Building
 
-### 6. 📋 Trello Cards
-- #T12 - Chat: send message backend
-- #T13 - Upload avatar
-- #T14 - i18n setup
+To build the project run:
 
----
+```bash
+ng build
+```
 
-### 7. 🌿 Git Branch Naming
-- feature/T12-chat-send-message
-- feature/T13-upload-avatar
-- fix/T14-i18n-bug
-- **Format:** type/TrelloID-description
+This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
----
+## Running unit tests
 
-### 8. 💬 Commit Messages
-- feat(T12): implement websocket message handler
-- feat(T13): add avatar upload endpoint
-- **Format:** type(TrelloID): short description 
+To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
 
----
+```bash
+ng test
+```
 
-### 9. 🔀 Pull Requests
-- Title : [T12] Chat - send message backend
-- Description:
-  - What was done
-  - How to test
-  - Screenshoots (if necessary)
+## Running end-to-end tests
+
+For end-to-end (e2e) testing, run:
+
+```bash
+ng e2e
+```
+
+Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+
+## Additional Resources
+
+For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

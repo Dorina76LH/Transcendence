@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -11,12 +11,12 @@ import { RouterLink } from '@angular/router';
       <a routerLink="/" class="nav-link">
         <strong>TRANSCENDENCE</strong>
       </a>
-      <button class="navbar-toggler" type="button" data-mdb-collapse-init data-mdb-target="#navbarExample01"
-        aria-controls="navbarExample01" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-mdb-collapse-init data-mdb-target="#navbar"
+        aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
         <i class="fas fa-bars"></i>
       </button>
-      <div class="collapse navbar-collapse" id="navbarExample01">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <div class="collapse navbar-collapse" id="navbar">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
           <li class="nav-item active">
             <a routerLink="/profile" class="nav-link">
               Profile
@@ -43,14 +43,25 @@ import { RouterLink } from '@angular/router';
       <h1>Settings Page</h1>
       <h2>This is the actual settings page, still in progress, but I got the page lol</h2>
       <p>Languages setting page :</p>
-      <div class="Language-button" style="text-align: center">
-        <u><a routerLink="/languages">Languages</a></u>
-      </div>
+      <a routerLink="/languages" class="btn btn-secondary">🇪🇸 / 🇫🇷 / 🇬🇧</a>
+      <button class="btn btn-secondary me-3" (click)="toggleDarkMode()">
+          {{ isDarkMode ? ' ☀️ ' : ' 🌙 ' }}
+      </button>
+      <a routerLink="/profile-settings" class="btn btn-secondary"> ⚙️ </a>
     </div>
   </div>
 </main>`,
 styleUrl: './settings.css',
+encapsulation: ViewEncapsulation.None,
 })
-export class SettingsComponent {
-
+export class SettingsComponent implements OnInit {
+  isDarkMode = localStorage.getItem('darkMode') === 'true';
+  ngOnInit() {
+    document.body.classList.toggle('dark-mode', this.isDarkMode);
+  }
+  toggleDarkMode() {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('darkMode', String(this.isDarkMode));
+    document.body.classList.toggle('dark-mode', this.isDarkMode);
+  }
 }
