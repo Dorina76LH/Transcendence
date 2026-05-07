@@ -3,10 +3,10 @@
 #? Default Django models
 #? -----------------------------------------------------------------------------
 
-# Import Django's built-in user model to extend it
+#& Import Django's built-in user model to extend it
 from django.contrib.auth.models import AbstractUser
 
-# Import Django's model module to define database fields
+#& Import Django's model module to define database fields
 from django.db import models
 
 #? -----------------------------------------------------------------------------
@@ -14,11 +14,51 @@ from django.db import models
 #? -----------------------------------------------------------------------------
 
 #& -----------------------------------------------------------------------------
-#& Extending Djando's default user model.
+#& By inheriting from AbstractUser, our custom User model automatically gets
+#& all of Django's built-in authentication features :
+#&   - Authentication  : login, logout, password hashing
+#&   - Permissions     : is_staff, is_superuser, groups, user_permissions
+#&   - Default fields  : username, email, first_name, last_name, date_joined, last_login
+#&
+#& This allows us to add custom fields (avatar, is_online, otp_secret, role...)
+#& without rewriting Django's authentication system from scratch. 
+#& 
+#& Custom USer model extending Django's AbstractUser.
+#& Always define a custom User model at the start of a project
+#& to allow future modifications without database reset.
+#&
+#&   - avatar      : profile picture stored in media/avatars/
+#&   - is_online   : track if the user is currently connected (useful for chat)
+#&   - otp_secret  : secret key for Two-Factor Authentication (2FA)
+#&   - friends     : many-to-many relationship with itself (friends list)
+#&                   Django automatically creates an intermediate table :
+#&                   Table : users_user_friends
+#&                   Columns : from_user_id | to_user_id
+#&                   This table is managed by Django - no need to define it manually.
+#&   - role        : role-based access control (user: default, admin: full access)
+#&                   Can only be changed by the superuser via Django admin panel.
+#&	 - verbose_name : names displayed int the Django admin panel
+#&
+#& groups and user_permissions are redefined to avoid related_name conflicts
+#& with Django's default User model when using a custom User model.
+#&
+#& @property avatar_url :
+#&   Transforms this method into an attribute - access like a regular field.
+#&   self.avatar      -> returns the file object (not useful for Angular)
+#&   self.avatar.url  -> returns the URL string (necessary for Angular to display)
+#&  If no avatar uploaded, returns a unique robot avatar from DiceBear API.
+#&   The seed ensures the same username always gets the same robot avatar.
+#& -----------------------------------------------------------------------------
+
+
+#& -----------------------------------------------------------------------------
+#& Extending Djando's default user model : garder les fonctionnalites fournis
+#& par Django (authentication, permission, superuser ...) et ajouter des champs
+#& personnalises (is_online, avatar, otp, friends ...)
 #& Always define a custom User model at the start of a project
 #& to allow future modification withut database reset.
 #&   - avatar		: profile picture stored in media/avatars/
-#&   - is_online		: track is the user is currently connected (useful for chat)
+#&   - is_online	: track is the user is currently connected (useful for chat)
 #&   - otp_secret	: secret key for Two-Factor Authentication (2FA)
 #&	 - friends		: ManyToMany realtionship with itself to store the user's
 #&					  friend list> Django automatically creates an intermadiate
@@ -26,6 +66,7 @@ from django.db import models
 #&					  Table : users_user_friends
 #&					  Columns : from_user_id | to_user_id
 #&	 - role			: role-based access control (user: default access, admin: full access)
+#&	 - verbose_name : displayed label on the admin page
 #&
 #& @property : decorator tranforms a method in an attribute
 #& 			  -> access like a regular field 'self.avatar.url'
@@ -49,23 +90,89 @@ from django.db import models
 
 class User(AbstractUser):
 	
+	# List of roles
 	class Role(models.TextChoices):
 		USER = 'user', 'User'
 		ADMIN = 'admin', 'Admin'
 
-	avatar = models.ImageField(upload_to='avatars', null=True, blank=True)
-	is_online = models.BooleanField(default=False)
-	otp_secret = models.CharField(max_length=32, blank=True)
-	friends = models.ManyToManyField('self', blank=True)
+	# Name displayed in the Django admin panel for User model
+	class Meta:
+		verbose_name = 'User'
+		verbose_name_plural = 'Users'
+	
+	# Profile picture uploaded by the user
+	# null=True, blank=True make this field optional
+	avatar = models.ImageField(
+		upload_to='avatars/',
+		null=True,
+		blank=True,
+		verbose_name='Profile picture'
+	)
+
+	# Tracks whether the user is currently connected
+	# Updated via WebSocket connect/disconnect events
+	is_online = models.BooleanField(
+		default=False,
+		verbose_name='Online status'
+	)
+
+	# Stores the secret key used for Two-Factor Authentication (2FA)
+	# Generated when the user enables 2FA
+	otp_secret = models.CharField(
+		max_length=32,
+		blank=True,
+		verbose_name='2FA secret key'
+	)
+
+	# Many-to-many relationship with itself to store the user's friends list
+	# Symetrical=True is the default for 'self' relationships 
+	friends = models.ManyToManyField(
+		'self',
+		blank=True
+		
+	)
+	
+	# Role-based access control - defaults to USER for every new account
+	# Can only used by the superuser via the Django admin panel
 	role = models.CharField(
 		max_length=20,
 		choices=Role.choices,
-		default=Role.USER
+		default=Role.USER,
+		verbose_name='User role'
 	)
 
+	# Redefined to avoid related_name conflicts with Django's default User model
+	# related_name='customuser_set' -> convention Django
+	# related_name='+' -> disable inverse relation
+	groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to.',
+        related_name='customuser_set',
+        related_query_name='user',
+    )
+
+	# Redefined to avoid related_name conflicts with Django's default User model
+	user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name='customuser_set',
+        related_query_name='user',
+    )
+
+	# Return e-mail if available, otherwise return username
+	# Email is preferred as it will be used as primary identifier OAuth
 	def __str__(self):
+		if self.email:
+			return self.email
 		return self.username
 	
+	# If the user has uploaded un avatar, return its URL
+	# OTherwise, generate a unique robot avatar via DiceBear API
+	# The seed parameter ensures the same username always gets the same avatar 
 	@property
 	def avatar_url(self):
 		if self.avatar:

@@ -5,6 +5,7 @@ from .models import User
 # Register your models here.
 Authentication = "users.User"
 
+#&
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     # Ajoute tes champs custom dans la vue liste
