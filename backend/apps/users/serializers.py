@@ -154,3 +154,7 @@ class UserSerializer(serializers.ModelSerializer):
     def get_avatar_url(self, obj):
         # Uses @property defined in the user model
         return obj.avatar_url
+    
+#* ----------------------------------------------------------------------------
+#* LogoutSerializer
+#* ----------------------------------------------------------------------------
