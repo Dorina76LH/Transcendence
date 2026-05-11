@@ -4,7 +4,17 @@
 
 from django.shortcuts import render
 
-
+'''
+# =============================================================================
+# VIEWS - apps/users/views.py
+#
+# Views are the orchestrators of the application.
+# They receive the HTTP request, call the serializer to validate data,
+# perform the action (create user, check password ...) and return the response.
+#
+# Flow : URL -> View -> Serializer -> Model -> Response
+# =============================================================================
+'''
 
 #* ----------------------------------------------------------------------------
 #* RegisterView

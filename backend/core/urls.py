@@ -17,6 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+# =============================================================================
+# URLS - apps/users/urls.py
+#
+# URL router - maps each endpoint to its corresponding View.
+# POST /api/register/   -> ResisterView
+# POST /api/login/      -> LoginView (handled by simpleJWT)
+# POST /api/logout/     -> LogoutView
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
