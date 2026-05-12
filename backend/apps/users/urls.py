@@ -5,6 +5,10 @@
 # FUNNEL STEP 2:
 # This file handles the specific sub-paths after 'api/auth/'.
 # It maps the remaining string to the actual View class.
+#
+# POST /api/register/ → RegisterView
+# POST /api/login/    → LoginView (handled by simplejwt)
+# POST /api/logout/   → LogoutView
 # =============================================================================
 '''
 
