@@ -27,7 +27,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 # 3. Your custom views from the local views.py file:
 # - RegisterView: Handles NEW USER creation
 # - LogoutView: Handles LOGOUT (invalidates the Refresh token)
-from .views import RegisterView
+from .views import RegisterView, LogoutView
 
 #* ============================================================================
 #* URL PATTERNS
@@ -53,5 +53,10 @@ urlpatterns = [
     #? Logout
     #& Full Path: /api/auth/logout/
     #& Action: Adds the refresh token to the blacklist
-    #path('logout/', LogoutView.as_view(), name='auth_logout'),
+    path('logout/', LogoutView.as_view(), name='auth_logout'),
 ]
+
+# ================= SIMPLIFIED, EASILY READABLE =============================
+    #path('api/auth/login/', TokenObtainPairView.as_view()),
+    #path('api/auth/refresh/', TokenRefreshView.as_view()),
+    #path('api/auth/logout/', LogoutView.as_view()),
