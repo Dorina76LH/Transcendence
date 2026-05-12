@@ -228,7 +228,8 @@ STATIC_ROOT = BASE_DIR / 'static'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200", #& Angular
     "http://localhost:5500", #& page de test
-    "http://127.0.0.0:5500", #& file://
+    "http://127.0.0.1:5500", #& file://
+    "http://127.0.0.1:5501", #& live server
 ]
 
 CORS_ALLOW_CREDENTIALS = True
