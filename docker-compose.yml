@@ -61,8 +61,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
 
 # --- PERSISTENCE ---
 # Named volume to ensure data isn't lost when containers are stopped
 volumes:
   postgres_data:
+  pgadmin_data:

@@ -26,12 +26,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qt6=#cg-v37e0k%y)xtz)yce1-5ar*(&k^0wwmd*iy6k@-3rng'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# cast string to bool : os.environ.get() always returns a string,
+# so we compare it to 'True' to get a real Python boolean
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+# split string to list : os.environ.get() always returns a string
+# we split it by ',' to get a real Python list
+# 'localhost' is the fallback value if ALLOWED_HOST is not defined in the .env file
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',')
 
 #? ----------------------------------------------------------------------------
 #? Application definition
@@ -208,7 +213,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 #& STATIC_URL : the public URL to access static files
 #& STATIC_ROOT : the folder where 'collectstatic' gathers all static files
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 
 #? ----------------------------------------------------------------------------
@@ -221,7 +226,8 @@ STATIC_ROOT = BASE_DIR / 'static'
 #TODO ajouter a la liste autorise http://transcendence.com en prod
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4200" #& dev
+    "http://localhost:4200", #& Angular
+    "http://localhost:5500", #& page de test
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -242,7 +248,7 @@ REST_FRAMEWORK = {
 
     #& by default, only authenticated users can access the API
     'DEFAULT_PERMISSION_CLASSES':[
-        'rest_framework_permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 
@@ -277,7 +283,7 @@ ASGI_APPLICATION = 'core.asgi.application'
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels-redis.core.RedisChanelLayer',
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             'hosts':[('redis', 6379)],
         },
