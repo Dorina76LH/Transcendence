@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class MessageSerializer(serializers.ModelSerializer):
 	sender = UserSerializer(read_only=True)
-	
+
 	class Meta:
 		model = Message
 		fields = ['id', 'conversation', 'sender', 'content', 'created_at' ]
@@ -19,6 +19,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class ConversationSerializer(serializers.ModelSerializer):
 	participants = UserSerializer(many=True, read_only = True)
+
 	class Meta:
 		model = Conversation
 		fields = ['id', 'participants','created_at']
