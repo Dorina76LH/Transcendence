@@ -96,9 +96,11 @@ class LogoutView(APIView):
 
             # on le blackliste -> il ne peut plus generer de nouveau access token
             token = RefreshToken(refresh_token)
+            print("TOKEN USER ID:", token["user_id"], type(token["user_id"]))
+            print("REQUEST USER ID:", request.user.id, type(request.user.id))
 
             # controle si c'est user ou pas
-            if token["user_id"] != request.user.id:
+            if int(token["user_id"]) != request.user.id:
                 return Response(
                     {"detail": "This token does not belong to you."},
                     status=status.HTTP_403_FORBIDDEN
