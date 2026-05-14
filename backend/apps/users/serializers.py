@@ -39,6 +39,10 @@ from django.contrib.auth.password_validation import validate_password
 # Import DRF serializers - the translators between JSON and Python
 from rest_framework import serializers
 
+# Import SimpleJWT's default login serializer to extend it with custom behavior
+# (is_online update, user data in response)
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 # Import custom User model to create and query users
 from .models import User
 
@@ -48,64 +52,116 @@ from .models import User
 #* ----------------------------------------------------------------------------
 # Handles user registration - validates input and creates a new user in the database.
 #
-#  Fields behavior :
-#    - username   : standard field, automatically handled by ModelSerializer
-#    - email      : standard field, format validated by DRF automatically
-#                   + custom validate_email() checks uniqueness in database
-#    - password   : redefined manually as CharField because it needs special
-#                   handling (write_only + password strength validators)
-#    - avatar_url : does not exist in DB (@property in model), redefined as
-#                   SerializerMethodField to calculate it manually via get_avatar_url()
+# FIELD BEHAVIOR:
+# ---------------
+#   1. Automatic: 'username' and 'email' are inferred from the User Model.
+#   2. Redefined: 'password' (to add custom validation and hide it in responses).
+#   3. Calculated: 'avatar_url' (does not exist in DB, generated on the fly).
+#
+# FLOW BETWEEN VIEW & SERIALIZER:
+# -------------------------------
+#   1. VIEW calls serializer.is_valid()  --> Triggers validate_email()
+#   2. VIEW calls serializer.save()      --> Triggers create()
+#   3. VIEW returns serializer.data      --> Triggers get_avatar_url()
+#* ----------------------------------------------------------------------------
+
+#? -----------------------------------------------------------------------------
+#? PYTHON FLOW FOR BEGINNERS
+#? -----------------------------------------------------------------------------
+#?
+#? DOES THE ORDER OF "def" MATTER?
+#? ------------------------------
+#?   NO! In Python classes, the order doesn't matter for execution.
+#?   You can write create() before validate_email(), and it will still work.
+#?   WHY? Because the VIEW is the conductor: it calls the methods only when 
+#?   needed (e.g., it won't call create() until is_valid() has finished).
+#?
+#? WHY ARE THERE MULTIPLE "def" (METHODS)?
+#? ---------------------------------------
+#?   Each method is a specific "checkpoint" triggered at a precise moment:
+#?
+#?   1. validate_<field>() : THE SPECIALIST (Triggered by .is_valid())
+#?      - Checks one specific field (ex: "Is this email already taken?").
+#?
+#?   2. create() : THE BUILDER (Triggered by .save())
+#?      - Actually writes the user to the DB and hashes the password.
+#?
+#?   3. get_<field>() : THE DECORATOR (Triggered during JSON output)
+#?      - Calculates values for "virtual" fields like avatar_url.
+#?
+#? WHO DOES WHAT? (VIEW VS SERIALIZER)
+#? -----------------------------------
+#?   1. VIEW: The "Manager" (Logic)
+#?      - Receives the Request from Angular.
+#?      - Tells the Serializer: "Hey, check if this data is valid."
+#?      - If valid, tells the Serializer: "Okay, save it to the database."
+#?      - Sends the final Response (201 Created or 400 Error) back to Angular.
+#?
+#?   2. SERIALIZER: The "Translator & Quality Control" (Data)
+#?      - Translates JSON to Python.
+#?      - Checks the quality (Email format, Password strength).
+#?      - Actually writes the user to the Database via create().
+#?
+#?   - The VIEW is the "Conductor": it decides WHEN to validate or save.
+#?   - The SERIALIZER is the "Expert": it knows HOW to validate or save.
+#?
+#? WHY USE write_only=True ON THE PASSWORD?
+#? -----------------------------------------
+#?   This is a CRITICAL security measure. 
+#?   write_only means: "We accept it when Angular sends it (writing),
+#?   but we NEVER include it in the JSON response (reading)."
+#?
+#? WHAT IS A SerializerMethodField?
+#? --------------------------------
+#?   It is a "virtual" field. It tells DRF: "Don't look for this field in 
+#?   the database; I will provide the value via a specific function."
+#?   By convention, DRF looks for a function named get_<field_name>.
+#?
+#? WHY FILTER THE EMAIL IN validate_email?
+#? ---------------------------------------
+#?   Even if the model has `unique=True`, performing validation in the serializer
+#?   allows us to return a clean error (400 Bad Request) to Angular with a 
+#?   user-friendly message, rather than a raw database constraint error.
+#?
+#? WHY USE create_user() INSTEAD OF create()?
+#? ------------------------------------------
+#?   If we use .create(), the password will be saved in "plain text" (ex: "123").
+#?   Django will never be able to log the user in because it expects a hash.
+#?   .create_user() is a special Django method that:
+#?     1. Takes the raw password.
+#?     2. "Scrambles" it (algorithmic hashing).
+#?     3. Saves the unreadable result in the database.
+#?
+#? WHAT IS validated_data?
+#? -----------------------
+#?   It is the dictionary of data after it has passed all validation tests.
+#?   Think of it as the "clean basket" ready to be stored in the database.
+#? -----------------------------------------------------------------------------
+
 class RegisterSerializer(serializers.ModelSerializer):
 
-    #& STEP 1 : specifications
+    #& STEP 1 : Special field specifications
 
-    # Redefined manually because it needs special specifications :
-    # write_only=True          → received from Angular but NEVER returned in response
-    # required=True            → field is mandatory
-    # validators=[validate_password] → calls Django's built-in password rules :
-    #   - MinimumLengthValidator  : minimum 8 characters
-    #   - CommonPasswordValidator : rejects common passwords ('123456', 'password'...)
-    #   - NumericPasswordValidator: rejects passwords with only numbers
+    # Password validation 
     password = serializers.CharField(
         write_only=True,
         required=True,
         validators=[validate_password]
     )
 
-    # Redefined manually because avatar_url does not exist in the database.
-    # It is a @property in the User model calculated dynamically.
-    # SerializerMethodField means : "I will handle this field manually"
-    # DRF will automatically call get_avatar_url() to get the value.
-    # Always read_only by default (cannot be sent by Angular)
+    # Get avatar from database -> @property method in USer model 
     avatar_url = serializers.SerializerMethodField()
 
-    #& STEP 2 : declare Meta (model and fields to serialize)
+    #& STEP 2 : Meta (Model and Fields to serialize)
 
     class Meta:
         model = User
-        # Tells the serializer which Django model to base itself on
-        # ModelSerializer will automatically generate fields from this model
-
         fields = ('username', 'email', 'password', 'avatar_url')
-        # Define fields to expose in this serializer
-        # - 'username'   : required input from Angular
-        # - 'email'      : required input from Angular
-        # - 'password'   : required input, write_only (never returned in response)
-        # - 'avatar-url' : read_only, generated by the @property in the User model
-
-    #& STEP 3 : Custom handlers (field getters, validators and object creation)
-
-    def get_avatar_url(self, obj):
-        # Called automatically by DRF when building the response.
-        # obj is the User instance just created.
-        # Uses the @property defined in the User model :
-        #   - If avatar uploaded → returns the real file URL
-        #   - If no avatar       → returns DiceBear robot URL based on username
-        return obj.avatar_url
     
+    #& STEP 3 : Custom handlers (field getters, validators and object creation)
+    
+    """ Checkpoint 1 : triggered by is_valid() """
     def validate_email(self, value):
-        # Level 2 custom validation - called automatically by is_valid()
         # value = the email entered by the user
         # Checks that no other user already has this email in the database.
         # This rule is not automatic - DRF doesn't know it's required here.
@@ -113,9 +169,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Email already exists.")
         return value
     
+    """ Checkpoint 2 : triggered by save() """
     def create(self, validated_data):
-        # Called automatically by serializer.save() in the View.
-        # validated_data = all fields already validated by is_valid()
         # create_user() is used instead of create() because it automatically
         # hashes the password - NEVER store a plain text password in the database.
         user = User.objects.create_user(
@@ -124,6 +179,13 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
         )
         return user
+    
+    """ Checkpoint 3 : triggered when returning data """
+    def get_avatar_url(self, obj):
+        # We call the @property defined in models.py
+        #   - If avatar uploaded → returns the real file URL
+        #   - If no avatar       → returns DiceBear robot URL based on username
+        return obj.avatar_url
 
 #* ----------------------------------------------------------------------------
 #* UserSerializer
@@ -155,6 +217,155 @@ class UserSerializer(serializers.ModelSerializer):
         # Uses @property defined in the user model
         return obj.avatar_url
     
+#* ----------------------------------------------------------------------------
+#* LoginSerializer (SimpleJWT Extension)
+#* ----------------------------------------------------------------------------
+# Extends SimpleJWT's default TokenObtainPairSerializer to add custom behavior :
+#   - set is_online = True when user logs in
+#   - return user info alongside the tokens
+#
+# WHY EXTEND TokenObtainPairSerializer?
+# -------------------------------------
+#   SimpleJWT already handles the "Supervisor" role (validate()):
+#   1. Checks if user exists + checks hashed password.
+#   2. Generates Access & Refresh JWT tokens.
+#   3. We just "inject" our custom logic (is_online & user info) into the result.
+# 
+# WHAT DOES TokenObtainPairSerializer DO UNDER THE HOOD ?
+# -------------------------------------------------------
+#   When we call super().validate(attrs), the parent class secretly does :
+#
+#   1. Extracts username and password from attrs :
+#      username = attrs['username']
+#      password = attrs['password']
+#
+#   2. Looks up the user in the database :
+#      user = User.objects.get(username=username)
+#
+#   3. Verifies the password against the hashed version in the database :
+#      user.check_password(password)
+#
+#   4. Raises AuthenticationFailed automatically if :
+#      - username does not exist in the database
+#      - password does not match
+#      - account is inactive (is_active = False)
+#
+#   5. If credentials are correct :
+#      - stores the User object in self.user (accessible in our validate())
+#      - generates access and refresh JWT tokens for this user
+#      - returns { "access": "eyJ...", "refresh": "eyJ..." }
+#* -----------------------------------------------------------------------------
+
+#? -----------------------------------------------------------------------------
+#? PYTHON FLOW FOR BEGINNERS
+#? -----------------------------------------------------------------------------
+#?
+#? WHY EXTEND TokenObtainPairSerializer?
+#? -------------------------------------
+#?   SimpleJWT already handles the "Supervisor" role (validate()):
+#?   1. Checks if user exists + checks hashed password.
+#?   2. Generates Access & Refresh JWT tokens.
+#?   3. We just "inject" our custom logic (is_online & user info) into the result.
+#?
+#? WHAT IS A DICTIONARY ?
+#? ----------------------
+#?   A dictionary is a collection of key:value pairs, like a drawer with labels :
+#?   drawer = {
+#?       "firstname" : "Antoine",    # label : content
+#?       "age"       : 25,          # label : content
+#?       "city"      : "Paris",     # label : content
+#?   }
+#?   To access the content : drawer["firstname"] → "Antoine"
+#?
+#? WHY DOES DJANGO USE DICTIONARIES ?
+#? ----------------------------------
+#?   Because JSON IS a dictionary - it is exactly the same structure :
+#?   Python dict : {"access": "eyJ...", "refresh": "eyJ..."}
+#?   JSON        : {"access": "eyJ...", "refresh": "eyJ..."}
+#?   DRF automatically converts the Python dictionary to JSON for Angular.
+#?
+#? WHY EXTEND INSTEAD OF REWRITE ?
+#? -------------------------------
+#?   TokenObtainPairSerializer already handles the heavy lifting :
+#?   - checks username/password against the database
+#?   - raises an exception automatically if credentials are wrong
+#?   - generates access and refresh tokens
+#?   We just add our custom behavior on top with super().validate()
+#?
+#? WHAT IS super().validate(attrs) ?
+#? ---------------------------------
+#?   super() = the parent class (TokenObtainPairSerializer)
+#?   .validate(attrs) = its validation method
+#?   attrs = raw incoming data : { "username": "...", "password": "..." }
+#?   Calling super().validate() means : "do your usual work first, I'll add mine after"
+#?   Returns : { "access": "eyJ...", "refresh": "eyJ..." }
+#?
+#? WHAT IS self.user ?
+#? -------------------
+#?   Automatically set by the parent class after successful validation.
+#?   It is the full Django User object retrieved from the database.
+#?   We can access any field : self.user.is_online, self.user.username...
+#?
+#? WHAT IS update_fields ?
+#? -----------------------
+#?   save() without update_fields rewrites the entire user row in the database.
+#?   save(update_fields=['is_online']) only updates this one column → optimization.
+#?
+#? WHAT IS UserSerializer(self.user).data ?
+#? ----------------------------------------
+#?   UserSerializer(self.user) → creates a serializer instance with our User object
+#?   .data → triggers the serialization → transforms User object into JSON dict
+#?
+#? WHAT IS data['user'] = UserSerializer(self.user).data ?
+#? -------------------------------------------------------
+#?   It is three things in one line :
+#?   1. UserSerializer(self.user) → creates a serializer instance with our User object
+#?   2. .data → triggers serialization = transforms User Python object into JSON dict
+#?   3. data['user'] = → adds this dict to data under the key 'user'
+#?   This key name is a CONTRACT between Django and Angular :
+#?   Django  : data['user'] = UserSerializer(self.user).data
+#?   Angular : response.user.username  ← must match exactly
+#?   If Django writes data['profil'] but Angular reads response.user → undefined !
+#? 
+#? FINAL RESPONSE TO ANGULAR :
+#? ---------------------------
+#?   {
+#?     "access"  : "eyJ...",        ← short-lived token for API requests
+#?     "refresh" : "eyJ...",        ← long-lived token to get a new access token
+#?     "user"    : {                ← user info formatted by UserSerializer
+#?       "id"        : 1,
+#?       "username"  : "...",
+#?       "email"     : "...",
+#?       "avatar_url": "...",
+#?       "is_online" : true,
+#?       "role"      : "user"
+#?     }
+#?   }
+#?
+#? FLOW :
+#? ------
+#?   Angular → LoginView → LoginSerializer.validate()
+#?     → super().validate() : checks credentials, generates tokens
+#?     → is_online = True saved in database
+#?     → UserSerializer formats user data
+#?     → returns tokens + user data to Angular
+#? -----------------------------------------------------------------------------
+class LoginSerializer(TokenObtainPairSerializer):
+
+    def validate(self, attrs):
+        # Call parent validate() to check credentials and generate tokens
+        data = super().validate(attrs)
+
+        # self.user is set by parent after successful validation
+        # Update is_online in the database
+        self.user.is_online = True
+        self.user.save(update_fields=['is_online'])
+
+        # Add user info to the response alongside the tokens
+        data['user'] = UserSerializer(self.user).data
+
+        return data
+
 #* ----------------------------------------------------------------------------
 #* LogoutSerializer
 #* ----------------------------------------------------------------------------
