@@ -123,7 +123,17 @@ Unlike HTTP's "one-shot" connection, WebSockets provide a **persistent, full-dup
 
 ---
 
-### 🚀 8. Essential Developer Cheat Sheet
+### 🔄 8. Data Flow: The Request/Response Cycle
+1.	The Trigger: A user interacts with the Frontend (Angular).  
+2.	The Request: An HTTP request (GET, POST, etc.) is sent to the Django server via a specific URL.
+3.	The Routing: Django's urls.py directs the request to the appropriate View.
+4.	The Logic (The View): The View interacts with the Model (via the ORM) to fetch or save data in the PostgreSQL database.
+5.	The Serialization: The Serializer converts complex Model instances into JSON data that the Frontend can understand.  
+6.	The Response: Django sends back an HTTP Response with a Status Code (like 200 OK or 201 Created).
+
+---
+
+### 🚀 9. Essential Developer Cheat Sheet
 
 ```bash
 # Build and start all services
