@@ -172,7 +172,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     """ Checkpoint 2 : triggered by save() """
     def create(self, validated_data):
         # create_user() is used instead of create() because it automatically
-        # hashes the password - NEVER store a plain text password in the database.
+        # hashes the password
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -182,41 +182,60 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     """ Checkpoint 3 : triggered when returning data """
     def get_avatar_url(self, obj):
-        # We call the @property defined in models.py
-        #   - If avatar uploaded → returns the real file URL
-        #   - If no avatar       → returns DiceBear robot URL based on username
+        """
+        Calculates the avatar source:
+        1. Checks if a file exists in the ImageField.
+        2. If not, returns the DiceBear API string defined in the Model @property.
+        """
         return obj.avatar_url
+
+
 
 #* ----------------------------------------------------------------------------
 #* UserSerializer
 #* ----------------------------------------------------------------------------
-# Handles user profile display.
-# Used after login to return user information to Angular.
-# No validation needed - read only, no data creation.
+# Handles user profile display (Read-Only).
+# Used to return sanitized user information to Angular after login or for profile pages.
 #
-# All fields except avatar_url are automatically handled by ModelSerializer
-# because they exist directly in the database.
-# avatar_url is redefined as SerializerMethodField because it is a @property.
+# WHY NO VALIDATION HERE?
+# ------------------------
+#   Since this serializer is used to SEND data (Python -> JSON), we trust the 
+#   database. Validation is only critical when RECEIVING data (Register/Update).
+#
+# THE "SHAPE SORTER" CONCEPT:
+# ---------------------------
+#   The Serializer acts as a filter. Even if the User model has 20 fields 
+#   (including sensitive ones like 'password'), this class ensures Angular 
+#   ONLY receives the 6 fields defined in Meta.fields.
+#* ----------------------------------------------------------------------------
 class UserSerializer(serializers.ModelSerializer):
     
-    #& STEP 1 : specifications
+    #& STEP 1 : Special Field Specifications
     
-    # Redefined manually because avatar_url does not exist in the database.
-    # SerializerMethodField means DRF will call get_avatar_url() automatically.
+    # SerializerMethodField: DRF, don't look for 'avatar_url' in the DB columns.
+    # DRF, looks for a method in THIS class named 'get_avatar_url'.
     avatar_url = serializers.SerializerMethodField()
     
-    #& STEP 2 : define Meta (model ans fields to serialize)
+    #& STEP 2 : Meta Definition
     class Meta:
         model = User
-         # All these fields exist in the DB - automatically handled by ModelSerializer
-        # avatar_url is the only exception - calculated via get_avatar_url()
+        # 'id', 'username', 'email', 'is_online', 'role' -> Injected directly from DB.
+        # 'avatar_url' -> Injected from the method below.
         fields = ('id', 'username', 'email', 'avatar_url', 'is_online', 'role')
+        # Safety: these cannot be modified via this serializer.
+        read_only_fields = ('id', 'username', 'role')
     
-    #& STEP 3 : Custom handlers (field getters, validators and object creation)
+    #& STEP 3 : Custom Handlers
     def get_avatar_url(self, obj):
-        # Uses @property defined in the user model
+        """
+        Calculates the avatar source (calls the @property method defined in models.py):
+        1. Checks if a file exists in the ImageField.
+        2. If not, returns the DiceBear API string defined in the Model @property.
+        """
         return obj.avatar_url
     
+
+
 #* ----------------------------------------------------------------------------
 #* LoginSerializer (SimpleJWT Extension)
 #* ----------------------------------------------------------------------------
@@ -350,6 +369,7 @@ class UserSerializer(serializers.ModelSerializer):
 #?     → UserSerializer formats user data
 #?     → returns tokens + user data to Angular
 #? -----------------------------------------------------------------------------
+
 class LoginSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
@@ -365,6 +385,8 @@ class LoginSerializer(TokenObtainPairSerializer):
         data['user'] = UserSerializer(self.user).data
 
         return data
+
+
 
 #* ----------------------------------------------------------------------------
 #* LogoutSerializer

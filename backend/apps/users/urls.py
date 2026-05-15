@@ -6,6 +6,9 @@
 # This file handles the specific sub-paths after 'api/auth/'.
 # It maps the remaining string to the actual View class.
 #
+# This file defines the 5+ entrypoints (APIs) for the User Module
+# We follow the CRUD pattern (Create, Read, Update, Delete) + Auth
+#
 # POST /api/register/ → RegisterView
 # POST /api/login/    → LoginView (handled by simplejwt)
 # POST /api/logout/   → LogoutView
@@ -60,3 +63,46 @@ urlpatterns = [
     #path('api/auth/login/', TokenObtainPairView.as_view()),
     #path('api/auth/refresh/', TokenRefreshView.as_view()),
     #path('api/auth/logout/', LogoutView.as_view()),
+
+'''
+# =============================================================================
+# URLS - apps/users/urls.py
+#
+# This file defines the 5+ entry points (APIs) for the User Module.
+# We follow the CRUD pattern (Create, Read, Update, Delete) + Auth.
+# =============================================================================
+
+from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
+from .views import RegisterView, LoginView, LogoutView, MeView
+
+urlpatterns = [
+    # -------------------------------------------------------------------------
+    # 1. CREATE : Register a new user
+    # POST /api/users/register/
+    # -------------------------------------------------------------------------
+    path('register/', RegisterView.as_view(), name='register'),
+
+    # -------------------------------------------------------------------------
+    # 2. AUTH : Login (Get Tokens) & Logout (Blacklist)
+    # POST /api/users/login/
+    # POST /api/users/logout/
+    # -------------------------------------------------------------------------
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
+
+    # -------------------------------------------------------------------------
+    # 3. READ / UPDATE / DELETE : The "Me" Endpoint
+    # GET    /api/users/me/ -> Read my profile
+    # PATCH  /api/users/me/ -> Update my profile (Partial)
+    # DELETE /api/users/me/ -> Delete my account
+    # -------------------------------------------------------------------------
+    path('me/', MeView.as_view(), name='user_me'),
+
+    # -------------------------------------------------------------------------
+    # 4. TOKEN MANAGEMENT : Refresh the session
+    # POST /api/users/token/refresh/
+    # -------------------------------------------------------------------------
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+]
+'''
