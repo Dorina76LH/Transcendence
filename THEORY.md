@@ -3,36 +3,37 @@
 This document details the technical logic and architecture of the Transcendence Django backend, from low-level network protocols to framework orchestration.
 
 ---
-
 ## 🌐 1. Network Fundamentals: HTTP vs WebSockets
 
 ### HTTP (HyperText Transfer Protocol)
 HTTP is a **stateless** request/response protocol. In this project, it handles all standard data management (CRUD).
 
-*   **Statelessness:** The server does not "remember" previous requests. Each exchange is independent, which is why we use **JWT** to identify the user at every request.
-*   **Request Structure:**
-    *   **Start Line:** Method (`GET`, `POST`, `PUT`, `DELETE`) + URL + HTTP Version.
-    *   **Headers:** Metadata (e.g., `Content-Type: application/json`, `Authorization: Bearer <token>`).
-    *   **Body:** The actual data payload (JSON sent by the client).
-*   **Response Structure:**
-    *   **Status Code:** Categorized indicators:
+* **Statelessness:** The server does not "remember" previous requests. Each exchange is independent, which is why we use **JWT (JSON Web Tokens)** to identify the user at every request.
+* **Anatomy of a Request:**
+    * **Start Line:** Method (GET, POST, PUT, DELETE) + URL + HTTP Version.
+    * **Headers:** Metadata (e.g., `Content-Type: application/json`, `Authorization: Bearer <token>`).
+    * **Body:** The actual data payload (JSON).
+* **Response Structure:**
+    * **Status Code:** Categorized indicators:
         *   `1xx`: Informational.
         *   `2xx` (Success): **200 OK**, **201 Created**.
         *   `3xx` (Redirection): **301 Moved Permanently**, **304 Not Modified**.
         *   `4xx` (Client Error): **400 Bad Request**, **401 Unauthorized**, **404 Not Found**.
         *   `5xx` (Server Error): **500 Internal Server Error**.
-    *   **Body:** Usually returning JSON data or error messages.
+    * **Body:** Usually returning JSON data or error messages.
 
-### 🔐 Security: SSL vs TLS
-We use **HTTPS** (HTTP + Encryption) to ensure data privacy and integrity:
-*   **SSL (Secure Sockets Layer):** The legacy security protocol (now deprecated).
-*   **TLS (Transport Layer Security):** The modern successor. It encrypts the data stream and authenticates the server using certificates, preventing "Man-in-the-Middle" (MITM) attacks.
+### 📊 HTTP Status Codes (The Survival List)
 
-### ⚡ WebSockets (Real-Time Communication)
-Unlike HTTP's "one-shot" connection, WebSockets provide a **persistent, full-duplex** bridge.
-*   **The Handshake:** The connection starts as an HTTP request but "Upgrades" to a WebSocket (`ws://` or `wss://`).
-*   **Bidirectional:** Both client and server can send data at any time without waiting for a request.
-*   **Use Case:** Essential for the **Live Chat**, **Notifications**, and **Game State** where immediate data delivery is required.
+| Code | Meaning | Project Context |
+| :--- | :--- | :--- |
+| **200 OK** | Success | Standard data retrieval. |
+| **201 Created** | Resource created | User registration or message sent. |
+| **304 Not Modified** | Cached | Efficient loading of static assets. |
+| **400 Bad Request** | Client Error | Invalid form data (Serializer error). |
+| **401 Unauthorized** | Auth Error | Missing or expired JWT token. |
+| **403 Forbidden** | Permission Error | User trying to edit someone else's profile. |
+| **404 Not Found** | Missing Resource | Wrong URL or resource doesn't exist. |
+| **500 Internal Error** | Server Error | Python/Django code crashed. |
 
 ---
 
@@ -105,5 +106,41 @@ We use **Docker** to ensure the project runs exactly the same on every machine.
     *   `frontend`: Angular application (served by Nginx).
 *   **Reproducibility:** Fixes the "it works on my machine" issue by standardizing the entire environment.
 
+---
 
+### 🔐 6. Security: SSL vs TLS
+We use **HTTPS** (HTTP + Encryption) to ensure data privacy and integrity:
+*   **SSL (Secure Sockets Layer):** The legacy security protocol (now deprecated).
+*   **TLS (Transport Layer Security):** The modern successor. It encrypts the data stream and authenticates the server using certificates, preventing "Man-in-the-Middle" (MITM) attacks.
 
+---
+
+### ⚡ 7. WebSockets (Real-Time Communication)
+Unlike HTTP's "one-shot" connection, WebSockets provide a **persistent, full-duplex** bridge.
+*   **The Handshake:** The connection starts as an HTTP request but "Upgrades" to a WebSocket (`ws://` or `wss://`) via **Django Channels/Daphne**.
+*   **Bidirectional:** Both client and server can send data at any time without waiting for a request.
+*   **Use Case:** Essential for the **Live Chat**, **Notifications**, and **Game State** where immediate data delivery is required.
+
+---
+
+### 🚀 8. Essential Developer Cheat Sheet
+
+```bash
+# Build and start all services
+docker compose up --build
+
+# Run migrations inside the container
+docker compose exec backend python manage.py makemigrations
+docker compose exec backend python manage.py migrate
+
+# Check logs in real-time (Crucial for debugging 500 errors)
+docker compose logs -f backend
+
+# Clean up environment (Fixes space issues on /goinfre)
+docker system prune -a --volumes
+
+# Access the Database CLI
+docker exec -it db psql -U user -d dbname
+```
+
+---
