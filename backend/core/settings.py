@@ -246,6 +246,7 @@ REST_FRAMEWORK = {
     #& use JWT authentication instead of Django's default session authentication
     'DEFAULT_AUTHENTICATION_CLASSES':[
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
 
     #& by default, only authenticated users can access the API

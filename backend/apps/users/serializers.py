@@ -177,6 +177,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
+            # auto login
+            is_active=True,
+            is_online=True
         )
         return user
     

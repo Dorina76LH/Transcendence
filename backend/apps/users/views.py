@@ -245,6 +245,11 @@ class LogoutView(APIView):
                     {"detail": "This token does not belong to you."},
                     status=status.HTTP_403_FORBIDDEN
                 )
+            
+            # mettre le statut is_online a false
+            request.user.is_online = False
+            request.user.save(update_fields=['is_online'])
+
             token.blacklist()
 
             return Response(
