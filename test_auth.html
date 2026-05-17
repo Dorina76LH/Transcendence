@@ -237,6 +237,12 @@
       }
     }
 
+    function clearAuthState() {
+      accessToken = null;
+      refreshToken = null;
+      updateTokenDisplay();
+    }
+
     // --- REGISTER ---
     async function register() {
       const username = document.getElementById('reg-username').value;

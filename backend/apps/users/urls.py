@@ -6,43 +6,11 @@
 # This file handles the specific sub-paths after 'api/auth/'.
 # It maps the remaining string to the actual View class.
 #
-# THE CRUD PATTERN:
-# -----------------
-# We organize our URLs by "Action Type" to stay consistent with REST standards:
-# - CREATE : register/ (POST)
-# - READ   : me/       (GET)
-# - UPDATE : me/       (PATCH)
-# - DELETE : me/       (DELETE)
-# - AUTH   : login/logout/refresh
-#
-# THE CRUD & AUTH MAPPING:
-# ------------------------
-# This file defines the 5+ entrypoints (APIs) for the User Module
-# ACTION  | VERB   | ENDPOINT             | VIEW         | DESCRIPTION
-# --------|--------|----------------------|--------------|--------------------
-# CREATE  | POST   | /api/auth/register/  | RegisterView | New account
-# AUTH    | POST   | /api/auth/login/     | LoginView    | Get tokens
-# AUTH    | POST   | /api/auth/logout/    | LogoutView   | Blacklist refresh
-# READ    | GET    | /api/auth/me/        | MeView       | My profile info
-# UPDATE  | PATCH  | /api/auth/me/        | MeView       | Edit my profile
-# DELETE  | DELETE | /api/auth/me/        | MeView       | Delete my account
-# AUTH    | POST   | /api/auth/token/ref/ | RefreshView  | Get new access
+# POST /api/register/ → RegisterView
+# POST /api/login/    → LoginView (handled by simplejwt)
+# POST /api/logout/   → LogoutView
 # =============================================================================
 '''
-
-#? -----------------------------------------------------------------------------
-#? PYTHON FLOW FOR BEGINNERS
-#? -----------------------------------------------------------------------------
-#?
-#? THE URL ADDITION
-#? ----------------
-#?   How does Django find the full path? It's a simple addition:
-#?
-#?   PATH IN core/urls.py  +  PATH IN users/urls.py  =  FINAL URL
-#?       "api/auth/"       +      "register/"        =  "api/auth/register/"
-#?
-#?   Note: We OVERRIDE the default SimpleJWT LoginView with our own custom one.
-#? -----------------------------------------------------------------------------
 
 #* ============================================================================
 #* IMPORT
@@ -52,42 +20,44 @@
 from django.urls import path
 
 # 2. SimpleJWT built-in logic for authentication tokens:
+# - TokenObtainPairView: Handles LOGIN (takes credentials, returns Access & Refresh tokens)
 # - TokenRefreshView: Handles TOKEN RENEWAL (takes Refresh token, returns a new Access token)
 from rest_framework_simplejwt.views import TokenRefreshView
 
-# 3. Custom views from the local views.py file:
-from .views import RegisterView, LoginView, LogoutView, MeView
+# 3. Your custom views from the local views.py file:
+# - RegisterView: Handles NEW USER creation
+# - LoginView: Handles LOGIN and marks the user online
+# - LogoutView: Handles LOGOUT (invalidates the Refresh token)
+from .views import RegisterView, LoginView, LogoutView
 
 #* ============================================================================
 #* URL PATTERNS
 #* ============================================================================
 
 urlpatterns = [
-    # -------------------------------------------------------------------------
-    # 1. CREATE : Register a new user
-    # POST /api/users/register/
-    # -------------------------------------------------------------------------
-    path('register/', RegisterView.as_view(), name='register'),
 
-    # -------------------------------------------------------------------------
-    # 2. AUTH : Login (Get Tokens) & Logout (Blacklist)
-    # POST /api/users/login/
-    # POST /api/users/logout/
-    # -------------------------------------------------------------------------
-    path('login/', LoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    #? Register
+    #& Full Path: /api/auth/register/
+    #& Action: Creates a new user in the database
+    path('register/', RegisterView.as_view(), name='auth_register'),
 
-    # -------------------------------------------------------------------------
-    # 3. READ / UPDATE / DELETE : The "Me" Endpoint
-    # GET    /api/users/me/ -> Read my profile
-    # PATCH  /api/users/me/ -> Update my profile (Partial)
-    # DELETE /api/users/me/ -> Delete my account
-    # -------------------------------------------------------------------------
-    path('me/', MeView.as_view(), name='user_me'),
+    #? Login
+    #& Full Path: /api/auth/login/
+    #& Action: Verifies credentials and provides the JWT tokens
+    path('login/', LoginView.as_view(), name='token_obtain_pair'),
 
-    # -------------------------------------------------------------------------
-    # 4. TOKEN MANAGEMENT : Refresh the session
-    # POST /api/users/token/refresh/
-    # -------------------------------------------------------------------------
+    #? Token Refresh
+    #& Full Path: /api/auth/token/refresh/
+    #& Action: Refreshes an expired access token using the refresh token
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    #? Logout
+    #& Full Path: /api/auth/logout/
+    #& Action: Adds the refresh token to the blacklist
+    path('logout/', LogoutView.as_view(), name='auth_logout'),
 ]
+
+# ================= SIMPLIFIED, EASILY READABLE =============================
+    #path('api/auth/login/', TokenObtainPairView.as_view()),
+    #path('api/auth/refresh/', TokenRefreshView.as_view()),
+    #path('api/auth/logout/', LogoutView.as_view()),
