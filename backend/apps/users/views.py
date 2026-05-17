@@ -240,6 +240,10 @@ class LogoutView(APIView):
             print("REQUEST USER ID:", request.user.id, type(request.user.id))
 
             # controle si c'est user ou pas
+            '''
+            remplacer pour login avec mail
+            if str(token["user_id"]) != str(request.user.id):
+            '''
             if int(token["user_id"]) != request.user.id:
                 return Response(
                     {"detail": "This token does not belong to you."},

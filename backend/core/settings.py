@@ -268,6 +268,14 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
+'''
+#& TECHNICAL REQUIREMENT: LOGIN WITH EMAIL
+    #& Specifies which field in the User model is used to identify the user inside the token payload.
+    #& Keeping 'id' (database primary key) ensures str(token["user_id"]) matches request.user.id in LogoutView.
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+'''
+
 #? ----------------------------------------------------------------------------
 #? Django Channels configuration
 #? ----------------------------------------------------------------------------

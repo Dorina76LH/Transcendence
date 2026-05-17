@@ -76,6 +76,21 @@ class User(AbstractUser):
 		verbose_name = 'User'
 		verbose_name_plural = 'Users'
 	
+	'''
+	# TECHNICAL REQUIREMENT: LOGIN WITH EMAIL
+    # Redefine email field to enforce uniqueness directly in the database (PostgreSQL)
+    email = models.EmailField(
+        unique=True, 
+        verbose_name='Email address'
+    )
+
+	# Instruct Django to use the email field as the primary identifier for authentication
+    USERNAME_FIELD = 'email'
+    
+    # The username remains mandatory, specifically for creating superusers via CLI
+    REQUIRED_FIELDS = ['username']
+	'''
+	
 	# STEP 2 : Custom Database Fields (The Columns)
 
 	# Profile picture uploaded by the user
