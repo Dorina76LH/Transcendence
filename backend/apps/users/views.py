@@ -103,14 +103,23 @@ class LogoutView(APIView):
             # This keeps chat presence in sync even if token blacklisting fails later.
             request.user.is_online = False
             request.user.save(update_fields=["is_online"])
+            # Try to obtain the refresh token from the request body or cookies
+            refresh_token = (
+                request.data.get("refresh")
+                or request.COOKIES.get("refresh")
+                or request.COOKIES.get("refresh_token")
+            )
 
-             #on recupere le refresh token depuis le body
-            refresh_token = request.data["refresh"]
+            if not refresh_token:
+                return Response(
+                    {"detail": "Refresh token is required."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-            # on le blackliste -> il ne peut plus generer de nouveau access token
+            # Blacklist the refresh token so it can't be used again
             token = RefreshToken(refresh_token)
 
-            # controle si c'est user ou pas
+            # Ensure the token belongs to the requesting user
             if int(token["user_id"]) != request.user.id:
                 return Response(
                     {"detail": "This token does not belong to you."},
@@ -118,10 +127,17 @@ class LogoutView(APIView):
                 )
             token.blacklist()
 
-            return Response(
+            # Build the response and delete any auth cookies if present
+            response = Response(
                 {"detail": "Successfully disconnected."},
                 status=status.HTTP_205_RESET_CONTENT
             )
+            # Common cookie names used for tokens / sessions
+            response.delete_cookie("refresh")
+            response.delete_cookie("refresh_token")
+            response.delete_cookie("access")
+            response.delete_cookie("sessionid")
+            return response
         except KeyError:
             return Response(
                 { "detail": "Refresh token is required."},
