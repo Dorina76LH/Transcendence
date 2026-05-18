@@ -46,9 +46,6 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # Import custom User model to create and query users
 from .models import User
 
-# For JWT login customization
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
 
 #* ----------------------------------------------------------------------------
 #* RegisterSerializer
@@ -240,23 +237,28 @@ class UserSerializer(serializers.ModelSerializer):
         """
         return obj.avatar_url
 
-
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-
-        self.user.is_online = True
-        self.user.save(update_fields=["is_online"])
-
-        data["user"] = {
-            "id": self.user.id,
-            "username": self.user.username,
-            "email": self.user.email,
-            "avatar_url": self.user.avatar_url,
-            "is_online": self.user.is_online,
-            "role": self.user.role,
-        }
-        return data
+# -----------------------------------------------------------------------------
+# NOTE : CustomTokenObtainPairSerializer commented out
+# A LoginSerializer with the same logic already exists above (line ~240).
+# It uses UserSerializer instead of a manual dict, which is more maintainable.
+# Please compare both approaches and we can decide together which to keep.
+# -----------------------------------------------------------------------------
+# class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+#     def validate(self, attrs):
+#         data = super().validate(attrs)
+#
+#         self.user.is_online = True
+#         self.user.save(update_fields=["is_online"])
+#
+#         data["user"] = {
+#             "id": self.user.id,
+#             "username": self.user.username,
+#             "email": self.user.email,
+#             "avatar_url": self.user.avatar_url,
+#             "is_online": self.user.is_online,
+#             "role": self.user.role,
+#         }
+#         return data
     
 
 
