@@ -4,7 +4,7 @@
 
 # --- CORE FRAMEWORK ---
 django                          # Main web framework
-djangorestframework             # Toolkit for building REST APIs (Angular connectivity)
+djangorestframework>=3.15,<4.0             # Toolkit for building REST APIs (Angular connectivity)
 django-cors-headers             # Handles Cross-Origin Resource Sharing (CORS) for Angular
 
 # ---AUTHENTICATION ---
@@ -12,16 +12,16 @@ djangorestframework-simplejwt   # JWT authentication for angular
 django-environ                  # Reads environment variables from .env
 
 # --- REAL-TIME / CHAT (WebSockets) ---
-django-channels                 # Extends Django to handle WebSockets and long-running connections
+channels>=4.0,<5.0                 # Extends Django to handle WebSockets and long-running connections
 channels-redis                  # Redis backing store for Django Channels
-daphne                          # ASGI server to run the project with WebSocket support
+daphne>=4.0,<5.0                          # ASGI server to run the project with WebSocket support
 
 # --- DATABASE ---
-psycopg2-binary                 # PostgreSQL database adapter for Python
+psycopg[binary]>=3.1,<4.0                 # PostgreSQL database adapter for Python
 
 # --- MEDIA & STATIC FILES ---
 Pillow                          # Image procesing for avatars
-whitenoise                      # Serves static files with DAPHNE/ASGI
+whitenoise>=6.0,<7.0                      # Serves static files with DAPHNE/ASGI
 
 # --- ADMIN ---
 django-jazzmin                  # Moderne theme for Django admin panel
