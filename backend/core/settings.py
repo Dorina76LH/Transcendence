@@ -78,6 +78,8 @@ JAZZMIN_UI_TWEAKS = {
 }
 
 INSTALLED_APPS = [
+
+    'daphne', # New import chat
     
     # django apps
     'jazzmin',
@@ -94,6 +96,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'channels',
+    #'apps.chat.apps.ChatConfig', # New import chat
 
     # personnal apps
     "apps.users",
@@ -292,6 +295,9 @@ ASGI_APPLICATION = 'core.asgi.application'
 #& When a user A sends a message, Redis broadcasts it to all connected users
 #& Host 'redis' refers to the Redis container name in docker compose
 
+# new migration chat
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -300,3 +306,12 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+'''
+config chat
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+'''
