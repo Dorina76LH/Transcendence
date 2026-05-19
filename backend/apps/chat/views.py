@@ -19,21 +19,26 @@ class ConversationListView(generics.ListAPIView):
 class ConversationCreateView(generics.CreateAPIView):
 		serializer_class = ConversationCreateSerializer
 		permission_classes = [permissions.IsAuthenticated]
-
-		def create (self, request, *args, **kwargs):
-			serializer = self.get_serializer(data = request.data)
-			serializer.is_valid(raised_exception=True)
-			participant_id = serializer.validated_data['participant_id']
-			try:
-					participant = User.objects.get(id = participant_id)
-			except User.DoesNotExist:
-					raise NotFound('User not found.')
-			if participant == request.user:
-				raise PermissionDenied('You cannot create a conversation with yourself.')
-			conversation = Conversation.objects.create()	
-			conversation.participants.add(request.user, participant)
-			response_serializer = ConversationSerializer(conversation)
-			return Response(response_serializer.data)
+		def create(self, request, *args, **kwargs):
+				serializer = self.get_serializer(data=request.data)
+				serializer.is_valid(raise_exception=True)
+				participant_id = serializer.validated_data['participant_id']
+				try:
+						participant = User.objects.get(id=participant_id)
+				except User.DoesNotExist:
+						raise NotFound('User not found.')
+				if participant == request.user:
+						raise PermissionDenied('You cannot create a conversation with yourself.')
+				conversation = Conversation.objects.filter(
+						participants=request.user
+				).filter(
+						participants=participant
+				).first()
+				if conversation is None:
+						conversation = Conversation.objects.create()
+						conversation.participants.add(request.user, participant)
+				response_serializer = ConversationSerializer(conversation)
+				return Response(response_serializer.data)
 		
 class MessageListView(generics.ListAPIView):
 		serializer_class = MessageSerializer
