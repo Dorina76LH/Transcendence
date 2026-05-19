@@ -11,7 +11,8 @@ from django.db import models
 #sert a ecrire une contrainte conditionnelle en base
 from django.db.models import Q
 
-
+from django.utils import timezone
+from django.core.exceptions import PermissionDenied
 # ================================================================================= #
 # c'est une table en base, il y a deux classes dans une class car c'est une liste   #
 # des valeurs possibles pour le champ status, on l'imbriques dedans car elle        #
@@ -51,6 +52,8 @@ class FriendRequest(models.Model):
 		choices=Status.choices,
 		default=Status.PENDING,
 	)
+	# timestamp quand la demande est acceptee (null si pas accepté)
+	accepted_at = models.DateTimeField(null=True, blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -73,9 +76,20 @@ class FriendRequest(models.Model):
 		if self.from_user_id == self.to_user_id:
 			raise ValidationError('You cannot send a friend request to yourself.')
 
+    # la demande passe en accepted
+	# on sauvegarde la demande avec save.
+	# on ajoute l'autre user dans la liste d'amis avec add()
+	def accept(self, by_user):
+		if self.to_user_id != getattr(by_user, 'id', None):
+			raise PermissionDenied('Only the recipient can accept this request.')
+		if self.status != self.Status.PENDING:
+			raise ValidationError('Only pending requests can be accepted.')
+		self.status = self.Status.ACCEPTED
+		self.accepted_at = timezone.now()
+		self.save()
+		self.from_user.friends.add(self.to_user)
+
     # cette methode definit la maniere dont l'objet s'affiche sous forme de texte
 	# dans l'admin django, les logs et le debug
 	def __str__(self):
 		return f'{self.from_user} -> {self.to_user} ({self.status})'
-
-
