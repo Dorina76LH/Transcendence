@@ -1,7 +1,6 @@
 services:
   backend:
     build: ./backend
-    container_name: transcendence_backend
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
@@ -13,7 +12,6 @@ services:
       - db
   db:
     image: postgres:16
-    container_name: transcendence_db
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
