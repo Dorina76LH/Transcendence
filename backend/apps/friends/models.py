@@ -74,16 +74,16 @@ class FriendRequest(models.Model):
 	# ici elle verifie qu'un utilisateur ne s'envoie pas une demande d'ami a lui-meme
 	def clean(self):
 		if self.from_user_id == self.to_user_id:
-			raise ValidationError('You cannot send a friend request to yourself.')
+			raise ValidationError
 
     # la demande passe en accepted
 	# on sauvegarde la demande avec save.
 	# on ajoute l'autre user dans la liste d'amis avec add()
 	def accept(self, by_user):
 		if self.to_user_id != getattr(by_user, 'id', None):
-			raise PermissionDenied('Only the recipient can accept this request.')
+			raise PermissionDenied
 		if self.status != self.Status.PENDING:
-			raise ValidationError('Only pending requests can be accepted.')
+			raise ValidationError
 		self.status = self.Status.ACCEPTED
 		self.accepted_at = timezone.now()
 		self.save()
