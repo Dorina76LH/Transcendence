@@ -5,46 +5,49 @@ import { RouterLink } from '@angular/router';
   selector: 'app-home',
   imports: [RouterLink],
   template: `
-  <header>
-    <nav class="navbar navbar-expand-lg navbar-dark d-none d-lg-block" style="z-index: 2000;">
-      <div class="container-fluid">
-        <a routerLink="/" class="nav-link">
-          <strong>TRANSCENDENCE</strong>
-        </a>
-        <button class="navbar-toggler" type="button" data-mdb-collapse-init data-mdb-target="#navbar"
-          aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
-          <i class="fas fa-bars"></i>
-        </button>
-        <div class="collapse navbar-collapse" id="navbar">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
-            <li class="nav-item active">
-              <a routerLink="/profile" class="nav-link">
-                Profile
-              </a>
-            </li>
-            <li class="nav-item">
-              <a routerLink="/settings" class="nav-link">
-                Settings
-              </a>
-            </li>
-            <li class="nav-item">
-              <a routerLink="/chat" class="nav-link">
-                Chat
-              </a>
-            </li>
-          </ul>
-          <div class="d-flex gap-2 ms-auto">
-            <a routerLink="/languages" class="btn btn-primary">Languages</a>
-            <a routerLink="/login" class="btn btn-secondary">Login</a>
-            <a routerLink="/register" class="btn btn-primary">Register</a>
-          </div>
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a routerLink="/" class="nav-link">
+        <strong>TRANSCENDENCE</strong>
+      </a>
+      <button class="navbar-toggler" type="button" 
+              data-bs-toggle="collapse" 
+              data-bs-target="#navbar" 
+              aria-controls="navbar" 
+              aria-expanded="false" 
+              aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
+          <li class="nav-item">
+            <a routerLink="/profile" class="nav-link">Profile</a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/settings" class="nav-link">Settings</a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/chat" class="nav-link">Chat</a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/friends" class="nav-link">Friends</a>
+          </li>
+        </ul>
+        <div class="d-flex gap-4 ms-4 me-5">
+          <input placeholder="oui">
+        </div>
+        <div class="d-flex gap-2">
+          <a routerLink="/login" class="btn btn-secondary">Login</a>
+          <a routerLink="/register" class="btn btn-primary">Register</a>
         </div>
       </div>
-    </nav>
-  </header>
+    </div>
+  </nav>
+</header>
   <main class="main">
   <div class="content">
-    <h1> Welcome to our project !</h1>
+    <!-- <h1> Welcome to our project !</h1>
     <h2>This is the Transcendence project.</h2>
     <h2>📌 Git & Trello Rules</h2>
     <h3>1. 🧩 Tools</h3>
@@ -102,18 +105,14 @@ import { RouterLink } from '@angular/router';
         How to test <br>
         Screenshoots (if necessary) <br>
     </h4>
-    <h3>_____________________________</h3>
-    <h3> Buttons fun</h3>
-    <div class="buttons">
-      <a routerLink="/settings" class="btn btn-light">Secret Button</a>
-      <button type="button" class="btn btn-secondary">Lot</button>
-      <button type="button" class="btn btn-success">Of</button>
-      <button type="button" class="btn btn-danger">Buttons</button>
-      <button type="button" class="btn btn-warning">Here</button>
-      <button type="button" class="btn btn-info">Kinda</button>
-      <button type="button" class="btn btn-light">Fun</button>
-      <button type="button" class="btn btn-dark">Lol</button>
-    </div>
+    <h3>_____________________________</h3> -->
+    <img src="assets/favicon.ico" style="min-height: calc(20vh - 56px);">
+    <h1>Welcome to our <b><i>Transcendence</i></b> project !</h1>
+    <h3>In this project, the main goal is to make a website, which is made by mixing frontend and backend abilities.</h3>
+    <h4>For the frontend, we used Angular, a framework to make a website that is communicating with the backend easily</h4>
+    <h4>This framework is mainly used for it's ability to make components, which are the pages themselves for this project <br>
+      since the structure of a page in this project is written inside of a component.
+    </h4>
   </div>
 </main>`,
   styleUrl: './home.css'

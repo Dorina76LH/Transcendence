@@ -8,33 +8,38 @@ import { CommonModule } from '@angular/common';
   imports: [RouterLink, FormsModule, CommonModule],
   template: `
 <header>
-  <nav class="navbar navbar-expand-lg navbar-dark d-none d-lg-block" style="z-index: 2000;">
+  <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
       <a routerLink="/" class="nav-link">
         <strong>TRANSCENDENCE</strong>
       </a>
-      <button class="navbar-toggler" type="button" data-mdb-collapse-init data-mdb-target="#navbar"
-        aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
-        <i class="fas fa-bars"></i>
+      <button class="navbar-toggler" type="button" 
+              data-bs-toggle="collapse" 
+              data-bs-target="#navbar" 
+              aria-controls="navbar" 
+              aria-expanded="false" 
+              aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbar">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
-          <li class="nav-item active">
-            <a routerLink="/profile" class="nav-link">
-              Profile
-            </a>
+          <li class="nav-item">
+            <a routerLink="/profile" class="nav-link">Profile</a>
           </li>
           <li class="nav-item">
-            <a routerLink="/settings" class="nav-link">
-              Settings
-            </a>
+            <a routerLink="/settings" class="nav-link">Settings</a>
           </li>
           <li class="nav-item">
-            <a routerLink="/chat" class="nav-link">
-              Chat
-            </a>
+            <a routerLink="/chat" class="nav-link">Chat</a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/friends" class="nav-link">Friends</a>
           </li>
         </ul>
+        <div class="d-flex gap-2">
+          <a routerLink="/login" class="btn btn-secondary">Login</a>
+          <a routerLink="/register" class="btn btn-primary">Register</a>
+        </div>
       </div>
     </div>
   </nav>
@@ -44,7 +49,8 @@ import { CommonModule } from '@angular/common';
     <div class="row h-100">
 
       <!-- left column, friend list -->
-      <div class="col-2 border-end border-secondary d-flex flex-column py-3">
+    <div class="col-2 border-end border-secondary py-3">
+      <div class="col-15 border-end border-secondary d-flex flex-column py-3" style="overflow:scroll; height:200px">
         <button class="btn d-flex align-items-center mb-3 w-100" (click)="selectFriend('Friend 1')">
           <div class="rounded-circle bg-secondary me-2" style="width:40px;height:40px;"></div>
           <h5 class="mb-0">Friend 1</h5>
@@ -58,6 +64,7 @@ import { CommonModule } from '@angular/common';
           <h5 class="mb-0">Friend 3</h5>
         </button>
       </div>
+    </div>
 
       <!-- whole column for the chat, on the middle -->
       <div class="col d-flex flex-column py-3">
@@ -120,10 +127,10 @@ export class ChatComponent {
         timestamp: new Date().toISOString()
       };
       this.socket.send(JSON.stringify(payload));
-      this.messages.push(`Moi : ${messageToSend}`);
+      this.messages.push(`Me : ${messageToSend}`);
       this.inputMessage = '';
-    } else {
-      alert("Connection lost. Can't send the message.");
+    // } else {
+    //   alert("Connection lost. Can't send the message.");
     }
   } else if (!this.selectedFriend) {
     alert("Choose a friend first.");

@@ -7,6 +7,7 @@ import { ChatComponent } from './chat/chat.component';
 import { LoginComponent } from './login';
 import { RegisterComponent } from './register/register.component';
 import { ProfileSettingsComponent } from './profile_settings';
+import { GDPRComponent } from './gdpr/gdpr.component';
 
 export const routes: Routes = [
 	{path: '', component: HomeComponent},
@@ -16,5 +17,6 @@ export const routes: Routes = [
 	{path: 'chat', component:ChatComponent},
 	{path: 'login', component:LoginComponent},
 	{path: 'register', component:RegisterComponent},
-	{path: 'profile-settings', component:ProfileSettingsComponent}
+	{path: 'profile-settings', component:ProfileSettingsComponent},
+	{path : 'gdpr', component:GDPRComponent},
 ];

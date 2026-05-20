@@ -1,8 +1,8 @@
+import { RouterLink } from "@angular/router";
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-lang',
+  selector: 'app-gdpr',
   imports: [RouterLink],
   template: `
 <header>
@@ -45,15 +45,15 @@ import { RouterLink } from '@angular/router';
 <main class="Languages">
   <div class="Content">
     <div>
-      <h1>Languages Page</h1>
-      <h2>This is the actual languages page, still in progress, but I got the page lol</h2>
-	<h3>We'll soon have 3 more languages handled for the project, but for now we only got one</h3>
-	<h3>Which is english as you can see.</h3>
+      <h1>gdpr Page</h1>
+      <h2>This is the actual gdpr page, still in progress, but I got the page lol</h2>
+      I mean I dont know what I could do with all of that but ima just try to find out. 
     </div>
   </div>
 </main>`,
-  styleUrl: './languages.css',
+styleUrl: 'gdpr.css',
 })
-export class LanguageComponent {
+
+export class GDPRComponent {
 
 }

@@ -104,7 +104,7 @@ textarea {
 
 h1, h2, h3, h4, h5, p, span, label{
   color: var(--text-color) !important;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem !important;
 }
 
 h1 {
@@ -137,7 +137,7 @@ p {
   margin-bottom: 1rem;
 }
 
-a { 
+a {
   font-size: 1rem;
   margin-right: 1rem;
 }

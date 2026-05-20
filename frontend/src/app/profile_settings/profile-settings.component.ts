@@ -7,33 +7,38 @@ import { FormsModule } from '@angular/forms';
   imports: [RouterLink, FormsModule],
   template: `
 <header>
-  <nav class="navbar navbar-expand-lg navbar-dark d-none d-lg-block" style="z-index: 2000;">
+  <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
       <a routerLink="/" class="nav-link">
         <strong>TRANSCENDENCE</strong>
       </a>
-      <button class="navbar-toggler" type="button" data-mdb-collapse-init data-mdb-target="#navbar"
-        aria-controls="navbar" aria-expanded="true" aria-label="Toggle navigation">
-        <i class="fas fa-bars"></i>
+      <button class="navbar-toggler" type="button" 
+              data-bs-toggle="collapse" 
+              data-bs-target="#navbar" 
+              aria-controls="navbar" 
+              aria-expanded="false" 
+              aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbar">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
-          <li class="nav-item active">
-            <a routerLink="/profile" class="nav-link">
-              Profile
-            </a>
+          <li class="nav-item">
+            <a routerLink="/profile" class="nav-link">Profile</a>
           </li>
           <li class="nav-item">
-            <a routerLink="/settings" class="nav-link">
-              Settings
-            </a>
+            <a routerLink="/settings" class="nav-link">Settings</a>
           </li>
           <li class="nav-item">
-            <a routerLink="/chat" class="nav-link">
-              Chat
-            </a>
+            <a routerLink="/chat" class="nav-link">Chat</a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/friends" class="nav-link">Friends</a>
           </li>
         </ul>
+        <div class="d-flex gap-2">
+          <a routerLink="/login" class="btn btn-secondary">Login</a>
+          <a routerLink="/register" class="btn btn-primary">Register</a>
+        </div>
       </div>
     </div>
   </nav>
@@ -43,7 +48,7 @@ import { FormsModule } from '@angular/forms';
     <h2 class="text-center mb-4">Profile Settings</h2>
     <div class="text-center mb-4">
       <div class="position-relative d-inline-block">
-        <img [src]="user.avatarUrl" class="rounded-circle border border-secondary" 
+        <img [src]="user.avatarPath" class="rounded-circle border border-secondary" 
              style="width:100px; height:100px; object-fit: cover;">
         <button class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle">
           <i class="fas fa-camera fa-xs"></i>
@@ -82,11 +87,11 @@ export class ProfileSettingsComponent {
     username: 'TEST',
     email: 'test@transcendence.com',
     bio: 'testing my code',
-    avatarUrl: 'assets/Zoliac.png'
+    avatarPath: 'assets/Zoliac.png'
   };
 
   saveProfile() {
-    console.log('Données enregistrées :', this.user);
-    alert('Profil mis à jour avec succès !');
+    console.log('Saved changes :', this.user);
+    alert('Profile propreties changed');
   }
 }
