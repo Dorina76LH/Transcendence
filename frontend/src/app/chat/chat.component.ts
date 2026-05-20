@@ -97,7 +97,7 @@ import { CommonModule } from '@angular/common';
     </div>
   </div>
 </main>`,
-styleUrl: './chat.css'
+styleUrl: './chat.css',
 })
 export class ChatComponent {
   selectedFriend = '';
@@ -129,11 +129,11 @@ export class ChatComponent {
       this.socket.send(JSON.stringify(payload));
       this.messages.push(`Me : ${messageToSend}`);
       this.inputMessage = '';
-    // } else {
-    //   alert("Connection lost. Can't send the message.");
+    } else {
+      console.log("Connection lost. Can't send the message.");
     }
   } else if (!this.selectedFriend) {
-    alert("Choose a friend first.");
+    console.log("Choose a friend first.");
   }
 }
   ngOnDestroy() {

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from './auth.guard';
 import { ProfileComponent } from './profile/profile.component';
 import { HomeComponent } from './home/home.component';
 import { SettingsComponent } from './settings/settings.component';
@@ -8,15 +9,17 @@ import { LoginComponent } from './login';
 import { RegisterComponent } from './register/register.component';
 import { ProfileSettingsComponent } from './profile_settings';
 import { GDPRComponent } from './gdpr/gdpr.component';
+import { FriendsComponent } from '../friends/friends.component';
 
 export const routes: Routes = [
 	{path: '', component: HomeComponent},
-	{path: 'profile', component: ProfileComponent},
-	{path: 'settings', component: SettingsComponent},
-	{path: 'languages', component: LanguageComponent},
-	{path: 'chat', component:ChatComponent},
 	{path: 'login', component:LoginComponent},
 	{path: 'register', component:RegisterComponent},
-	{path: 'profile-settings', component:ProfileSettingsComponent},
-	{path : 'gdpr', component:GDPRComponent},
+	{path: 'profile', component: ProfileComponent/*, canActivate: [AuthGuard]*/},
+	{path: 'settings', component: SettingsComponent},
+	{path: 'languages', component: LanguageComponent},
+	{path: 'chat', component:ChatComponent/*, canActivate: [AuthGuard]*/},
+	{path: 'profile-settings', component:ProfileSettingsComponent/*, canActivate: [AuthGuard]*/},
+	{path : 'gdpr', component:GDPRComponent/*, canActivate: [AuthGuard]*/},
+	{path : 'friends', component: FriendsComponent/*, canActivate: [AuthGuard]*/},
 ];

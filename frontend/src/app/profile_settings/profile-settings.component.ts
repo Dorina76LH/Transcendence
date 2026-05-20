@@ -87,11 +87,11 @@ export class ProfileSettingsComponent {
     username: 'TEST',
     email: 'test@transcendence.com',
     bio: 'testing my code',
-    avatarPath: 'assets/Zoliac.png'
+    avatarPath: 'Zoliac.png'
   };
 
   saveProfile() {
     console.log('Saved changes :', this.user);
-    alert('Profile propreties changed');
+    console.log('Profile propreties changed');
   }
 }

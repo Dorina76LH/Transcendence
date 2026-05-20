@@ -18,4 +18,9 @@ export class UserService {
   register(firstName: string, surname: string, email: string, password: string) {
     return this.http.post(`${this.url}/auth/register`, { firstName, surname, email, password });
   }
+
+    getProfile() {
+    const token = localStorage.getItem('token');
+    return this.http.get(`${this.url}/profile`, {headers: { Authorization: `Bearer ${token}` }});
+  }
 }

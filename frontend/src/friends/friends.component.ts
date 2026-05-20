@@ -1,10 +1,10 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-@Component({
-  selector: 'user-settings',
-  imports: [RouterLink],
-  template: `
+@Component ({
+	selector: "app-root",
+	imports: [RouterLink],
+	template: `
 <header>
   <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
@@ -41,33 +41,10 @@ import { RouterLink } from '@angular/router';
       </div>
     </div>
   </nav>
-</header>
-<main class="Settings">
-  <div class="Content">
-    <div>
-      <h1>Settings Page</h1>
-      <h2>This is the actual settings page, still in progress, but I got the page lol</h2>
-      <p>Languages setting page :</p>
-      <a routerLink="/languages" class="btn btn-secondary">🇪🇸 / 🇫🇷 / 🇬🇧</a>
-      <button class="btn btn-secondary me-3" (click)="toggleDarkMode()">
-          {{ isDarkMode ? ' ☀️ ' : ' 🌙 ' }}
-      </button>
-      <a routerLink="/profile-settings" class="btn btn-secondary"> ⚙️ </a>
-    </div>
-  </div>
-</main>`,
-styleUrl: './settings.css',
-encapsulation: ViewEncapsulation.None,
+</header>`,
+styleUrl: "./friends.css",
 })
-export class SettingsComponent implements OnInit {
-  isDarkMode = localStorage.getItem('darkMode') === 'true';
-  ngOnInit() {
-    document.body.classList.toggle('dark-mode', this.isDarkMode);
-  }
-  toggleDarkMode() {
-    this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('darkMode', String(this.isDarkMode));
-    document.body.classList.toggle('dark-mode', this.isDarkMode);
-    console.log("The website is now on darkmode");
-  }
+
+export class FriendsComponent {
+	
 }
