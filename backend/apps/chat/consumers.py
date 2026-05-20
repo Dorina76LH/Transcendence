@@ -23,21 +23,36 @@ class ChatTestConsumer(AsyncWebsocketConsumer):
 class ChatConversationConsumer(AsyncWebsocketConsumer):
 		
 		async def connect(self):
-				self.user = self.scope['user']
-				self.conversation_id = self.scope['url_route']['kwargs']['conversation_id']
-				self.room_group_name = f'chat_conversation_{self.conversation_id}'
-				if self.user.is_anonymous:
-						await self.close()
-						return
-				has_access = await self.user_has_access()
-				if not has_access:
-						await self.close()
-						return
-				await self.channel_layer.group_add(
-						self.room_group_name,
-						self.channel_name
-				)
-				await self.accept()
+			self.user = self.scope['user']
+			self.conversation_id = self.scope['url_route']['kwargs']['conversation_id']
+			self.room_group_name = f'chat_conversation_{self.conversation_id}'
+
+			print('WEBSOCKET USER:', self.user)
+			print('WEBSOCKET USER ID:', getattr(self.user, 'id', None))
+			print('WEBSOCKET CONVERSATION ID:', self.conversation_id)
+
+			if self.user.is_anonymous:
+					print('WEBSOCKET REJECTED: anonymous user')
+					await self.close()
+					return
+
+			has_access = await self.user_has_access()
+
+			print('WEBSOCKET HAS ACCESS:', has_access)
+
+			if not has_access:
+					print('WEBSOCKET REJECTED: user is not participant')
+					await self.close()
+					return
+
+			await self.channel_layer.group_add(
+					self.room_group_name,
+					self.channel_name
+			)
+
+			await self.accept()
+
+			print('WEBSOCKET ACCEPTED')
 
 		async def disconnect(self, close_code):
 				await self.channel_layer.group_discard(
