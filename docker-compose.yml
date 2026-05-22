@@ -8,7 +8,7 @@ services:
       - "443:443"
     volumes:
       - ./infra/nginx/conf.d:/etc/nginx/conf.d
-      - ./infra/nginx/ssl:/etc/nginx/ssl
+      #- ./infra/nginx/ssl:/etc/nginx/ssl
     networks:
       - gateway
     restart: always
