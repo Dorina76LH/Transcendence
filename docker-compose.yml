@@ -8,6 +8,7 @@ services:
       - "443:443"
     volumes:
       - ./infra/nginx/conf.d:/etc/nginx/conf.d
+      - static_volume:/etc/nginx/static
       #- ./infra/nginx/ssl:/etc/nginx/ssl
     networks:
       - gateway
@@ -38,6 +39,7 @@ services:
     env_file: .env
     volumes:
       - ./backend:/usr/src/app
+      - static_volume:/usr/src/app/static
     networks:
       - gateway
       - internal
@@ -46,9 +48,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    command: >
-      sh -c "python manage.py migrate &&
-             daphne -b 0.0.0.0 -p 8000 core.asgi:application"
+    command: daphne -b 0.0.0.0 -p 8000 core.asgi:application
 
   # --- CACHE / MESSAGE BROKER: Redis ---
   redis:
@@ -98,3 +98,4 @@ networks:
 volumes:
   postgres_data:
   pgadmin_data:
+  static_volume:

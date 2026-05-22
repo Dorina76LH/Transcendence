@@ -80,7 +80,7 @@ JAZZMIN_UI_TWEAKS = {
 INSTALLED_APPS = [
 
     #'daphne', # New import chat
-    
+
     # django apps
     'jazzmin',
     'django.contrib.admin',
@@ -317,3 +317,16 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+#? ----------------------------------------------------------------------------
+#? HTTPS / Nginx Security for Django Admin
+#? ----------------------------------------------------------------------------
+# Allow Django to accept POST requests (forms) coming from Nginx's HTTPS
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost",
+    "https://127.0.0.1",
+]
+
+# Secure cookies so they are only transmitted over HTTPS connections
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
