@@ -1,0 +1,6 @@
+infra/nginx/ssl/*.crt
+infra/nginx/ssl/*.key
+infra/nginx/ssl/*.csr
+.env
+.env.*
+!.env.example
