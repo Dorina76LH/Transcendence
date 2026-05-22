@@ -13,11 +13,11 @@ import { CommonModule } from '@angular/common';
       <a routerLink="/" class="nav-link">
         <strong>TRANSCENDENCE</strong>
       </a>
-      <button class="navbar-toggler" type="button" 
-              data-bs-toggle="collapse" 
-              data-bs-target="#navbar" 
-              aria-controls="navbar" 
-              aria-expanded="false" 
+      <button class="navbar-toggler" type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbar"
+              aria-controls="navbar"
+              aria-expanded="false"
               aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -111,7 +111,7 @@ export class ChatComponent {
   inputMessage = '';
 
   ngOnInit() {
-    this.socket = new WebSocket('ws://localhost:8000/ws/chat/');
+    this.socket = new WebSocket('wss://localhost/ws/chat/');
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       this.messages.push(data.message);
