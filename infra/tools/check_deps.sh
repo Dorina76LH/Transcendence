@@ -21,7 +21,7 @@ if ! docker compose version &> /dev/null; then
 fi
 
 # 3. Vérifier si les ports sont libres
-if lsof -Pi :80 -sTCP:LISTEN -t >/dev/null || lsof -Pi :443 -sTCP:LISTEN -t >/dev/null ; then
+if ss -tuln | grep -qE ':80\b|:443\b'; then
     echo -e "${RED}Error: Port 80 or 443 is already in use.${NC}"
     echo "Stop any other web server (nginx, apache) before running."
     exit 1
