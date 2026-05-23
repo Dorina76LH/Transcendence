@@ -6,13 +6,58 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 # importe les outils django pour creer des modeles
-from django.db import models
+from django.db import models, transaction
 
 #sert a ecrire une contrainte conditionnelle en base
 from django.db.models import Q
 
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
+class Friendship(models.Model):
+	user1 = models.ForeignKey(
+		settings.AUTH_USER_MODEL,
+		on_delete=models.CASCADE,
+		related_name='friendship_user1',
+	)
+	user2 = models.ForeignKey(
+		settings.AUTH_USER_MODEL,
+		on_delete=models.CASCADE,
+		related_name='friendship_user2',
+	)
+	created_at = models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+		verbose_name = 'Friendship'
+		verbose_name_plural = 'Friendships'
+		constraints = [
+			models.UniqueConstraint(
+				fields=['user1', 'user2'],
+				name='unique_friendship_pair',
+			),
+		]
+
+	def clean(self):
+		if self.user1_id == self.user2_id:
+			raise ValidationError('A user cannot be friends with themselves.')
+
+	@classmethod
+	def get_pair(cls, user_a, user_b):
+		"""Return the canonical friendship pair for two users."""
+		if user_a.id is None or user_b.id is None:
+			raise ValueError('Both users must be saved before creating a friendship.')
+		if user_a.id < user_b.id:
+			return user_a, user_b
+		return user_b, user_a
+
+	@classmethod
+	def get_or_create_between(cls, user_a, user_b):
+		user1, user2 = cls.get_pair(user_a, user_b)
+		return cls.objects.get_or_create(user1=user1, user2=user2)
+
+	def __str__(self):
+		return f'{self.user1} <-> {self.user2}'
+
+
 # ================================================================================= #
 # c'est une table en base, il y a deux classes dans une class car c'est une liste   #
 # des valeurs possibles pour le champ status, on l'imbriques dedans car elle        #
@@ -78,16 +123,17 @@ class FriendRequest(models.Model):
 
     # la demande passe en accepted
 	# on sauvegarde la demande avec save.
-	# on ajoute l'autre user dans la liste d'amis avec add()
+	# on ajoute la relation friend via le modele Friendship
 	def accept(self, by_user):
 		if self.to_user_id != getattr(by_user, 'id', None):
 			raise PermissionDenied
 		if self.status != self.Status.PENDING:
 			raise ValidationError
-		self.status = self.Status.ACCEPTED
-		self.accepted_at = timezone.now()
-		self.save()
-		self.from_user.friends.add(self.to_user)
+		with transaction.atomic():
+			self.status = self.Status.ACCEPTED
+			self.accepted_at = timezone.now()
+			self.save()
+			Friendship.get_or_create_between(self.from_user, self.to_user)
 
     # cette methode definit la maniere dont l'objet s'affiche sous forme de texte
 	# dans l'admin django, les logs et le debug
