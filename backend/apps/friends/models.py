@@ -14,15 +14,15 @@ from django.db.models import Q
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 class Friendship(models.Model):
-	user1 = models.ForeignKey(
+	user_id = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
-		related_name='friendship_user1',
+		related_name='friendships_sent',
 	)
-	user2 = models.ForeignKey(
+	friend_user_id = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
-		related_name='friendship_user2',
+		related_name='friendships_received',
 	)
 	created_at = models.DateTimeField(auto_now_add=True)
 
@@ -31,13 +31,13 @@ class Friendship(models.Model):
 		verbose_name_plural = 'Friendships'
 		constraints = [
 			models.UniqueConstraint(
-				fields=['user1', 'user2'],
+				fields=['user_id', 'friend_user_id'],
 				name='unique_friendship_pair',
 			),
 		]
 
 	def clean(self):
-		if self.user1_id == self.user2_id:
+		if self.user_id_id == self.friend_user_id_id:
 			raise ValidationError('A user cannot be friends with themselves.')
 
 	@classmethod
@@ -51,11 +51,11 @@ class Friendship(models.Model):
 
 	@classmethod
 	def get_or_create_between(cls, user_a, user_b):
-		user1, user2 = cls.get_pair(user_a, user_b)
-		return cls.objects.get_or_create(user1=user1, user2=user2)
+		user_id, friend_user_id = cls.get_pair(user_a, user_b)
+		return cls.objects.get_or_create(user_id=user_id, friend_user_id=friend_user_id)
 
 	def __str__(self):
-		return f'{self.user1} <-> {self.user2}'
+		return f'{self.user_id} <-> {self.friend_user_id}'
 
 
 # ================================================================================= #

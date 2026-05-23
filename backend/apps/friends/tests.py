@@ -33,8 +33,8 @@ class FriendshipModelTests(TestCase):
 		self.assertTrue(created_1)
 		self.assertFalse(created_2)
 		self.assertEqual(friendship_1.pk, friendship_2.pk)
-		self.assertEqual(friendship_1.user1, self.user_a)
-		self.assertEqual(friendship_1.user2, self.user_b)
+		self.assertEqual(friendship_1.user_id, self.user_a)
+		self.assertEqual(friendship_1.friend_user_id, self.user_b)
 		self.assertIsNotNone(friendship_1.created_at)
 
 	def test_get_pair_rejects_unsaved_users(self):
@@ -44,7 +44,7 @@ class FriendshipModelTests(TestCase):
 			Friendship.get_pair(self.user_a, unsaved_user)
 
 	def test_clean_rejects_self_friendship(self):
-		friendship = Friendship(user1=self.user_a, user2=self.user_a)
+		friendship = Friendship(user_id=self.user_a, friend_user_id=self.user_a)
 
 		with self.assertRaises(ValidationError):
 			friendship.clean()
@@ -82,8 +82,8 @@ class FriendRequestModelTests(TestCase):
 		self.assertIsNotNone(friend_request.accepted_at)
 		self.assertEqual(Friendship.objects.count(), 1)
 		friendship = Friendship.objects.get()
-		self.assertEqual(friendship.user1, self.sender)
-		self.assertEqual(friendship.user2, self.receiver)
+		self.assertEqual(friendship.user_id, self.sender)
+		self.assertEqual(friendship.friend_user_id, self.receiver)
 
 	def test_accept_is_for_receiver_only(self):
 		friend_request = FriendRequest.objects.create(
