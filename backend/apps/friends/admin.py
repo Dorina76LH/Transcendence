@@ -1,19 +1,24 @@
+
+# Registers the FriendRequest model with Django admin and configures how requests
+# appear and are managed in the admin UI.
+# Customizes admin behavior
+
 from django.contrib import admin
 from .models import FriendRequest
 
-
 @admin.register(FriendRequest)
 class FriendRequestAdmin(admin.ModelAdmin):
-	# pour voir les colonnes 
+	# Columns shown on the change-list page(id, sender, receiver, status, timestamps)
 	list_display = ('id', 'from_user', 'to_user', 'status', 'accepted_at', 'created_at', 'updated_at')
-    
-	# pour filtrer par status et date
+	
+	# Sidebar filters to narrow list by status and timestamps
 	list_filter = ('status', 'created_at', 'updated_at', 'accepted_at')
-    
-	# pour cherhcer par username ou email
+	
+	# Enables admin search accross sender/receiver username and email
 	search_fields = ('from_user__username', 'from_user__email', 'to_user__username', 'to_user__email')
-    
-	# pour afficher les plus recentes en premier
+	
+	# Default sort order(newest first)
 	ordering = ('-created_at',)
+
 
 

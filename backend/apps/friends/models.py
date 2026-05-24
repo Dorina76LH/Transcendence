@@ -1,27 +1,35 @@
 
-# recupere le vrai modele utilisateur from users.User
 from django.conf import settings
-
-# sert a lever une erreur
 from django.core.exceptions import ValidationError
-
-# importe les outils django pour creer des modeles
 from django.db import models, transaction
-
-#sert a ecrire une contrainte conditionnelle en base
 from django.db.models import Q
-
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
+
+
+# =====================================Class methods ========================= #
+# These methods arent describing one existing friendship row. They are helpers # 
+# for creating or finding one.												   #
+# its a class level method which works on the model itself.					   #
+# ============================================================================ #
+
+
+# Persistent through-model for a friendship pair so each friendship can stor metadata(created_at)
+# Constraints: Unique constraint on user_id friend_user_id to prevent duplicate store pairs
+
 class Friendship(models.Model):
+	# One side of pair(FK)
 	user_id = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		related_name='friendships_sent',
 	)
+
+	# Other side of pair(FK)
 	friend_user_id = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
-		on_delete=models.CASCADE,
+		# Delete if the other user removed.
+		on_delete=models.CASCADE, 
 		related_name='friendships_received',
 	)
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -36,74 +44,78 @@ class Friendship(models.Model):
 			),
 		]
 
+	# Raises an error if someone tried to create a self-friendship
 	def clean(self):
 		if self.user_id_id == self.friend_user_id_id:
 			raise ValidationError('A user cannot be friends with themselves.')
 
+
+	# Writing the users in the same order.
+	# user_a  = alice(id=5), user_b  = melissa(id=7)
+	# user_b = melissa(id=7), user_a = alice(id=5) puts it in the right order
+	# smaller id is written at first.
 	@classmethod
 	def get_pair(cls, user_a, user_b):
-		"""Return the canonical friendship pair for two users."""
 		if user_a.id is None or user_b.id is None:
 			raise ValueError('Both users must be saved before creating a friendship.')
 		if user_a.id < user_b.id:
 			return user_a, user_b
 		return user_b, user_a
 
+	# First puts get_pair() users in the right order
+	# Then checks if there is a friendship between them
+	# if there isnt, it creates a friendship.
+	# friend the register or create friendship between non dublicated friendship
 	@classmethod
 	def get_or_create_between(cls, user_a, user_b):
 		user_id, friend_user_id = cls.get_pair(user_a, user_b)
 		return cls.objects.get_or_create(user_id=user_id, friend_user_id=friend_user_id)
 
+	# Defines a humanreadable string for a friendship instance
+	# Returns a short string showing the two users.
 	def __str__(self):
 		return f'{self.user_id} <-> {self.friend_user_id}'
 
 
-# ================================================================================= #
-# c'est une table en base, il y a deux classes dans une class car c'est une liste   #
-# des valeurs possibles pour le champ status, on l'imbriques dedans car elle        #
-# appartient a FriendRequest. Ca permet d'ecrire FriendRequest.Status.PENDING       #
-# a la place de chercher la valeur en dur.                                          #
-#                                                                                   #
-# ForeignKey est un lien entre deux tables en base de donnes,                       #
-# c'est a dire: from_user vers la table User.                                       #
-#                                                                                   #
-# Si l'utilisateur est supprimé,on_delete=models.CASCADE supprime aussi ses demandes#
-#                                                                                   #
-# TextChoices n'est pas necessaire mais ca nous empeche d'ecrire les valeurs en dur #
-# ==================================================================================#
+# Defines a Django model for a friend request row in the database.
 class FriendRequest(models.Model):
 
+	# Creates a list of allowed status.
 	class Status(models.TextChoices):
 		PENDING = 'pending', 'Pending'
 		ACCEPTED = 'accepted', 'Accepted'
 		REJECTED = 'rejected', 'Rejected'
 		CANCELED = 'canceled', 'Canceled'
     
-    #utilisateur qui envoie la demande
+
+	# The user who sends the friendrequest
 	from_user = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		related_name='sent_friend_requests',
 	)
-	#utilisateur qui recoit la demande
+
+	# The user who receives the friend request
 	to_user = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		related_name='received_friend_requests',
 	)
-	#stocke l'etat actuel de la demande
+
+	# Current status
 	status = models.CharField(
 		max_length=20,
 		choices=Status.choices,
 		default=Status.PENDING,
 	)
-	# timestamp quand la demande est acceptee (null si pas accepté)
+
 	accepted_at = models.DateTimeField(null=True, blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
-    #sert a mettre des regles au niveau de la table
-	#UniqueConstraint empeche d'avoir deux demandes pendantes identiques entre les memes utilisateurs
+    
+	# Holds database-level settings for the model
+	# Constraints prevents dublicate pending requests from the same sender to the same receiver.
 	class Meta:
 		verbose_name = 'Friend Request'
 		verbose_name_plural = 'Friend Requests'
@@ -115,27 +127,30 @@ class FriendRequest(models.Model):
 			),
 		]
 
-    # cette methode sert a valider les donnees avant l'enregistrement
-	# ici elle verifie qu'un utilisateur ne s'envoie pas une demande d'ami a lui-meme
 	def clean(self):
 		if self.from_user_id == self.to_user_id:
 			raise ValidationError
 
-    # la demande passe en accepted
-	# on sauvegarde la demande avec save.
-	# on ajoute la relation friend via le modele Friendship
+	# A helper method that accepts the request
 	def accept(self, by_user):
+
+		# checks that the user calling accept is really the receiver of the request
 		if self.to_user_id != getattr(by_user, 'id', None):
 			raise PermissionDenied
+		
+		# make sure only pending requests can be accepted
 		if self.status != self.Status.PENDING:
 			raise ValidationError
+		
+		# makes the whole accept process happen as one database transaction 
+		# if one step fails everything rolls back
+		# its atomic because accepting a friend request changes more than one database state
+		# and those changes must happen together.
 		with transaction.atomic():
 			self.status = self.Status.ACCEPTED
 			self.accepted_at = timezone.now()
 			self.save()
 			Friendship.get_or_create_between(self.from_user, self.to_user)
 
-    # cette methode definit la maniere dont l'objet s'affiche sous forme de texte
-	# dans l'admin django, les logs et le debug
 	def __str__(self):
 		return f'{self.from_user} -> {self.to_user} ({self.status})'

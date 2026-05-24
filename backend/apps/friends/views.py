@@ -23,12 +23,14 @@ from .permissions import IsReceiverOfRequest, IsSenderOfRequest
 # FRIEND REQUEST ENDPOINTS
 # =============================================================================
 
+# List all friend requests to the authenticated user and allow sending a new request
+# Methods: GET, POST(create)
+# Permissions : isAutenticated
+# GET returns friendrequest object where from_user or to_user is request_user
+# POST delegates validation and creation to friendrequestserializer
+# and returns the serialized object with http201
 class FriendRequestView(generics.ListCreateAPIView):
-	
-	# List all friend requests (sent + received)
-	# Create a new friend request
-	# GET  /api/friends/friend-requests/ → List all requests
-	# POST /api/friends/friend-requests/ → Create new request
+
 	serializer_class = FriendRequestSerializer
 	permission_classes = [permissions.IsAuthenticated]
 
@@ -39,40 +41,16 @@ class FriendRequestView(generics.ListCreateAPIView):
 		)
 
 	def create(self, request, *args, **kwargs):
-		to_user_id = request.data.get('to_user_id')
+		serializer = self.get_serializer(data=request.data, context={'request': request})
+		serializer.is_valid(raise_exception=True)
+		friend_request = serializer.save()
+		return Response(self.get_serializer(friend_request).data, status=status.HTTP_201_CREATED)
 
-		if not to_user_id:
-			return Response({'error': 'to_user_id required'}, status=status.HTTP_400_BAD_REQUEST)
-
-		try:
-			to_user_id_int = int(to_user_id)
-		except (TypeError, ValueError):
-			return Response({'error': 'to_user_id must be an integer'}, status=status.HTTP_400_BAD_REQUEST)
-
-		if to_user_id_int == request.user.id:
-			return Response({'error': 'Cannot send request to yourself'}, status=status.HTTP_400_BAD_REQUEST)
-
-		existing = FriendRequest.objects.filter(
-			from_user=request.user,
-			to_user_id=to_user_id_int,
-			status=FriendRequest.Status.PENDING
-		).exists()
-
-		if existing:
-			return Response({'error': 'Pending request already exists'}, status=status.HTTP_400_BAD_REQUEST)
-
-		friend_request = FriendRequest.objects.create(
-			from_user=request.user,
-			to_user_id=to_user_id_int
-		)
-		serializer = self.get_serializer(friend_request)
-		return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
+# List pending friend request received by the authenticated user.
+# Methods: GET
+# Permissions : isAutenticated
+# Returns friendrequest objects with to_user==request.user and status==PENDING
 class FriendRequestReceivedView(generics.ListAPIView):
-	
-	# List friend requests received by the user (pending only)
-	# GET /api/friends/friend-requests/received/ → Incoming requests
 	
 	serializer_class = FriendRequestSerializer
 	permission_classes = [permissions.IsAuthenticated]
@@ -85,10 +63,12 @@ class FriendRequestReceivedView(generics.ListAPIView):
 		return received
 
 
+# List pending requests sent the the autenticated user
+# Methods: GET
+# Permissions : isAutenticated
+# Returns friendrequest objects with from_user==request.user and status==pending ?
 class FriendRequestSentView(generics.ListAPIView):
 	
-	# List friend requests sent by the user (pending only)
-	# GET /api/friends/friend-requests/sent/ → Outgoing requests
 	serializer_class = FriendRequestSerializer
 	permission_classes = [permissions.IsAuthenticated]
 
@@ -100,10 +80,14 @@ class FriendRequestSentView(generics.ListAPIView):
 		return sent
 
 
+# Alloq the receiver of a friend request to accept it
+# Methods: PUT/PATCH(update)
+# Permissions: isAutenticated / isReceiverOfRequest 
+# Calls friendrequest.accept(request.user) which updates the request status and
+# Creates friendship (atomic in model)
+# Returns status:accepted with http 200 ; on error returns http400 and the error message
 class FriendRequestAcceptView(generics.UpdateAPIView):
-	
-    # Accept a friend request (only receiver can accept)
-	# PUT/PATCH /api/friends/friend-requests/<id>/accept/ → Accept request
+
 	serializer_class = FriendRequestSerializer
 	permission_classes = [permissions.IsAuthenticated, IsReceiverOfRequest]
 	queryset = FriendRequest.objects.all()
@@ -120,10 +104,13 @@ class FriendRequestAcceptView(generics.UpdateAPIView):
 		return self.update(request, *args, **kwargs)
 
 
+# Allow the receiver to reject a pending friend request 
+# Methods: PUT/PATCH(update)
+# Permissions: isAutenticated / isReceiverOfrequest
+# if request is not pending returns HTTP 400 with an error
+# Otherwise sets status==REJECTED and returns status:rejected with http 200
 class FriendRequestRejectView(generics.UpdateAPIView):
-	
-	# Reject a friend request (only receiver can reject)
-	# PUT/PATCH /api/friends/friend-requests/<id>/reject/ → Reject request
+
 	serializer_class = FriendRequestSerializer
 	permission_classes = [permissions.IsAuthenticated, IsReceiverOfRequest]
 	queryset = FriendRequest.objects.all()
@@ -140,10 +127,13 @@ class FriendRequestRejectView(generics.UpdateAPIView):
 		return self.update(request, *args, **kwargs)
 
 
+# Allow the senter to cancel a pending friend request
+# Methods: DELETE(destroy)
+# Permissions: isAuthenticated / isSenderOfRequest
+# If request is not pending returns http 400 with an error
+# Otherwise deletes the request and returns http 204 no content
 class FriendRequestCancelView(generics.DestroyAPIView):
 	
-    # Cancel a friend request (only sender can cancel)
-	# DELETE /api/friends/friend-requests/<id>/cancel/ → Cancel reques
 	serializer_class = FriendRequestSerializer
 	permission_classes = [permissions.IsAuthenticated, IsSenderOfRequest]
 	queryset = FriendRequest.objects.all()

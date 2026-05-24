@@ -1,15 +1,16 @@
 
-#Baskalari istekleri benim adima kabul etmesin diye
-
+# Import DRF's base class for custom object-level permissons.
 from rest_framework.permissions import BasePermission
 
-# seulement celui qui recoit la demande d'ami peut accepter ou refuser
+
+# Defines a permission that allows only the request receiver to act
 class IsReceiverOfRequest(BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.to_user == request.user
-
-
-# seulement celui qui envoie peut annuler sa demande d'ami
+    
+# Defines a permission that allows only the request sender to act
 class IsSenderOfRequest(BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.from_user == request.user
+
+
