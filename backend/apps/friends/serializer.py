@@ -13,7 +13,40 @@ class UserSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
-    
+
+# Converts Friendship model objects into API response data.
+# Used for the friends list endpoint where the app needs to return the authenticated user's accepted friends
+# it exposes only id: friend: created_at: 
+# it figures out the other user in the friendship, based on who is making the request
+# it uses UserSimpleSerializer to return the friend as a simple user object with username,id,email
+# GET/friends/
+class FriendshipSerializer(serializers.ModelSerializer):
+    friend = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Friendship
+        fields = ['id', 'friend', 'created_at']
+
+    def get_friend(self, obj):
+        request = self.context.get('request')
+        current_user = getattr(request, 'user', None)
+
+        if current_user is not None and current_user.is_authenticated:
+            if obj.user_id_id == current_user.id:
+                friend_user = obj.friend_user_id
+            else:
+                friend_user = obj.user_id
+        else:
+            friend_user = obj.friend_user_id
+
+        return UserSimpleSerializer(friend_user).data
+
+
+# Validate incoming data
+    # authentication check, no self-request, target exists,
+    # not already friends, no dublicate pending
+# JSON input -> PYTHON object 
+# Create and return a FriendRequest instance 
 class FriendRequestSerializer(serializers.ModelSerializer):
 
     # The client sends a plain numeric user id in the POST body /its only for input / wont appear in the response JSON
@@ -27,13 +60,6 @@ class FriendRequestSerializer(serializers.ModelSerializer):
         model = FriendRequest
         fields = ['id', 'from_user', 'to_user', 'to_user_id', 'status', 'created_at', 'accepted_at', 'updated_at']
         read_only_fields = ['id', 'from_user', 'to_user', 'status', 'created_at', 'accepted_at', 'updated_at']
-
-    # Checks if the incoming to_user_id is valid before creating the friend request
-    # Is user authenticated ? 
-    # Does the destination user actually exist ? 
-    # Are the users already friends ? 
-    # Is there any existing pending request from the same sender to the same receiver ?
-    # So the serializer is responsible for all request-data validation 
 
     def validate_to_user_id(self, value):
         request = self.context.get('request')
@@ -65,12 +91,6 @@ class FriendRequestSerializer(serializers.ModelSerializer):
 
         return value
 
-    # This part creates the actual friendrequest context 
-    # Reads the validated to_user_id
-    # Finds the real destination user
-    # Creates FriendRequest(from_user=reques.user, to_user=to_user)
-    # Calls full_clean()
-    # Saves the object
     def create(self, validated_data):
         request = self.context.get('request')
         to_user_id = validated_data.pop('to_user_id')

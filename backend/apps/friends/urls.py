@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    FriendListView,
     FriendRequestView,
     FriendRequestReceivedView,
     FriendRequestSentView,
@@ -11,6 +12,7 @@ from .views import (
 urlpatterns = [
     # Main endpoints
     path('friend-requests/', FriendRequestView.as_view(), name='friend-request-list'),
+    path('friends/', FriendListView.as_view(), name='friend-list'),
     
     # Filter endpoints
     path('friend-requests/received/', FriendRequestReceivedView.as_view(), name='friend-request-received'),
@@ -21,3 +23,6 @@ urlpatterns = [
     path('friend-requests/<int:pk>/reject/', FriendRequestRejectView.as_view(), name='friend-request-reject'),
     path('friend-requests/<int:pk>/cancel/', FriendRequestCancelView.as_view(), name='friend-request-cancel'),
 ]
+
+
+

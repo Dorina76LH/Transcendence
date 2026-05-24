@@ -2,9 +2,8 @@
 # =============================================================================
 # VIEWS - apps/friends/views.py
 #
-# Generic views for FriendRequest CRUD operations
+# Generic views for FriendRequest CRUD operations which doesnt need to written manually
 # Pattern: Separate class per endpoint
-#
 # =============================================================================
 
 from django.shortcuts import render
@@ -14,8 +13,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
 from django.core.exceptions import ValidationError as DjangoValidationError
 
-from .serializer import FriendRequestSerializer
-from .models import FriendRequest
+from .serializer import FriendRequestSerializer, FriendshipSerializer
+from .models import FriendRequest, Friendship
 from .permissions import IsReceiverOfRequest, IsSenderOfRequest
 
 
@@ -23,12 +22,11 @@ from .permissions import IsReceiverOfRequest, IsSenderOfRequest
 # FRIEND REQUEST ENDPOINTS
 # =============================================================================
 
-# List all friend requests to the authenticated user and allow sending a new request
-# Methods: GET, POST(create)
-# Permissions : isAutenticated
-# GET returns friendrequest object where from_user or to_user is request_user
-# POST delegates validation and creation to friendrequestserializer
-# and returns the serialized object with http201
+# Expose HTTP endpoints (list and create) and map URLs to actions
+# Enforce request-level permissions
+# Choose and call the serializer and return proper HTTP responses/status codes
+# Provide querysets and filtering for list endpoints(received/ send/all)
+# Handle action endpoints(accept/reject/cancel) and error handling
 class FriendRequestView(generics.ListCreateAPIView):
 
 	serializer_class = FriendRequestSerializer
@@ -45,6 +43,23 @@ class FriendRequestView(generics.ListCreateAPIView):
 		serializer.is_valid(raise_exception=True)
 		friend_request = serializer.save()
 		return Response(self.get_serializer(friend_request).data, status=status.HTTP_201_CREATED)
+
+
+# List the authenticated user's accepted friends.
+# Methods: GET
+# Permissions: IsAuthenticated
+# Returns friendship rows where the current user is on either side,
+# with the other user serialized as `friend`.
+class FriendListView(generics.ListAPIView):
+
+	serializer_class = FriendshipSerializer
+	permission_classes = [permissions.IsAuthenticated]
+
+	def get_queryset(self):
+		user = self.request.user
+		return Friendship.objects.filter(
+			Q(user_id=user) | Q(friend_user_id=user)
+		).select_related('user_id', 'friend_user_id').order_by('-created_at')
 
 # List pending friend request received by the authenticated user.
 # Methods: GET
@@ -80,7 +95,7 @@ class FriendRequestSentView(generics.ListAPIView):
 		return sent
 
 
-# Alloq the receiver of a friend request to accept it
+# Allow the receiver of a friend request to accept it
 # Methods: PUT/PATCH(update)
 # Permissions: isAutenticated / isReceiverOfRequest 
 # Calls friendrequest.accept(request.user) which updates the request status and
