@@ -150,7 +150,7 @@ class FriendRequestRejectView(generics.UpdateAPIView):
 
 
 
-# Allow the senter to cancel a pending friend request
+# Allow the sender to cancel a pending friend request
 # Methods: DELETE(destroy)
 # Permissions: isAuthenticated / isSenderOfRequest
 # If request is not pending returns http 400 with an error

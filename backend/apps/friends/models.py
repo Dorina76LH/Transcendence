@@ -16,7 +16,6 @@ from django.core.exceptions import PermissionDenied
 
 # Persistent through-model for a friendship pair so each friendship can stor metadata(created_at)
 # Constraints: Unique constraint on user_id friend_user_id to prevent duplicate store pairs
-
 class Friendship(models.Model):
 	# One side of pair(FK)
 	user_id = models.ForeignKey(
@@ -87,21 +86,18 @@ class FriendRequest(models.Model):
 		REJECTED = 'rejected', 'Rejected'
 		CANCELED = 'canceled', 'Canceled'
     
-
 	# The user who sends the friendrequest
 	from_user = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		related_name='sent_friend_requests',
 	)
-
 	# The user who receives the friend request
 	to_user = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		related_name='received_friend_requests',
 	)
-
 	# Current status
 	status = models.CharField(
 		max_length=20,

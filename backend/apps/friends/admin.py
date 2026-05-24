@@ -27,6 +27,9 @@ class FriendshipAdmin(admin.ModelAdmin):
 	list_filter = ('created_at',)
 	search_fields = ('user_id__username', 'user_id__email', 'friend_user_id__username', 'friend_user_id__email')
 	ordering = ('-created_at',)
+	
+	def has_add_permission(self, request):
+		return False
 
 
 
