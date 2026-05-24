@@ -121,8 +121,9 @@ class User(AbstractUser):
 	friends = models.ManyToManyField(
 		'self',
 		blank=True,
-		symmetrical=True,
+		symmetrical=False,
 		through='friends.Friendship',
+		through_fields=('user_id', 'friend_user_id'),
 	)
 	
 	# Role-based access control - defaults to USER for every new account

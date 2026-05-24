@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.http import Http404
 
 from .serializer import FriendRequestSerializer, FriendshipSerializer
 from .models import FriendRequest, Friendship
@@ -45,6 +46,7 @@ class FriendRequestView(generics.ListCreateAPIView):
 		return Response(self.get_serializer(friend_request).data, status=status.HTTP_201_CREATED)
 
 
+
 # List the authenticated user's accepted friends.
 # Methods: GET
 # Permissions: IsAuthenticated
@@ -60,6 +62,8 @@ class FriendListView(generics.ListAPIView):
 		return Friendship.objects.filter(
 			Q(user_id=user) | Q(friend_user_id=user)
 		).select_related('user_id', 'friend_user_id').order_by('-created_at')
+
+
 
 # List pending friend request received by the authenticated user.
 # Methods: GET
@@ -95,6 +99,7 @@ class FriendRequestSentView(generics.ListAPIView):
 		return sent
 
 
+
 # Allow the receiver of a friend request to accept it
 # Methods: PUT/PATCH(update)
 # Permissions: isAutenticated / isReceiverOfRequest 
@@ -117,6 +122,7 @@ class FriendRequestAcceptView(generics.UpdateAPIView):
 
 	def partial_update(self, request, *args, **kwargs):
 		return self.update(request, *args, **kwargs)
+
 
 
 # Allow the receiver to reject a pending friend request 
@@ -142,6 +148,8 @@ class FriendRequestRejectView(generics.UpdateAPIView):
 		return self.update(request, *args, **kwargs)
 
 
+
+
 # Allow the senter to cancel a pending friend request
 # Methods: DELETE(destroy)
 # Permissions: isAuthenticated / isSenderOfRequest
@@ -158,6 +166,38 @@ class FriendRequestCancelView(generics.DestroyAPIView):
 		if friend_request.status != FriendRequest.Status.PENDING:
 			return Response({'error': 'Can only cancel pending requests'}, status=status.HTTP_400_BAD_REQUEST)
 		friend_request.delete()
+		return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FriendUnfriendView(generics.DestroyAPIView):
+
+	serializer_class = FriendshipSerializer
+	permission_classes = [permissions.IsAuthenticated]
+
+	def get_object(self):
+		friend_id = self.kwargs.get('friend_id')
+		user = self.request.user
+		if friend_id is None:
+			raise Http404
+		# prevent self-unfriend
+		if int(friend_id) == int(user.id):
+			raise Http404
+
+		# find friendship where either side matches (canonical ordering stored in model)
+		friendship = Friendship.objects.filter(
+			Q(user_id=user, friend_user_id__id=friend_id) | Q(user_id__id=friend_id, friend_user_id=user)
+		).select_related('user_id', 'friend_user_id').first()
+		if not friendship:
+			raise Http404
+		return friendship
+
+	def destroy(self, request, *args, **kwargs):
+		friendship = self.get_object()
+		# authenticated user must be a participant (extra safety)
+		user = request.user
+		if friendship.user_id_id != user.id and friendship.friend_user_id_id != user.id:
+			raise Http404
+		friendship.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
 

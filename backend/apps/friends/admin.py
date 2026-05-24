@@ -4,7 +4,7 @@
 # Customizes admin behavior
 
 from django.contrib import admin
-from .models import FriendRequest
+from .models import FriendRequest, Friendship
 
 @admin.register(FriendRequest)
 class FriendRequestAdmin(admin.ModelAdmin):
@@ -18,6 +18,14 @@ class FriendRequestAdmin(admin.ModelAdmin):
 	search_fields = ('from_user__username', 'from_user__email', 'to_user__username', 'to_user__email')
 	
 	# Default sort order(newest first)
+	ordering = ('-created_at',)
+
+
+@admin.register(Friendship)
+class FriendshipAdmin(admin.ModelAdmin):
+	list_display = ('id', 'user_id', 'friend_user_id', 'created_at')
+	list_filter = ('created_at',)
+	search_fields = ('user_id__username', 'user_id__email', 'friend_user_id__username', 'friend_user_id__email')
 	ordering = ('-created_at',)
 
 
