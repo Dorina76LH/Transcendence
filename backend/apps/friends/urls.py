@@ -27,6 +27,3 @@ urlpatterns = [
 ]
 
 
-# http://localhost:8000/api/friends/friend-requests/
-# http://localhost:8000/api/friends/friend-request/sent/
-# http://localhost:8000/api/friends/friend-request/received/

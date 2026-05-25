@@ -178,32 +178,25 @@ class FriendUnfriendView(generics.DestroyAPIView):
 	def get_object(self):
 		friend_id = self.kwargs.get('friend_id')
 		user = self.request.user
+
 		if friend_id is None:
 			raise Http404
-		# prevent self-unfriend
 		if int(friend_id) == int(user.id):
 			raise Http404
 
-		# find friendship where either side matches (canonical ordering stored in model)
 		friendship = Friendship.objects.filter(
-			Q(user_id=user, friend_user_id__id=friend_id) | Q(user_id__id=friend_id, friend_user_id=user)
-		).select_related('user_id', 'friend_user_id').first()
+			Q(user_id_id=user.id, friend_user_id_id=friend_id) | 
+			Q(user_id_id=friend_id, friend_user_id_id=user.id)
+		).first()
+
 		if not friendship:
 			raise Http404
 		return friendship
 
 	def destroy(self, request, *args, **kwargs):
 		friendship = self.get_object()
-		# authenticated user must be a participant (extra safety)
 		user = request.user
 		if friendship.user_id_id != user.id and friendship.friend_user_id_id != user.id:
 			raise Http404
 		friendship.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-
-
-
-
-

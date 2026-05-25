@@ -121,6 +121,11 @@ class FriendRequest(models.Model):
 				condition=Q(status='pending'),
 				name='unique_pending_friend_request',
 			),
+			 models.UniqueConstraint(
+            	fields=['from_user', 'to_user'],
+            	condition=Q(status='accepted'),
+            	name='unique_accepted_friend_request',
+        	),
 		]
 
 	def clean(self):

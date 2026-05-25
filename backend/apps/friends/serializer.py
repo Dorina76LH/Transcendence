@@ -81,6 +81,14 @@ class FriendRequestSerializer(serializers.ModelSerializer):
         if already_friends:
             raise serializers.ValidationError('You are already friends.')
 
+        accepted_exists = FriendRequest.objects.filter(
+            Q(from_user=request.user, to_user=to_user) |
+            Q(from_user=to_user, to_user=request.user),
+            status=FriendRequest.Status.ACCEPTED,
+        ).exists()
+        if accepted_exists:
+            raise serializers.ValidationError('Friend request already accepted.')
+
         pending_exists = FriendRequest.objects.filter(
             from_user=request.user,
             to_user=to_user,
