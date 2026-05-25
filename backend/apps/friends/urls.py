@@ -11,13 +11,13 @@ from .views import (
 )
 
 urlpatterns = [
-    # Main endpoints
-    path('friend-requests/', FriendRequestView.as_view(), name='friend-request-list'),
-    path('friends/', FriendListView.as_view(), name='friend-list'),
-    
     # Filter endpoints
     path('friend-requests/received/', FriendRequestReceivedView.as_view(), name='friend-request-received'),
     path('friend-requests/sent/', FriendRequestSentView.as_view(), name='friend-request-sent'),
+    
+    # Main endpoints
+    path('friend-requests/', FriendRequestView.as_view(), name='friend-request-list'),
+    path('friends/', FriendListView.as_view(), name='friend-list'),
     
     # Action endpoints
     path('friend-requests/<int:pk>/accept/', FriendRequestAcceptView.as_view(), name='friend-request-accept'),
@@ -27,4 +27,6 @@ urlpatterns = [
 ]
 
 
-
+# http://localhost:8000/api/friends/friend-requests/
+# http://localhost:8000/api/friends/friend-request/sent/
+# http://localhost:8000/api/friends/friend-request/received/

@@ -165,8 +165,9 @@ class FriendRequestCancelView(generics.DestroyAPIView):
 		friend_request = self.get_object()
 		if friend_request.status != FriendRequest.Status.PENDING:
 			return Response({'error': 'Can only cancel pending requests'}, status=status.HTTP_400_BAD_REQUEST)
-		friend_request.delete()
-		return Response(status=status.HTTP_204_NO_CONTENT)
+		friend_request.status = FriendRequest.Status.CANCELED
+		friend_request.save()
+		return Response({'status': 'cancelled'}, status.HTTP_200_OK)
 
 
 class FriendUnfriendView(generics.DestroyAPIView):
