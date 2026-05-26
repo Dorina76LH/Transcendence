@@ -80,7 +80,6 @@ JAZZMIN_UI_TWEAKS = {
 INSTALLED_APPS = [
 
     #'daphne', # New import chat
-
     # django apps
     'jazzmin',
     'django.contrib.admin',
@@ -101,6 +100,7 @@ INSTALLED_APPS = [
     # personnal apps
     "apps.users",
     "apps.api",
+    "apps.friends"
     #"apps.chat",
 ]
 
