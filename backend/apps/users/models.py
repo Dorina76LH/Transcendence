@@ -115,11 +115,14 @@ class User(AbstractUser):
 	)
 
 	# Many-to-many relationship with itself for the friends list.
-    # symmetrical=True means if I add you, we are both friends.
+	# The relation is stored through the explicit Friendship model so we can
+	# keep metadata like created_at on each accepted friendship.
 	friends = models.ManyToManyField(
 		'self',
 		blank=True,
-		symmetrical=True
+		symmetrical=False,
+		through='friends.Friendship',
+		through_fields=('user_id', 'friend_user_id'),
 	)
 	
 	# Role-based access control - defaults to USER for every new account

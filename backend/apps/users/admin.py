@@ -13,6 +13,6 @@ class CustomUserAdmin(UserAdmin):
     # Ajoute tes champs custom dans la vue détail
     fieldsets = UserAdmin.fieldsets + (
         ('Custom Fields', {
-            'fields': ('avatar', 'is_online', 'otp_secret', 'friends', 'role')
+            'fields': ('avatar', 'is_online', 'otp_secret', 'role')
         }),
     )

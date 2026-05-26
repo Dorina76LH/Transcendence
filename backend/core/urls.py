@@ -55,5 +55,8 @@ urlpatterns = [
     path('api/auth/', include('apps.users.urls')),
 
     #? Chat & Message entry point
-    path('api/chat/', include ('apps.chat.urls'))
+    path('api/chat/', include('apps.chat.urls')),
+
+    # Friends api
+    path('api/friends/', include('apps.friends.urls')),
 ]
