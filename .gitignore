@@ -12,6 +12,10 @@ venv/
 .venv/
 env/
 
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
 # --- CONFIGURATION & SECRETS ---
 # Never commit the .env file to Git! 
 # It contains passwords and secret keys.

@@ -16,3 +16,21 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('avatar', 'is_online', 'otp_secret', 'role')
         }),
     )
+    add_fieldsets = (
+    (
+        None,
+        {
+            'classes': ('wide',),
+            'fields': (
+                'email',
+                'username',
+                'password1',
+                'password2',
+                'role',
+                'is_staff',
+                'is_superuser',
+                'is_active',
+            ),
+        },
+    ),
+		)
