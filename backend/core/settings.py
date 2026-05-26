@@ -47,7 +47,15 @@ JAZZMIN_SETTINGS = {
     "site_header": "Transcendence",
     "site_brand": "Transcendence",
     "welcome_sign": "Welcome to Transcendence",
-    "theme": "darkly",  # ← thème bleu/sombre sympa
+
+    "user_avatar": "avatar",
+   #"theme": "darkly",  # ← thème bleu/sombre sympa
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
+
+    "change_form_template_global": False,
+    "custom_links": {},
 }
 
 JAZZMIN_UI_TWEAKS = {
@@ -70,10 +78,16 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
-    "theme": "darkly",
-    "default_theme_mode": "auto",
+    "theme": "flatly", # slate ou flatly
+    "dark_mode_theme": None,
+   # "default_theme_mode": "auto",
     "button_classes": {
         "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
     }
 }
 
@@ -110,6 +124,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

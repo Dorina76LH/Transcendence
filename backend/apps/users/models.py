@@ -5,6 +5,8 @@
 # The Model defines the database structure (The "Source of Truth").
 # We extend Django's AbstractUser to keep all built-in security features
 # while adding our custom social and status fields.
+# All human-readable strings are wrapped in gettext_lazy (_) for future 
+# internationalization (i18n) compatibility.
 # =============================================================================
 """
 
@@ -19,6 +21,9 @@ from django.contrib.auth.models import AbstractUser
 
 # 2. Django's field definitions for database columns
 from django.db import models
+
+# 3. Django's internationalization utility for lazy translations
+from django.utils.translation import gettext_lazy as _
 
 #? -----------------------------------------------------------------------------
 #? CUSTOM USER MODEL - THE ARCHITECTURE
@@ -71,17 +76,18 @@ class User(AbstractUser):
 		USER = 'user', 'User'
 		ADMIN = 'admin', 'Admin'
 
-	# Meta configuration for Django Admin display
+	# Meta configuration for Django Admin pluralization and internal display names
+	# Wrapped in _() to allow automatic translation across different client locales
 	class Meta:
-		verbose_name = 'User'
-		verbose_name_plural = 'Users'
+		verbose_name = _('User')
+		verbose_name_plural = _('Users')
 	
 	
 	# TECHNICAL REQUIREMENT: LOGIN WITH EMAIL
     # Redefine email field to enforce uniqueness directly in the database (PostgreSQL)
 	email = models.EmailField(
 			unique=True, 
-			verbose_name='Email address'
+			verbose_name=_('Email address')
 	)
 
 	# Instruct Django to use the email field as the primary identifier for authentication
@@ -98,20 +104,20 @@ class User(AbstractUser):
 		upload_to='avatars/',
 		null=True,
 		blank=True,
-		verbose_name='Profile picture'
+		verbose_name=_('Profile picture')
 	)
 
 	# Tracks real-time connection status (Updated via WebSockets)
 	is_online = models.BooleanField(
 		default=False,
-		verbose_name='Online status'
+		verbose_name=_('Online status')
 	)
 
 	# Secret key used for 2FA (Two-Factor Authentication)
 	otp_secret = models.CharField(
 		max_length=32,
 		blank=True,
-		verbose_name='2FA secret key'
+		verbose_name=_('2FA secret key')
 	)
 
 	# Many-to-many relationship with itself for the friends list.
@@ -131,7 +137,7 @@ class User(AbstractUser):
 		max_length=20,
 		choices=Role.choices,
 		default=Role.USER,
-		verbose_name='User role'
+		verbose_name=_('User role')
 	)
 
 	# STEP 3 : Redefined relationships (Avoid conflicts)
@@ -165,9 +171,9 @@ class User(AbstractUser):
 	@property
 	def avatar_url(self):
 		"""
-        Returns the appropriate avatar URL:
-        1. If a file is uploaded, return its URL.
-        2. Otherwise, return a robot avatar from DiceBear using username as seed.
+        Dynamic property that returns the appropriate avatar URL resource:
+        1. If a local file exists, returns its relative media path.
+        2. Otherwise, dynamically requests a consistent robotic avatar from DiceBear API.
         """
 		if self.avatar:
 			return self.avatar.url
