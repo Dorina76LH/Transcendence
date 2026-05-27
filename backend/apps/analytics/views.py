@@ -35,3 +35,4 @@ class AdminDashboardView(APIView):
             'top_active_users': list(top_active_users),
         }
         return Response(data)
+
