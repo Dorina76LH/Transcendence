@@ -20,7 +20,7 @@ if echo "$@" | grep -qE "runserver|daphne"; then
     python manage.py collectstatic --noinput
 
     echo "Checking/Creating Superuser..."
-    python manage.py createsuperuser --noinput || true
+    python manage.py createsuperuser --noinput 2>/dev/null || true
 fi
 
 echo "Executing command: $@"
