@@ -130,7 +130,7 @@ class FriendRequest(models.Model):
 
 	def clean(self):
 		if self.from_user_id == self.to_user_id:
-			raise ValidationError
+			raise ValidationError('A user cannot send a friend request to themselves.')
 
 	# A helper method that accepts the request
 	def accept(self, by_user):
