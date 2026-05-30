@@ -85,10 +85,10 @@ class User(AbstractUser):
 	)
 
 # Instruct Django to use the email field as the primary identifier for authentication
-	USERNAME_FIELD = 'email'
-	
-	# The username remains mandatory, specifically for creating superusers via CLI
-	REQUIRED_FIELDS = ['username']
+	USERNAME_FIELD = 'username'
+
+	# Email remains mandatory for registration
+	REQUIRED_FIELDS = ['email']
 
 	
 	# STEP 2 : Custom Database Fields (The Columns)
