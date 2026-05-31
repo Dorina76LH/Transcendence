@@ -60,7 +60,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 # - RegisterView: Handles NEW USER creation
 # - LoginView: Handles LOGIN and marks the user online
 # - LogoutView: Handles LOGOUT (invalidates the Refresh token)
-from .views import RegisterView, LoginView, LogoutView, MeView
+from .views import RegisterView, LoginView, LogoutView, MeView, SocialAuthView
 
 #* ============================================================================
 #* URL PATTERNS
@@ -94,4 +94,10 @@ urlpatterns = [
     # POST /api/users/token/refresh/
     # -------------------------------------------------------------------------
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # -------------------------------------------------------------------------
+    # 5. OAUTH : Social login (Google / GitHub / 42)
+    # POST /api/auth/social/  { provider: "google", code: "..." }
+    # -------------------------------------------------------------------------
+    path('social/', SocialAuthView.as_view(), name='social_auth'),
 ]
