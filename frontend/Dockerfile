@@ -8,6 +8,8 @@ RUN npm install
 
 RUN npm install -g @angular/cli
 
+RUN npm install tslib
+
 COPY . .
 
 EXPOSE 4200

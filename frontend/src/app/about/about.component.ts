@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink } from "@angular/router";
+import { Component } from "@angular/core";
 
 @Component({
-	selector: 'user-settings',
+	selector: 'app-chat',
 	imports: [RouterLink],
 	template: `
 <header>
@@ -42,32 +42,36 @@ import { RouterLink } from '@angular/router';
 		</div>
 	</nav>
 </header>
-<main class="Settings">
-	<div class="Content">
-		<div>
-			<h1>Settings Page</h1>
-			<h2>This is the actual settings page, still in progress, but I got the page lol</h2>
-			<p>Languages setting page :</p>
-			<a routerLink="/languages" class="btn btn-secondary">🇪🇸 / 🇫🇷 / 🇬🇧</a>
-			<button class="btn btn-secondary me-3" (click)="toggleDarkMode()">
-				{{ isDarkMode ? ' ☀️ ' : ' 🌙 ' }}
-			</button>
-			<a routerLink="/profile-settings" class="btn btn-secondary"> ⚙️ </a>
+<main>
+	<div class="content">
+		<h3>This transcendence project was made by a group of 5 people :</h3>
+		<h4>-Jeffrey Vega (jvega)</h4>
+		<h4>-Dorina Béres (doberes)</h4>
+		<h4>-Léo Langanay (llangana)</h4>
+		<h4>-Ada Eudes (aeudes)</h4>
+		<h4>-Leny Patin (lpatin)</h4>
+		<div class="border-top">
+			<br>
+			<h3>The role of each of us : </h3>
+			<h4>-Jeffrey was doing all of the chat components on the backend <br>
+				He basically was the technical lead of the project.</h4>
+			<h4>-Dorina was on the backend, she worked on the database and she was<br>
+				 the project manager.</h4>
+			<h4>-Léo was on the DevOPs part, which is making the infrastructure <br>
+				of the project, he was the Product Owner.</h4>
+			<h4>-Ada did a bit of the DevOPs part, and also worked on the database</h4>
+			<h4>-Lény has done all of the frontend, the GUI, the pages, the text</h4>
+		</div>
+		<div class="border-top">
+		<br>
+		<h4>We all worked together to make a good website for our project, we did everything to make <br>
+			all components work together, to make them communicate smoothly and without errors</h4>
 		</div>
 	</div>
 </main>`,
-styleUrl: './settings.css',
-encapsulation: ViewEncapsulation.None,
+styleUrl: './about.css'
 })
-export class SettingsComponent implements OnInit {
-	isDarkMode = localStorage.getItem('darkMode') === 'true';
-	ngOnInit() {
-		document.body.classList.toggle('dark-mode', this.isDarkMode);
-	}
-	toggleDarkMode() {
-		this.isDarkMode = !this.isDarkMode;
-		localStorage.setItem('darkMode', String(this.isDarkMode));
-		document.body.classList.toggle('dark-mode', this.isDarkMode);
-		console.log("The website is now on darkmode");
-	}
+
+export class AboutComponent {
+
 }

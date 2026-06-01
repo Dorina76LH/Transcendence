@@ -1,20 +1,20 @@
 :host {
-  display: flex;
-  min-height: 100vh;
-  flex-direction: column;
+	display: flex;
+	min-height: 100vh;
+	flex-direction: column;
 }
 
 main.Settings {
-  width: 100%;
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
+	width: 100%;
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 1rem;
 }
 
 .Profile {
-  padding-top: 80px; /* Pour éviter que le header fixe ne cache le contenu */
-  min-height: 100vh;
-  background-color: #f8f9fa;
+	padding-top: 80px;
+	min-height: 100vh;
+	background-color: #f8f9fa;
 }
