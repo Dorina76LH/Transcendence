@@ -25,15 +25,30 @@ To discover which HTTP verbs (`GET`, `POST`, `PATCH`, `DELETE`) a route actually
   * `def post(self, request):` $\rightarrow$ Accepts **POST**
 * **Generic Views (`generics.XXXXAPIView`):** DRF handles the verbs automatically based on the class name:
   * `CreateAPIView` $\rightarrow$ Accepts **POST** (Create)
+  * `ListAPIView` $\rightarrow$ Accepts **GET** (List)
+  * `ListCreateAPIView` $\rightarrow$ Accepts **GET** (List) + **POST** (Create)
+  * `UpdateAPIView` $\rightarrow$ Accepts **PUT + PATCH** (Update - both verbs, same action)
+  * `DestroyAPIView` $\rightarrow$ Accepts **DELETE** (Destroy)
+    : the handler can override the same behavior(e.g. soft-delete instead of real delete - the row stays in the base, we only change its status to CANCELED)
   * `RetrieveUpdateDestroyAPIView` $\rightarrow$ Accepts **GET** (Read), **PATCH/PUT** (Update), and **DELETE** (Destroy).
+
+  [
+   * **ListAPIView** — used by FriendListView, FriendRequestReceivedView, FriendRequestSentView
+   * **ListCreateAPIView** — used by FriendRequestView
+   * **UpdateAPIView** — used by FriendRequestAcceptView, FriendRequestRejectView
+   * **DestroyAPIView** — used by FriendRequestCancelView (overrides destroy to cancel, not delete) and FriendUnfriendView
+   * **RetrieveUpdateDestroyAPIView** — used by MeView
+  ]
+
 
 ### Step 3: Verifying Access Control (Permissions)
 Authentication requirements are explicitly enforced in the view via the `permission_classes` attribute. Always check this list to document access constraints:
 
 * `permission_classes = [AllowAny]` $\rightarrow$ **Auth Required: ❌ No**. The endpoint is public (e.g., Login, Register).
 * `permission_classes = [IsAuthenticated]` $\rightarrow$ **Auth Required:  Yes**. DRF will block the request with a `401 Unauthorized` if a valid JWT token is missing.
-* *Special Cases:* Look out for custom permissions (like `IsAdminUser` or custom team-defined guards) which restrict access to specific roles.
-
+* `permission_classes = [IsAuthenticated, IsReceiverOfRequest]` $\rightarrow$ **Auth Required:  Yes**. (When multiple permissions are listed, all must pass(AND logic))
+*  `permission_classes = [IsAuthenticated, IsSenderOfRequest]` $\rightarrow$ **Auth Required:  Yes**. (When multiple permissions are listed, all must pass (AND logic))
+* **Special cases:** In this project: IsReceiverOfRequest and IsSenderOfRequest are custom guards that check the relationship between the authenticated user and the specific FriendRequest object - not just whether the user is logged in.
 ---
 
 ## 🗺️ Applications Map
@@ -134,9 +149,9 @@ Authentication requirements are explicitly enforced in the view via the `permiss
 Note: All fields are optional. Content-Type must be multipart/form-data if an avatar file is included.
 ```json
 {
-  "username": "marvin_new",
-  "first_name": "Marvin",
-  "last_name": "Robot"
+  "username": "marvin_new", <- "I want to change my username to this"
+  "first_name": "Marvin",   <- "I want to change my first_name to this"
+  "last_name": "Robot"      <- "I want to change my last_name to this"
 }
 ```
 
@@ -144,17 +159,17 @@ Note: All fields are optional. Content-Type must be multipart/form-data if an av
 ```json
 {
   "id": 42,
-  "username": "marvin",
+  "username": "ada", <- "name changed"
   "email": "marvin@student.42.fr",
-  "first_name": "Marvin",
-  "last_name": "Robot",
+  "first_name": "Ada",
+  "last_name": "Eds", <- "last name changed"
   "avatar_url": "https://api.dicebear.com/9.x/bottts/svg?seed=marvin",
   "is_online": true,
   "role": "user"
 }
 ```
 
-**EExpected Payload (POST api/auth/logout/):**
+**Expected Payload (POST api/auth/logout/):**
 ```json
 {
   "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
