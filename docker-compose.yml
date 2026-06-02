@@ -1,0 +1,101 @@
+services:
+  # --- REVERSE PROXY ---
+  nginx:
+    build: ./infra/nginx
+    container_name: transcendence_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx/conf.d:/etc/nginx/conf.d
+      - static_volume:/etc/nginx/static
+      #- ./infra/nginx/ssl:/etc/nginx/ssl
+    networks:
+      - gateway
+    restart: always
+    depends_on:
+      backend:
+        condition: service_started
+      frontend:
+        condition: service_started
+
+  # --- FRONTEND ---
+  frontend:
+    build: ./frontend
+    container_name: transcendence_frontend
+    environment:
+      - NG_CLI_ANALYTICS=false
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - gateway
+    tty: true
+
+  # --- BACKEND ---
+  backend:
+    build: ./backend
+    container_name: transcendence_backend
+    env_file: .env
+    volumes:
+      - ./backend:/usr/src/app
+      - static_volume:/usr/src/app/static
+    networks:
+      - gateway
+      - internal
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: daphne -b 0.0.0.0 -p 8000 core.asgi:application
+
+  # --- CACHE / MESSAGE BROKER: Redis ---
+  redis:
+    image: redis:7
+    container_name: transcendence_redis
+    restart: always
+    networks:
+      - internal
+
+  # --- DATABASE ---
+  db:
+    image: postgres:16
+    container_name: transcendence_db
+    env_file: .env
+    restart: always
+    networks:
+      - internal
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- DATABASE GUI: PGAdmin ---
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: transcendence_pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    networks:
+      - internal
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+networks:
+  gateway:
+  internal:
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  static_volume:

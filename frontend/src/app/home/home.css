@@ -1,0 +1,30 @@
+:host {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+b {
+  background: linear-gradient(90deg, 
+    #ff0000, #ff8000, #ffff00, #00ff00, 
+    #0000ff, #8000ff, #ff00ff, #ff0000);
+  background-size: 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rainbow 3s linear infinite;
+}
+
+@keyframes rainbow {
+  0%   { background-position: 0%; }
+  100% { background-position: 200%; }
+}
+
+main.Settings {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
