@@ -20,6 +20,9 @@ from django.contrib.auth.models import AbstractUser
 # 2. Django's field definitions for database columns
 from django.db import models
 
+# 3. Django's built-in translation module
+from django.utils.translation import gettext_lazy as _
+
 #? -----------------------------------------------------------------------------
 #? CUSTOM USER MODEL - THE ARCHITECTURE
 #? -----------------------------------------------------------------------------
@@ -68,20 +71,20 @@ class User(AbstractUser):
 
 	# List of available roles (Semantic choices for the DB)
 	class Role(models.TextChoices):
-		USER = 'user', 'User'
-		ADMIN = 'admin', 'Admin'
+		USER = 'user', _('User')
+		ADMIN = 'admin', _('Admin')
 
 	# Meta configuration for Django Admin display
 	class Meta:
-		verbose_name = 'User'
-		verbose_name_plural = 'Users'
+		verbose_name = _('User')
+		verbose_name_plural = _('Users')
 	
 
 # TECHNICAL REQUIREMENT: LOGIN WITH EMAIL
 	# Redefine email field to enforce uniqueness directly in the database (PostgreSQL)
 	email = models.EmailField(
 			unique=True, 
-			verbose_name='Email address'
+			verbose_name=_('Email address')
 	)
 
 # Instruct Django to use the email field as the primary identifier for authentication
@@ -99,20 +102,20 @@ class User(AbstractUser):
 		upload_to='avatars/',
 		null=True,
 		blank=True,
-		verbose_name='Profile picture'
+		verbose_name=_('Profile picture')
 	)
 
 	# Tracks real-time connection status (Updated via WebSockets)
 	is_online = models.BooleanField(
 		default=False,
-		verbose_name='Online status'
+		verbose_name=_('Online status')
 	)
 
 	# Secret key used for 2FA (Two-Factor Authentication)
 	otp_secret = models.CharField(
 		max_length=32,
 		blank=True,
-		verbose_name='2FA secret key'
+		verbose_name=_('2FA secret key')
 	)
 
 	# Many-to-many relationship with itself for the friends list.
@@ -124,6 +127,7 @@ class User(AbstractUser):
 		symmetrical=False,
 		through='friends.Friendship',
 		through_fields=('user_id', 'friend_user_id'),
+		verbose_name=_('Friends')
 	)
 	
 	# Role-based access control - defaults to USER for every new account
@@ -132,25 +136,25 @@ class User(AbstractUser):
 		max_length=20,
 		choices=Role.choices,
 		default=Role.USER,
-		verbose_name='User role'
+		verbose_name=_('User role')
 	)
 
 	# STEP 3 : Redefined relationships (Avoid conflicts)
 	
 	groups = models.ManyToManyField(
         'auth.Group',
-        verbose_name='groups',
+        verbose_name=_('groups'),
         blank=True,
-        help_text='The groups this user belongs to.',
+        help_text=_('The groups this user belongs to.'),
         related_name='customuser_set',
         related_query_name='user',
     )
 
 	user_permissions = models.ManyToManyField(
         'auth.Permission',
-        verbose_name='user permissions',
+        verbose_name=_('user permissions'),
         blank=True,
-        help_text='Specific permissions for this user.',
+        help_text=_('Specific permissions for this user.'),
         related_name='customuser_set',
         related_query_name='user',
     )

@@ -110,6 +110,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -181,16 +182,36 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
+#? ----------------------------------------------------------------------------
+#? Internationalization
+#? ----------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
+from django.utils.translation import gettext_lazy as _
+
+# Default language
 LANGUAGE_CODE = 'en-us'
 
+# Time zone
 TIME_ZONE = 'UTC'
 
+# Boolean -> turns on Django's translation system
 USE_I18N = True
 
+# Boolean -> timezon-awarw
 USE_TZ = True
+
+# List of all available languages
+LANGUAGES = [
+    ('fr', _('French')),
+    ('en', _('English')),
+    ('es', _('Spanish')),
+]
+
+# Absolute path where Django looks for translation files (.po / .mo)
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 #? ----------------------------------------------------------------------------
 #? CustomUser model
