@@ -4,7 +4,7 @@ CHECK_DEPS = ./infra/tools/check_deps.sh
 all:
 	@chmod +x $(CHECK_DEPS)
 	@$(CHECK_DEPS)
-	docker compose up --build
+	docker compose up --build -d
 
 down:
 	docker compose down

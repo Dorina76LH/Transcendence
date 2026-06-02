@@ -4,8 +4,8 @@ services:
     build: ./infra/nginx
     container_name: transcendence_nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "8443:443"
     volumes:
       - ./infra/nginx/conf.d:/etc/nginx/conf.d
       - static_volume:/etc/nginx/static
