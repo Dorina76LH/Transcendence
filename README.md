@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by [aeudes], [doberes], [jvega], [csauvage], [lpatin] and [].*
+*This project has been created as part of the 42 curriculum by [aeudes], [doberes], [jvega], [llan], [lpatin]*
 
 # ft_transcendence - Advanced Web Platform
 
@@ -51,10 +51,13 @@ The platform uses **PostgreSQL** as its primary data store. The schema is manage
     Create a .env file at the root based on .env.example and fill in your secrets.
 
 3.  **Launch with Docker:**
-    docker-compose up --build
+    docker-compose up --build -d
 
 4.  **Access:**
-    The application will be accessible at `https://localhost:8080`.
+   * 8080 -> port 80  on nginx -> HTTP
+   * 8443 -> port 443 on nginx -> HTTPS
+    The application will be accessible at 'https://localhost:8443'
+    The application will be accessible at 'https://localhost:8080'
 
 ---
 
@@ -89,7 +92,7 @@ We followed a strict **"1 Trello card = 1 branch = 1 PR"** policy to ensure code
 *   **Backend as Microservices:** Decoupled services for authentication, chat, and user data.
 *   **Real-time Features:** Live interaction using WebSockets.
 *   **User Interaction:** Friendship system, user blocking, and profiles.
-*   **Standard User Management:** Robust auth + **Google OAuth** integration.
+*   **Standard User Management:** Robust auth + **Google OAuth** + Two Factor Auth integration.
 *   **Advanced Permissions System:** Complex Role-Based Access Control (RBAC).
 *   **Security Hardening:** WAF implementation + **HashiCorp Vault** for secrets.
 
@@ -121,6 +124,9 @@ We followed a strict **"1 Trello card = 1 branch = 1 PR"** policy to ensure code
 *   [Angular Official Docs](https://angular.io/docs)
 *   [Django REST Framework](https://www.django-rest-framework.org/)
 *   [HashiCorp Vault Guide](https://developer.hashicorp.com/vault/docs)
+*   [Git Official Documentation](https://git-scm.com/docs)
+*   [PostgreSQL Official Documentation](https://www.postgresql.org/docs/)
+*   [Docker Official Documentation](https://docs.docker.com/)
 
 ### 🤖 AI Usage
 AI was utilized as a technical collaborator for:
