@@ -149,9 +149,9 @@ Authentication requirements are explicitly enforced in the view via the `permiss
 Note: All fields are optional. Content-Type must be multipart/form-data if an avatar file is included.
 ```json
 {
-  "username": "marvin_new", <- "I want to change my username to this"
-  "first_name": "Marvin",   <- "I want to change my first_name to this"
-  "last_name": "Robot"      <- "I want to change my last_name to this"
+  "username": "marvin_new", <- I want to change my username to this
+  "first_name": "Marvin",   <- I want to change my first_name to this
+  "last_name": "Robot"      <- I want to change my last_name to this
 }
 ```
 
@@ -159,10 +159,10 @@ Note: All fields are optional. Content-Type must be multipart/form-data if an av
 ```json
 {
   "id": 42,
-  "username": "ada", <- "name changed"
+  "username": "marvin_new", <- changed
   "email": "marvin@student.42.fr",
-  "first_name": "Ada",
-  "last_name": "Eds", <- "last name changed"
+  "first_name": "Marvin",   <- changed
+  "last_name": "Robot",     <- changed
   "avatar_url": "https://api.dicebear.com/9.x/bottts/svg?seed=marvin",
   "is_online": true,
   "role": "user"
