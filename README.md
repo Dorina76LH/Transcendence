@@ -56,8 +56,8 @@ The platform uses **PostgreSQL** as its primary data store. The schema is manage
 4.  **Access:**
    * 8080 -> port 80  on nginx -> HTTP
    * 8443 -> port 443 on nginx -> HTTPS
-    The application will be accessible at 'https://localhost:8443'
-    The application will be accessible at 'https://localhost:8080'
+    The application will be accessible at 'https://localhost:8443' ?
+     The application will be accessible at 'https://localhost:8080' ?
 
 ---
 
