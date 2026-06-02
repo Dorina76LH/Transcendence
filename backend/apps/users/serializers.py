@@ -224,9 +224,9 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         # 'id', 'username', 'email', 'is_online', 'role' -> Injected directly from DB.
         # 'avatar_url' -> Injected from the method below.
-        fields = ('id', 'username', 'email', 'avatar_url', 'is_online', 'role')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'avatar_url', 'is_online', 'role')
         # Safety: these cannot be modified via this serializer.
-        read_only_fields = ('id', 'username', 'role')
+        read_only_fields = ('id', 'role')
     
     #& STEP 3 : Custom Handlers
     def get_avatar_url(self, obj):
