@@ -21,6 +21,19 @@ The exact path is always a **mathematical addition** between the core router and
 To discover which HTTP verbs (`GET`, `POST`, `PATCH`, `DELETE`) a route actually accepts, look at the **class type** or **methods defined** inside `views.py`:
 
 * **Manual Views (`APIView`):** Look at the explicit Python function names.
+* **Generic Views (`generics.XXXXAPIView`):** DRF handles the verbs automatically based on the class architecture.
+
+| DRF View Type / Class | Active HTTP Method(s) | Default Action & Framework Behavior / Code Signature |
+| :--- | :--- | :--- |
+| **Manual Views** (`APIView`) | *Custom* | Bound manually via explicit Python functions:<br>• `def get(self, request):` $\rightarrow$ Accepts **GET**<br>• `def post(self, request):` $\rightarrow$ Accepts **POST** |
+| `CreateAPIView` | **POST** | **Create:** Handles resource creation. |
+| `ListAPIView` | **GET** | **List:** Handles listing collections of resources. |
+| `ListCreateAPIView` | **GET** / **POST** | **List + Create:** Combines resource listing and creation workflows. |
+| `UpdateAPIView` | **PUT** / **PATCH** | **Update:** Both verbs trigger the same underlying action. |
+| `DestroyAPIView` | **DELETE** | **Destroy:** Handles resource deletion. The handler can override this behavior (e.g., soft-delete instead of real delete—the row stays in the base, we only change its status to `CANCELED`). |
+| `RetrieveUpdateDestroyAPIView` | **GET** / **PATCH** / **PUT** / **DELETE** | **Read, Update, and Destroy:** Encompasses the full lifecycle of a single specific resource. |
+
+<!-- * **Manual Views (`APIView`):** Look at the explicit Python function names.
   * `def get(self, request):` $\rightarrow$ Accepts **GET**
   * `def post(self, request):` $\rightarrow$ Accepts **POST**
 * **Generic Views (`generics.XXXXAPIView`):** DRF handles the verbs automatically based on the class name:
@@ -30,25 +43,17 @@ To discover which HTTP verbs (`GET`, `POST`, `PATCH`, `DELETE`) a route actually
   * `UpdateAPIView` $\rightarrow$ Accepts **PUT + PATCH** (Update - both verbs, same action)
   * `DestroyAPIView` $\rightarrow$ Accepts **DELETE** (Destroy)
     : the handler can override the same behavior(e.g. soft-delete instead of real delete - the row stays in the base, we only change its status to CANCELED)
-  * `RetrieveUpdateDestroyAPIView` $\rightarrow$ Accepts **GET** (Read), **PATCH/PUT** (Update), and **DELETE** (Destroy).
+  * `RetrieveUpdateDestroyAPIView` $\rightarrow$ Accepts **GET** (Read), **PATCH/PUT** (Update), and **DELETE** (Destroy).-->
 
-  [
-   * **ListAPIView** — used by FriendListView, FriendRequestReceivedView, FriendRequestSentView
-   * **ListCreateAPIView** — used by FriendRequestView
-   * **UpdateAPIView** — used by FriendRequestAcceptView, FriendRequestRejectView
-   * **DestroyAPIView** — used by FriendRequestCancelView (overrides destroy to cancel, not delete) and FriendUnfriendView
-   * **RetrieveUpdateDestroyAPIView** — used by MeView
-  ]
-
-
+  
 ### Step 3: Verifying Access Control (Permissions)
 Authentication requirements are explicitly enforced in the view via the `permission_classes` attribute. Always check this list to document access constraints:
 
-* `permission_classes = [AllowAny]` $\rightarrow$ **Auth Required: ❌ No**. The endpoint is public (e.g., Login, Register).
-* `permission_classes = [IsAuthenticated]` $\rightarrow$ **Auth Required:  Yes**. DRF will block the request with a `401 Unauthorized` if a valid JWT token is missing.
-* `permission_classes = [IsAuthenticated, IsReceiverOfRequest]` $\rightarrow$ **Auth Required:  Yes**. (When multiple permissions are listed, all must pass(AND logic))
-*  `permission_classes = [IsAuthenticated, IsSenderOfRequest]` $\rightarrow$ **Auth Required:  Yes**. (When multiple permissions are listed, all must pass (AND logic))
-* **Special cases:** In this project: IsReceiverOfRequest and IsSenderOfRequest are custom guards that check the relationship between the authenticated user and the specific FriendRequest object - not just whether the user is logged in.
+* `permission_classes = [AllowAny]`<br>$\rightarrow$ **Auth Required: ❌ No**. The endpoint is public (e.g., Login, Register).
+* `permission_classes = [IsAuthenticated]`<br>$\rightarrow$ **Auth Required:  Yes**. DRF will block the request with a `401 Unauthorized` if a valid JWT token is missing.
+* `permission_classes = [IsAuthenticated, IsReceiverOfRequest]` <br>$\rightarrow$ **Auth Required:  Yes**. (When multiple permissions are listed, all must pass(AND logic))
+*  `permission_classes = [IsAuthenticated, IsSenderOfRequest]`<br> $\rightarrow$ **Auth Required:  Yes**. (When multiple permissions are listed, all must pass (AND logic))
+* `Special cases = [IsReceiverOfRequest, IsSenderOfRequest]`<br>$\rightarrow$ In this project IsReceiverOfRequest and IsSenderOfRequest are custom guards that check the relationship between the authenticated user and the specific FriendRequest object - not just whether the user is logged in.
 ---
 
 ## 🗺️ Applications Map
@@ -73,6 +78,18 @@ Authentication requirements are explicitly enforced in the view via the `permiss
 | **PATCH**| `api/auth/me/` |  Yes | Username&nbsp;(opt),<br>Email&nbsp;(opt),<br>First_name&nbsp;(opt),<br>Last_name&nbsp;(opt),<br>Avatar&nbsp;(file, opt) | `200` | Update profile / avatar |
 | **DELETE**| `api/auth/me/` |  Yes | *None* | `204` | Delete&nbsp;account (GDPR&nbsp;compliance)|
 | **POST** | `api/auth/token/refresh/` | ❌ No | Refresh token | `200` | Generate new Access Token |
+
+### 🔍 Backend Implementation Mapping (Users)
+
+> 🔒 **Global Policy:** `permission_classes = [IsAuthenticated]` is enforced across all user context endpoints except register, login, and token refresh (`AllowAny`).
+
+| Endpoint | Django View Class | DRF Generic Class | Active HTTP Verbs | Custom Behavior / Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `api/auth/register/` | `RegisterView` | `CreateAPIView` | **POST** | Validates uniqueness of email/username, triggers auto-login payload. |
+| `api/auth/login/` | `LoginView` | `APIView` | **POST** | Custom handling for email/password validation against `USERNAME_FIELD`. |
+| `api/auth/logout/` | `LogoutView` | `APIView` | **POST** | Updates `is_online = False` and blacklists the refresh token. |
+| `api/auth/me/` | `MeView` | `RetrieveUpdateDestroyAPIView` | **GET** / **PATCH** / **PUT** / **DELETE** | Context-driven. Routes all actions without exposing user IDs in the URL. |
+| `api/auth/token/refresh/`| `TokenRefreshView` | SimpleJWT Base | **POST** | Standard SimpleJWT token rotation implementation. |
 
 ### 💡 Important Architecture Notes for Frontend Integration
 
@@ -182,3 +199,43 @@ Note: All fields are optional. Content-Type must be multipart/form-data if an av
   "detail": "Successfully disconnected."
 }
 ```
+
+---
+
+## 💬 2. Chat & Messaging Module
+
+---
+
+## 👥 3. Friends & Relations Module
+
+[
+   * **ListAPIView** — used by FriendListView, FriendRequestReceivedView, FriendRequestSentView
+   * **ListCreateAPIView** — used by FriendRequestView
+   * **UpdateAPIView** — used by FriendRequestAcceptView, FriendRequestRejectView
+   * **DestroyAPIView** — used by FriendRequestCancelView (overrides destroy to cancel, not delete) and FriendUnfriendView
+   * **RetrieveUpdateDestroyAPIView** — used by MeView
+  ]
+
+<!-- 
+
+### 🔍 Backend Implementation Mapping (Friends & Relations)
+
+> 🔒 **Global Policy:** `permission_classes = [IsAuthenticated]` is mandatory across this entire module.
+
+| Endpoint | Django View Class | DRF Generic Class | Active HTTP Verbs | Custom Guards & Validation Specs |
+| :--- | :--- | :--- | :--- | :--- |
+| `api/friends/` | `FriendListView` | `ListAPIView` | **GET** | Automatically filters and returns established relationships where status is active. |
+| `api/friends/requests/received/` | `FriendRequestReceivedView` | `ListAPIView` | **GET** | Evaluates relations where `receiver == request.user` and status is pending. |
+| `api/friends/requests/sent/` | `FriendRequestSentView` | `ListAPIView` | **GET** | Evaluates relations where `sender == request.user` and status is pending. |
+| `api/friends/requests/` | `FriendRequestView` | `ListCreateAPIView` | **GET** / **POST** | Handles request dispatch. Validates that users cannot request themselves. |
+| `api/friends/requests/<id>/accept/`| `FriendRequestAcceptView` | `UpdateAPIView` | **PATCH** / **PUT** | **Guard:** `IsReceiverOfRequest`. Updates relationship state to active. |
+| `api/friends/requests/<id>/reject/`| `FriendRequestRejectView` | `UpdateAPIView` | **PATCH** / **PUT** | **Guard:** `IsReceiverOfRequest`. Updates relationship state to rejected. |
+| `api/friends/requests/<id>/cancel/`| `FriendRequestCancelView` | `DestroyAPIView` | **DELETE** | **Guard:** `IsSenderOfRequest`. Overrides destroy to apply status update (`CANCELED`). |
+| `api/friends/<id>/unfriend/` | `FriendUnfriendView` | `DestroyAPIView` | **DELETE** | Terminates the active relationship match between the two user IDs. |
+ -->
+
+---
+
+## 📊 4. Analytics & Statistics Module
+
+---
