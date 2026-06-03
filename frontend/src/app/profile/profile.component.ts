@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../user.service';
+import { Router } from '@angular/router';
 
 @Component({
 	selector: 'user-profile',
@@ -37,7 +38,9 @@ import { UserService } from '../user.service';
 					</li>
 				</ul>
 				<div class="d-flex gap-2">
-					<a routerLink="/login" class="btn btn-secondary">Login</a>
+					<div class="d-flex gap-2">
+						<button (click)="logout()" class="btn btn-danger">Logout</button>
+					</div>
 					<a routerLink="/register" class="btn btn-primary">Register</a>
 				</div>
 			</div>
@@ -48,7 +51,7 @@ import { UserService } from '../user.service';
 	<div class="card border-secondary p-4" style="width: 450px;">
 		<h2 class="text-center mb-4">Profile overview</h2>
 		<div class="text-center mb-4">
-			<img [src]="profile?.avatar || 'Zoliac.png'" class="rounded-circle border border-secondary" style="width:100px; height:100px; object-fit: cover;">
+			<img [src]="profile?.avatar_url || 'Zoliac.png'" class="rounded-circle border border-secondary" style="width:100px; height:100px; object-fit: cover;">
 		</div>
 		<div class="mb-3">
 			<label class="form-label">Username</label>
@@ -58,29 +61,43 @@ import { UserService } from '../user.service';
 			<label class="form-label">Email</label>
 			<p class="text-white">{{ profile?.email || '...' }}</p>
 		</div>
-		<div class="mb-3">
-			<label class="form-label">Biography</label>
-			<p class="text-white">{{ profile?.biography || '...' }}</p>
-		</div>
 		<p class="text-danger text-center" *ngIf="errorMessage">{{ errorMessage }}</p>
 	</div>
 </main>`,
 styleUrl: './profile.css',
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
 	profile: any = null;
 	errorMessage = '';
 
-	constructor(private userService: UserService) {}
+	constructor(private userService: UserService, private router: Router, private cdr: ChangeDetectorRef) {}
 
-	ngOnInit() {
-		this.userService.getProfile().subscribe({
-			next: (data: any) => {
-				this.profile = data;
+
+	logout() {
+		this.userService.logout().subscribe({
+			next: () => {
+			localStorage.removeItem('token');
+			localStorage.removeItem('refresh');
+			this.router.navigate(['/login']);
 			},
-			error: (err) => {
-				this.errorMessage = 'Unable to load profile';
+			error: () => {
+			localStorage.removeItem('token');
+			localStorage.removeItem('refresh');
+			this.router.navigate(['/login']);
 			}
 		});
 	}
+
+	ngOnInit() {
+			this.userService.getProfile().subscribe({
+			next: (data: any) => {
+				this.profile = data;
+				this.cdr.detectChanges();
+			},
+			error: (err) => {
+				this.errorMessage = 'Unable to load profile';
+				this.cdr.detectChanges();
+			}
+			});
+		}
 }

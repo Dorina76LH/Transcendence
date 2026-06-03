@@ -82,7 +82,8 @@ export class LoginComponent {
 	login() {
 		this.userService.login(this.email, this.password).subscribe({
 			next: (response: any) => {
-				localStorage.setItem('token', response.token);
+				localStorage.setItem('token', response.access);
+				localStorage.setItem('refresh', response.refresh);
 				this.router.navigate(['/']);
 			},
 			error: (err: any) => {
