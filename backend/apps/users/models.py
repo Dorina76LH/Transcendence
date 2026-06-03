@@ -203,7 +203,6 @@ class SocialAccount(models.Model):
 
 	class Provider(models.TextChoices):
 		GOOGLE   = 'google', 'Google'
-		GITHUB   = 'github', 'GitHub'
 		FORTYTWO = '42',     'École 42'
 
 	class Meta:

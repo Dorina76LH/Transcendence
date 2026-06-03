@@ -331,14 +331,12 @@ class SocialAuthView(APIView):
     # URLs to exchange the code for a token (one per provider)
     TOKEN_URLS = {
         'google': 'https://oauth2.googleapis.com/token',
-        'github': 'https://github.com/login/oauth/access_token',
         '42':     'https://api.intra.42.fr/oauth/token',
     }
 
     # URLs to fetch the user profile with the access_token
     PROFILE_URLS = {
         'google': 'https://www.googleapis.com/oauth2/v3/userinfo',
-        'github': 'https://api.github.com/user',
         '42':     'https://api.intra.42.fr/v2/me',
     }
 
@@ -394,7 +392,6 @@ class SocialAuthView(APIView):
     def _exchange_code(self, provider, code):
         credentials = {
             'google': (settings.GOOGLE_CLIENT_ID,   settings.GOOGLE_CLIENT_SECRET),
-            'github': (settings.GITHUB_CLIENT_ID,   settings.GITHUB_CLIENT_SECRET),
             '42':     (settings.FORTYTWO_CLIENT_ID, settings.FORTYTWO_CLIENT_SECRET),
         }
         client_id, client_secret = credentials[provider]
@@ -427,9 +424,6 @@ class SocialAuthView(APIView):
         if provider == 'google':
             uid   = str(profile['sub'])
             email = profile.get('email', '')
-        elif provider == 'github':
-            uid   = str(profile['id'])
-            email = profile.get('email') or f'github_{profile["id"]}@noreply.github.com'
         else:  # 42
             uid   = str(profile['id'])
             email = profile.get('email', '')

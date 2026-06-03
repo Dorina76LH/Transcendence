@@ -8,6 +8,8 @@ all:
 
 down:
 	docker compose down
+createsuperuser:
+	docker compose run backend python /usr/src/app/manage.py createsuperuser
 
 re: down all
 
