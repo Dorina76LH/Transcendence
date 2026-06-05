@@ -326,8 +326,21 @@ CHANNEL_LAYERS = {
 CSRF_TRUSTED_ORIGINS = [
     "https://localhost",
     "https://127.0.0.1",
+	"https://localhost:8443"
 ]
 
 # Secure cookies so they are only transmitted over HTTPS connections
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+
+# ----------------------------------------------------------------------------
+# OAuth 2.0 — Social Authentication
+# ----------------------------------------------------------------------------
+
+GOOGLE_CLIENT_ID     = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
+
+FORTYTWO_CLIENT_ID     = os.environ.get('FORTYTWO_CLIENT_ID')
+FORTYTWO_CLIENT_SECRET = os.environ.get('FORTYTWO_CLIENT_SECRET')
+
+OAUTH_REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI')
