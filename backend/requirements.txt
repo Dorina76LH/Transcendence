@@ -10,6 +10,8 @@ django-cors-headers                 # Handles Cross-Origin Resource Sharing (COR
 # ---AUTHENTICATION ---
 djangorestframework-simplejwt       # JWT authentication for angular
 django-environ                      # Reads environment variables from .env
+pyotp                               # A python library which handles TOTP for Django
+qrcode[pil]                         # A python library which creates an image for QR code
 
 # --- REAL-TIME / CHAT (WebSockets) ---
 channels>=4.0,<5.0                  # Extends Django to handle WebSockets and long-running connections

@@ -114,6 +114,19 @@ from rest_framework_simplejwt.exceptions import TokenError
 # 5. Local Experts (Custom Serializers)
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 
+# 6. TOTP for 2FA     
+# IO : input/output -> it lets us manipulate data in memory as if it were a file.
+# BytesIO is a fake file in RAM. Instead of saving the QR code image to disk, we write it to memory
+
+# BASE64 : an encoding system that converts binary data into text. A PNG image is binary - it cannot
+# travel inside JSON because JSON accepts only text. And Base64 converts it to plain text.
+# A png image is just the delivery method for secret. 
+
+import pyotp
+import qrcode
+import io 
+import base64
+
 
 
 #* ----------------------------------------------------------------------------
@@ -290,3 +303,41 @@ class LogoutView(APIView):
                 {"detail": "Invalid or expired token."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+
+#* ----------------------------------------------------------------------------
+#* TwoFASetupView
+#  - Endpoint: POST /api/auth/2fa/setup/
+#  - Generates a random TOTP secret
+#  - Saves it in user.otp_secret
+#  - Returns a QR code (base64) to scan with Google Authenticator
+# ----------------------------------------------------------------------------
+class TwoFASetupView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        # Generate a new TOTP secret
+        secret = pyotp.random_base32()
+        user.otp_secret = secret
+        user.save(update_fields=['otp_secret'])
+
+        # Build the provisionung URI for Google Authenticator
+        totp = pyotp.TOTP(secret)
+        uri = totp.provisioning_uri(
+            name=user.email,
+            issuer_name='Transcendence'
+        )
+
+        # Generate the QR code as a base64 image
+        qr = qrcode.make(uri)
+        buffer = io.BytesIO()
+        qr.save(buffer, format='PNG')
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+        return Response({
+            'secret':  secret,
+            'qr_code': f'data:image/png;base64,{qr_base64}',
+        }, status=status.HTTP_200_OK)
