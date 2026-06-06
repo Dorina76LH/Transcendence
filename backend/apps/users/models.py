@@ -115,6 +115,12 @@ class User(AbstractUser):
 		verbose_name='2FA secret key'
 	)
 
+	# Becomes true once the user has confirmed their authenticator app 
+	is_2fa_enabled = models.BooleanField(
+		default=False,
+		verbose_name='2FA enabled'
+	)
+
 	# Many-to-many relationship with itself for the friends list.
 	# The relation is stored through the explicit Friendship model so we can
 	# keep metadata like created_at on each accepted friendship.

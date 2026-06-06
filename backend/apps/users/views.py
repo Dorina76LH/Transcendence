@@ -341,3 +341,49 @@ class TwoFASetupView(APIView):
             'secret':  secret,
             'qr_code': f'data:image/png;base64,{qr_base64}',
         }, status=status.HTTP_200_OK)
+
+
+
+#* ----------------------------------------------------------------------------
+#* TwoFAEnableView
+#  - Endpoint: POST /api/auth/2fa/enable/
+#  - User sends the 6-digit code from Google Authenticator
+#  - Server verifies it against the stored otp_secret
+#  - If valid → sets is_2fa_enabled = True on the user
+# ----------------------------------------------------------------------------
+class TwoFAEnableView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        # Cannot enable 2FA if setup was never started (no secret generated yet)
+        if not user.otp_secret:
+            return Response(
+                {'detail': '2FA setup not started. Call /2fa/setup/ first.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        #if otp_code isn't correct
+        otp_code = request.data.get('otp_code')
+        if not otp_code:
+            return Response(
+                {'detail': 'otp_code is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Verify the code against the stored secret
+        totp = pyotp.TOTP(user.otp_secret)
+        if not totp.verify(otp_code):
+            return Response(
+                {'detail': 'Invalid or expired code.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Code is correct → activate 2FA
+        user.is_2fa_enabled = True
+        user.save(update_fields=['is_2fa_enabled'])
+
+        return Response(
+            {'detail': '2FA successfully enabled.'},
+            status=status.HTTP_200_OK
+        )
