@@ -206,38 +206,42 @@ class User(AbstractUser):
 class SocialAccount(models.Model):
 
 	class Provider(models.TextChoices):
-		GOOGLE   = 'google', 'Google'
-		FORTYTWO = '42',     'École 42'
+		GOOGLE   = 'google', _('Google')
+		FORTYTWO = '42',     _('École 42')
 
 	class Meta:
-		verbose_name        = 'Social Account'
-		verbose_name_plural = 'Social Accounts'
+		verbose_name        = _('Social Account')
+		verbose_name_plural = _('Social Accounts')
 		unique_together     = ('provider', 'uid')
 
 	user = models.ForeignKey(
 		'users.User',
 		on_delete=models.CASCADE,
-		related_name='social_accounts'
+		related_name='social_accounts',
+		verbose_name=_('User') # new
 	)
 
 	provider = models.CharField(
 		max_length=20,
 		choices=Provider.choices,
-		verbose_name='Provider'
+		verbose_name=_('Provider')
 	)
 
 	uid = models.CharField(
 		max_length=255,
-		verbose_name='Provider user ID'
+		verbose_name=_('Provider user ID')
 	)
 
 	extra = models.JSONField(
 		default=dict,
 		blank=True,
-		verbose_name='Extra data'
+		verbose_name=_('Extra data')
 	)
 
-	created_at = models.DateTimeField(auto_now_add=True)
+	created_at = models.DateTimeField(
+		auto_now_add=True,
+		verbose_name=_('Created at'), # new
+	)
 
 	def __str__(self):
 		return f'{self.provider} — {self.user.email}'

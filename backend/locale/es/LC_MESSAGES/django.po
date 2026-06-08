@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 16:20+0000\n"
+"POT-Creation-Date: 2026-06-08 15:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,17 +17,106 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: apps/users/models.py:74 apps/users/models.py:79
+#: apps/friends/apps.py:7 apps/users/models.py:130
+msgid "Friends"
+msgstr "Amigos"
+
+#: apps/friends/models.py:34 apps/users/models.py:74 apps/users/models.py:79
+#: apps/users/models.py:221
 msgid "User"
 msgstr "Usuario"
+
+#: apps/friends/models.py:43
+msgid "Friend"
+msgstr "Amigo"
+
+#: apps/friends/models.py:47
+msgid "Created_at"
+msgstr "Creado el"
+
+#: apps/friends/models.py:51
+msgid "Friendship"
+msgstr "Amistad"
+
+#: apps/friends/models.py:52
+msgid "Friendships"
+msgstr "Amistades"
+
+#: apps/friends/models.py:63
+msgid "A user cannot be friends with themselves."
+msgstr "Un usuario no puede ser amigo de sí mismo."
+
+#: apps/friends/models.py:98
+msgid "Pending"
+msgstr "Pendiente"
+
+#: apps/friends/models.py:99
+msgid "Accepted"
+msgstr "Aceptado"
+
+#: apps/friends/models.py:100
+msgid "Rejected"
+msgstr "Rechazado"
+
+#: apps/friends/models.py:101
+msgid "Canceled"
+msgstr "Cancelado"
+
+#: apps/friends/models.py:108
+msgid "Sender"
+msgstr "Remitente"
+
+#: apps/friends/models.py:115
+msgid "Receiver"
+msgstr "Destinatario"
+
+#: apps/friends/models.py:122
+msgid "Status"
+msgstr "Estado"
+
+#: apps/friends/models.py:128
+msgid "Accepted at"
+msgstr "Aceptado el"
+
+#: apps/friends/models.py:133 apps/users/models.py:243
+msgid "Created at"
+msgstr "Creado el"
+
+#: apps/friends/models.py:138
+msgid "Updated at"
+msgstr "Actualizado el"
+
+#: apps/friends/models.py:146
+msgid "Friend Request"
+msgstr "Solicitud de amistad"
+
+#: apps/friends/models.py:147
+msgid "Friend Requests"
+msgstr "Solicitudes de amistad"
+
+#: apps/friends/models.py:163
+msgid "A user cannot send a friend request to themselves."
+msgstr "Un usuario no puede enviar una solicituf de amistad a sí mismo."
+
+#: apps/users/admin.py:20
+msgid "Custom Fields"
+msgstr "Campos personalizados"
+
+#: apps/users/admin.py:47 apps/users/models.py:139
+msgid "User role"
+msgstr "Rol de usuario"
+
+#: apps/users/admin.py:52 apps/users/models.py:111
+msgid "Online status"
+msgstr "Estado en línea"
+
+#: apps/users/apps.py:6 apps/users/models.py:80
+msgid "Users"
+msgstr "Usuarios"
 
 #: apps/users/models.py:75
 msgid "Admin"
 msgstr "Administrador"
-
-#: apps/users/models.py:80
-msgid "Users"
-msgstr "Usuarios"
 
 #: apps/users/models.py:87
 msgid "Email address"
@@ -37,21 +126,9 @@ msgstr "Dirección de correo electrónico"
 msgid "Profile picture"
 msgstr "Foto de perfil"
 
-#: apps/users/models.py:111
-msgid "Online status"
-msgstr "Estado en línea"
-
 #: apps/users/models.py:118
 msgid "2FA secret key"
 msgstr "Clave secreta 2FA"
-
-#: apps/users/models.py:130
-msgid "Friends"
-msgstr "Amigos"
-
-#: apps/users/models.py:139
-msgid "User role"
-msgstr "Rol de usuario"
 
 #: apps/users/models.py:146
 msgid "groups"
@@ -69,14 +146,42 @@ msgstr "permisos de usuario"
 msgid "Specific permissions for this user."
 msgstr "Permisos específicos para este usuario."
 
-#: core/settings.py:206
+#: apps/users/models.py:209
+msgid "Google"
+msgstr "Google"
+
+#: apps/users/models.py:210
+msgid "École 42"
+msgstr "Escuela 42"
+
+#: apps/users/models.py:213
+msgid "Social Account"
+msgstr "Cuenta Social"
+
+#: apps/users/models.py:214
+msgid "Social Accounts"
+msgstr "Cuentas Sociales"
+
+#: apps/users/models.py:227
+msgid "Provider"
+msgstr "Proveedor"
+
+#: apps/users/models.py:232
+msgid "Provider user ID"
+msgstr "ID de usuario del proveedor"
+
+#: apps/users/models.py:238
+msgid "Extra data"
+msgstr "Datos adicionales"
+
+#: core/settings.py:213
 msgid "French"
 msgstr "Francés"
 
-#: core/settings.py:207
+#: core/settings.py:214
 msgid "English"
 msgstr "Inglés"
 
-#: core/settings.py:208
+#: core/settings.py:215
 msgid "Spanish"
 msgstr "Español"

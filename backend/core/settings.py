@@ -47,34 +47,41 @@ JAZZMIN_SETTINGS = {
     "site_header": "Transcendence",
     "site_brand": "Transcendence",
     "welcome_sign": "Welcome to Transcendence",
-    "theme": "darkly",  # ← thème bleu/sombre sympa
+    "theme": "solar", # qurtz, solar, lux
+    "show_ui_builder": False,
 }
 
 JAZZMIN_UI_TWEAKS = {
-    "navbar_small_text": False,
-    "footer_small_text": False,
+    "navbar_small_text": True,
+    "footer_small_text": True,
     "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": "navbar-primary",
+    "brand_small_text": True,
+    "brand_colour": False,
     "accent": "accent-primary",
-    "navbar": "navbar-dark",
+    "navbar": "navbar-dark bg-dark",
     "no_navbar_border": False,
-    "navbar_fixed": False,
+    "navbar_fixed": True,
     "layout_boxed": False,
     "footer_fixed": False,
-    "sidebar_fixed": False,
+    "sidebar_fixed": True,
     "sidebar": "sidebar-dark-primary",
-    "sidebar_nav_small_text": False,
+    "sidebar_nav_small_text": True,
     "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
+    "sidebar_nav_child_indent": True,
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
-    "theme": "darkly",
-    "default_theme_mode": "auto",
+    "theme": "quartz",
+    "default_theme_mode": "dark",
     "button_classes": {
         "primary": "btn-primary",
-    }
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    },
+    "actions_sticky_top": True
 }
 
 INSTALLED_APPS = [
@@ -98,7 +105,7 @@ INSTALLED_APPS = [
     'apps.chat.apps.ChatConfig', # New import chat
 
     # personnal apps
-    "apps.users.apps.UserConfig",
+    "apps.users",
     "apps.api",
     "apps.friends",
 	"apps.analytics.apps.AnalyticsConfig"
