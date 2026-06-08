@@ -59,4 +59,5 @@ urlpatterns = [
 
     # Friends api
     path('api/friends/', include('apps.friends.urls')),
+		path('api/analytics/', include('apps.analytics.urls'))
 ]

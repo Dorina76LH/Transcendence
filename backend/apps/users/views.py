@@ -114,6 +114,19 @@ from rest_framework_simplejwt.exceptions import TokenError
 # 5. Local Experts (Custom Serializers)
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 
+# 6. HTTP client to call Google/GitHub/42 APIs server-to-server
+import requests
+
+# 7. Django settings to read client_id / client_secret from .env
+from django.conf import settings
+
+# 8. SocialAccount model to store provider + uid links
+from .models import SocialAccount
+
+# 9. User model for get_or_create
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 
 
 #* ----------------------------------------------------------------------------
@@ -290,3 +303,150 @@ class LogoutView(APIView):
                 {"detail": "Invalid or expired token."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+
+#* ----------------------------------------------------------------------------
+#* SocialAuthView (MANUAL DRIVE - APIVIEW)
+#* ----------------------------------------------------------------------------
+# Endpoint: POST /api/auth/social/
+#
+# BODY: { "provider": "google" | "github" | "42", "code": "4/0AX4..." }
+#
+# FLOW:
+#   1. Receive the authorization code from Angular
+#   2. Exchange the code for an access_token (server-to-server, secret stays here)
+#   3. Use the access_token to fetch the user profile from the provider
+#   4. Upsert the user in PostgreSQL (create if new, retrieve if existing)
+#   5. Return a Django JWT so Angular can authenticate all future requests
+#
+# WHY APIVIEW?
+#   This is not a standard CRUD action. Every step is custom:
+#   calling external APIs, mapping provider data, upserting users.
+# ----------------------------------------------------------------------------
+class SocialAuthView(APIView):
+
+    permission_classes = [AllowAny]
+
+    # URLs to exchange the code for a token (one per provider)
+    TOKEN_URLS = {
+        'google': 'https://oauth2.googleapis.com/token',
+        '42':     'https://api.intra.42.fr/oauth/token',
+    }
+
+    # URLs to fetch the user profile with the access_token
+    PROFILE_URLS = {
+        'google': 'https://www.googleapis.com/oauth2/v3/userinfo',
+        '42':     'https://api.intra.42.fr/v2/me',
+    }
+
+    def post(self, request):
+        provider = request.data.get('provider')
+        code     = request.data.get('code')
+
+        if not provider or not code:
+            return Response(
+                {'detail': 'provider and code are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if provider not in self.TOKEN_URLS:
+            return Response(
+                {'detail': f'Unknown provider: {provider}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # STEP 1 — Exchange code for access_token, returns either acces_token or nothing if it fails
+        access_token = self._exchange_code(provider, code)
+        if not access_token:
+            return Response(
+                {'detail': 'Code exchange failed. The code may have expired.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # STEP 2 — Fetch user profile from the provider
+        profile = self._get_profile(provider, access_token)
+        if not profile:
+            return Response(
+                {'detail': 'Could not retrieve user profile.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # STEP 3 — Upsert = update+insert user in PostgreSQL
+        user = self._upsert_user(provider, profile)
+
+        # STEP 4 — Generate Django JWT and return it to Angular
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access':  str(refresh.access_token),
+            'refresh': str(refresh),
+        }, status=status.HTTP_200_OK)
+
+    # -------------------------------------------------------------------------
+    # PRIVATE HELPERS
+    # -------------------------------------------------------------------------
+
+    #   Calls the provider's token endpoint to exchange the authorization code
+    #   for an access_token. The client_secret never leaves this server.
+    
+    def _exchange_code(self, provider, code):
+        credentials = {
+            'google': (settings.GOOGLE_CLIENT_ID,   settings.GOOGLE_CLIENT_SECRET),
+            '42':     (settings.FORTYTWO_CLIENT_ID, settings.FORTYTWO_CLIENT_SECRET),
+        }
+        client_id, client_secret = credentials[provider]
+
+        #the request body we send to Google, each detail is obligated.
+        data = {
+            'client_id':     client_id,
+            'client_secret': client_secret,
+            'code':          code,
+            'grant_type':    'authorization_code',
+            'redirect_uri':  settings.OAUTH_REDIRECT_URI,
+        }
+        # GitHub requires Accept: application/json to return JSON instead of a query string
+        headers  = {'Accept': 'application/json'}
+        response = requests.post(self.TOKEN_URLS[provider], data=data, headers=headers)
+        return response.json().get('access_token')
+    
+    #  Calls the provider's userinfo endpoint to fetch the user's public profile.
+    def _get_profile(self, provider, access_token):
+      
+        headers  = {'Authorization': f'Bearer {access_token}'}
+        response = requests.get(self.PROFILE_URLS[provider], headers=headers)
+        return response.json() if response.ok else None
+
+    # Creates or retrieves the local User linked to this provider account.
+    # We identify by (provider + uid), never by email alone.
+    def _upsert_user(self, provider, profile):
+
+        # Each provider uses different field names — normalize here
+        if provider == 'google':
+            uid   = str(profile['sub'])
+            email = profile.get('email', '')
+        else:  # 42
+            uid   = str(profile['id'])
+            email = profile.get('email', '')
+
+        # Find existing SocialAccount or create a new one
+        social = SocialAccount.objects.filter(provider=provider, uid=uid).first()
+
+        if social:
+            # Existing user — update cached profile data
+            social.extra = profile
+            social.save(update_fields=['extra'])
+            return social.user
+
+        # New user — create User then SocialAccount
+        username = f'{provider}_{uid}'
+        user, _ = User.objects.get_or_create(
+            email=email,
+            defaults={'username': username}
+        )
+        SocialAccount.objects.create(
+            user=user,
+            provider=provider,
+            uid=uid,
+            extra=profile
+        )
+        return user
