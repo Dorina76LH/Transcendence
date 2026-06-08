@@ -1,6 +1,6 @@
-import {Component, OnInit} from 'angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink} from 'angular/router';
+import { RouterLink } from '@angular/router';
 import { AdminDashboard, AdminDashboardService } from './admin-dashboard.service';
 
 @Component({

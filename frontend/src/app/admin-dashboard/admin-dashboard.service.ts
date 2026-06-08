@@ -1,23 +1,23 @@
 import { Injectable } from '@angular/core';
-import { HTTPClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface TopActiveUser {
-	id: number;
-	username : string;
-	email : string;
-	messages_count : number;
+  id: number;
+  username: string;
+  email: string;
+  messages_count: number;
 }
 
 export interface AdminDashboard {
-	total_users: number;
-	online_users: number;
-	total_conversation: number;
-	total_messages: number;
-	messages_today: number;
-	total_friendships: number;
-	pending_friend_request: number;
-	top_active_users: TopActiveUser[];
+  total_users: number;
+  online_users: number;
+  total_conversations: number;
+  total_messages: number;
+  messages_today: number;
+  total_friendships: number;
+  pending_friend_requests: number;
+  top_active_users: TopActiveUser[];
 }
 
 @Injectable({ providedIn: 'root' })
