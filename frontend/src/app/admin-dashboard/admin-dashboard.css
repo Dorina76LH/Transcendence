@@ -1,0 +1,22 @@
+:host {
+	display: flex;
+	min-height: 100vh;
+	flex-direction:column;
+}
+
+.AdminDashboard{
+	align-item : stretch;
+}
+
+.dashboard-wrapper{
+	width : min(1100px, 100%)
+}
+
+.dashboard-grid{
+	grid-template-columns: repeat(auto-fix, minmax(180px, 1fr));
+	gap : 1rem;
+}
+
+.table{
+	color: var(--text-color);
+}

@@ -10,16 +10,18 @@ import { RegisterComponent } from './register/register.component';
 import { ProfileSettingsComponent } from './profile_settings';
 import { GDPRComponent } from './gdpr/gdpr.component';
 import { FriendsComponent } from '../friends/friends.component';
+import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 
 export const routes: Routes = [
-	{path: '', component: HomeComponent},
-	{path: 'login', component:LoginComponent},
-	{path: 'register', component:RegisterComponent},
-	{path: 'profile', component: ProfileComponent/*, canActivate: [AuthGuard]*/},
-	{path: 'settings', component: SettingsComponent},
-	{path: 'languages', component: LanguageComponent},
-	{path: 'chat', component:ChatComponent/*, canActivate: [AuthGuard]*/},
-	{path: 'profile-settings', component:ProfileSettingsComponent/*, canActivate: [AuthGuard]*/},
-	{path : 'gdpr', component:GDPRComponent/*, canActivate: [AuthGuard]*/},
-	{path : 'friends', component: FriendsComponent/*, canActivate: [AuthGuard]*/},
+  { path: '', component: HomeComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
+  { path: 'profile', component: ProfileComponent /*, canActivate: [AuthGuard]*/ },
+  { path: 'settings', component: SettingsComponent },
+  { path: 'languages', component: LanguageComponent },
+  { path: 'chat', component: ChatComponent /*, canActivate: [AuthGuard]*/ },
+  { path: 'profile-settings', component: ProfileSettingsComponent /*, canActivate: [AuthGuard]*/ },
+  { path: 'gdpr', component: GDPRComponent /*, canActivate: [AuthGuard]*/ },
+  { path: 'friends', component: FriendsComponent /*, canActivate: [AuthGuard]*/ },
+  { path: 'admin-dashboard', component: AdminDashboardComponent /*, canActivate: [AuthGuard]*/ },
 ];
