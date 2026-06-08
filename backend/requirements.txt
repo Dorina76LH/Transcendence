@@ -23,5 +23,8 @@ psycopg[binary]>=3.1,<4.0           # PostgreSQL database adapter for Python
 Pillow                              # Image procesing for avatars
 whitenoise>=6.0,<7.0                # Serves static files with DAPHNE/ASGI
 
+# --- HTTP ---
+requests                            # HTTP client (used for OAuth token exchange)
+
 # --- ADMIN ---
 django-jazzmin                      # Moderne theme for Django admin panel
