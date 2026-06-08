@@ -61,9 +61,7 @@ export class AdminDashboardComponent implements OnInit {
   errorMessage = '';
   statCards: Array<{ label: string; value: number }> = [];
 
-  constructor(
-    private adminDashboardService: AdminDashboardService
-  ) {}
+  constructor(private adminDashboardService: AdminDashboardService) {}
 
   ngOnInit() {
     this.adminDashboardService.getDashboard().subscribe({
@@ -81,12 +79,10 @@ export class AdminDashboardComponent implements OnInit {
         ];
 
         this.loading = false;
-        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Unable to load admin dashboard.';
         this.loading = false;
-        this.cdr.detectChanges();
       },
     });
   }
