@@ -98,7 +98,7 @@ INSTALLED_APPS = [
     'apps.chat.apps.ChatConfig', # New import chat
 
     # personnal apps
-    "apps.users",
+    "apps.users.apps.UserConfig",
     "apps.api",
     "apps.friends",
 	"apps.analytics.apps.AnalyticsConfig"
