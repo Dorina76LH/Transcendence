@@ -42,6 +42,14 @@ class CustomUserAdmin(UserAdmin):
         ),
 	)
 
-    # Custom column for "User role" translation mapping
-    #def role_column(self, obj):
-    #    return obj.get_role_display()
+    # --- Custom and Translated Columns Management ---
+    
+    @admin.display(description=_('User role'))
+    def role_column(self, obj):
+        # Returns the human-readable value of the choices defined in models.py
+        return obj.get_role_display()
+    
+    @admin.display(description=_('Online status'), boolean=True)
+    def online_column(self, obj):
+        # boolean=True allows Django ti display nice icons (green check / red cross)
+        return obj.is_online
