@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 16:02+0000\n"
+"POT-Creation-Date: 2026-06-08 12:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+#: apps/users/admin.py:20
+msgid "Custom Fields"
+msgstr "Champs personnalisés"
+
+#: apps/users/admin.py:47 apps/users/models.py:139
+msgid "User role"
+msgstr "Rôle de l'utilisateur"
+
+#: apps/users/admin.py:52 apps/users/models.py:111
+msgid "Online status"
+msgstr "Statut en ligne"
+
+#: apps/users/apps.py:6 apps/users/models.py:80
+msgid "Users"
+msgstr "Utilisateurs"
+
 #: apps/users/models.py:74 apps/users/models.py:79
 msgid "User"
 msgstr "Utilisateur"
@@ -24,10 +40,6 @@ msgstr "Utilisateur"
 #: apps/users/models.py:75
 msgid "Admin"
 msgstr "Administrateur"
-
-#: apps/users/models.py:80
-msgid "Users"
-msgstr "Utilisateurs"
 
 #: apps/users/models.py:87
 msgid "Email address"
@@ -37,10 +49,6 @@ msgstr "Adresse e-mail"
 msgid "Profile picture"
 msgstr "Photo de profil"
 
-#: apps/users/models.py:111
-msgid "Online status"
-msgstr "Statut en ligne"
-
 #: apps/users/models.py:118
 msgid "2FA secret key"
 msgstr "Clé de sécurité 2FA"
@@ -48,10 +56,6 @@ msgstr "Clé de sécurité 2FA"
 #: apps/users/models.py:130
 msgid "Friends"
 msgstr "Amis"
-
-#: apps/users/models.py:139
-msgid "User role"
-msgstr "Rôle de l'utilisateur"
 
 #: apps/users/models.py:146
 msgid "groups"
