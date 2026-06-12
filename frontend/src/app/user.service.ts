@@ -24,11 +24,11 @@ export class UserService {
 }
 
 	getAdmin() {
-		return this.http.get('${this.url}/admin/', {headers : {isAdmin: 'adminState'}} );
+		return this.http.get(`${this.url}/admin/`, {headers : {isAdmin: 'adminState'}} );
 	}
 
 	getUserFriends() {
-		return this.http.get('${this.url}/friends/', );
+		return this.http.get(`${this.url}/friends/`);
 	}
 
 	logout() {

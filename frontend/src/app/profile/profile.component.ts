@@ -55,11 +55,11 @@ import { Router } from '@angular/router';
 		</div>
 		<div class="mb-3">
 			<label class="form-label">Username</label>
-			<p class="text-white">{{ profile?.username || '...' }}</p>
+			<p>{{ profile?.username || '...' }}</p>
 		</div>
 		<div class="mb-3">
 			<label class="form-label">Email</label>
-			<p class="text-white">{{ profile?.email || '...' }}</p>
+			<p>{{ profile?.email || '...' }}</p>
 		</div>
 		<p class="text-danger text-center" *ngIf="errorMessage">{{ errorMessage }}</p>
 	</div>

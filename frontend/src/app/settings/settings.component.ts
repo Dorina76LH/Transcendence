@@ -52,7 +52,7 @@ import { RouterLink } from '@angular/router';
 			<button class="btn btn-secondary me-3" (click)="toggleDarkMode()">
 				{{ isDarkMode ? ' ☀️ ' : ' 🌙 ' }}
 			</button>
-			<a routerLink="/profile-settings" class="btn btn-secondary"> ⚙️ </a>
+			<!-- <a routerLink="/profile-settings" class="btn btn-secondary"> ⚙️ </a> -->
 		</div>
 	</div>
 </main>`,
