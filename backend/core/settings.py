@@ -326,7 +326,8 @@ CHANNEL_LAYERS = {
 CSRF_TRUSTED_ORIGINS = [
     "https://localhost",
     "https://127.0.0.1",
-	"https://localhost:8443"
+    "https://localhost:8443",
+    "https://127.0.0.1:8443",
 ]
 
 # Secure cookies so they are only transmitted over HTTPS connections
