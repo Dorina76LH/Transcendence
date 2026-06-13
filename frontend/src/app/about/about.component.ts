@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink } from "@angular/router";
+import { Component } from "@angular/core";
 
 @Component({
-	selector: 'app-lang',
+	selector: 'app-chat',
 	imports: [RouterLink],
 	template: `
 <header>
@@ -42,18 +42,36 @@ import { RouterLink } from '@angular/router';
 		</div>
 	</nav>
 </header>
-<main class="Languages">
-	<div class="Content">
-		<div>
-			<h1>Languages Page</h1>
-			<h2>This is the actual languages page, still in progress, but I got the page lol</h2>
-			<h3>We'll soon have 3 more languages handled for the project, but for now we only got one</h3>
-			<h3>Which is english as you can see.</h3>
+<main>
+	<div class="content">
+		<h3>This transcendence project was made by a group of 5 people :</h3>
+		<h4>-Jeffrey Vega (jvega)</h4>
+		<h4>-Dorina Béres (doberes)</h4>
+		<h4>-Léo Langanay (llangana)</h4>
+		<h4>-Ada Eudes (aeudes)</h4>
+		<h4>-Leny Patin (lpatin)</h4>
+		<div class="border-top">
+			<br>
+			<h3>The role of each of us : </h3>
+			<h4>-Jeffrey was doing all of the chat components on the backend <br>
+				He basically was the technical lead of the project.</h4>
+			<h4>-Dorina was on the backend, she worked on the database and she was<br>
+				 the project manager.</h4>
+			<h4>-Léo was on the DevOPs part, which is making the infrastructure <br>
+				of the project, he was the Product Owner.</h4>
+			<h4>-Ada did a bit of the DevOPs part, and also worked on the database</h4>
+			<h4>-Lény has done all of the frontend, the GUI, the pages, the text</h4>
+		</div>
+		<div class="border-top">
+		<br>
+		<h4>We all worked together to make a good website for our project, we did everything to make <br>
+			all components work together, to make them communicate smoothly and without errors</h4>
 		</div>
 	</div>
 </main>`,
-  styleUrl: './languages.css',
+styleUrl: './about.css'
 })
-export class LanguageComponent {
+
+export class AboutComponent {
 
 }
