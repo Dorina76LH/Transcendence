@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import User, SocialAccount
+
+admin.site.register(SocialAccount)
 
 # Register your models here.
 Authentication = "users.User"

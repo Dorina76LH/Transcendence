@@ -112,6 +112,7 @@ class FriendRequest(models.Model):
     
 	# Holds database-level settings for the model
 	# Constraints prevents dublicate pending requests from the same sender to the same receiver.
+	# no DUBLICATE
 	class Meta:
 		verbose_name = 'Friend Request'
 		verbose_name_plural = 'Friend Requests'

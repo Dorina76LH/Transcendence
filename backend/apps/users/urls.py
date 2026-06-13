@@ -60,7 +60,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 # - RegisterView: Handles NEW USER creation
 # - LoginView: Handles LOGIN and marks the user online
 # - LogoutView: Handles LOGOUT (invalidates the Refresh token)
-from .views import RegisterView, LoginView, LogoutView, MeView, TwoFASetupView, TwoFAEnableView, TwoFAVerifyView
+from .views import RegisterView, LoginView, LogoutView, MeView, TwoFASetupView, TwoFAEnableView, TwoFAVerifyView, SocialAuthView
 
 #* ============================================================================
 #* URL PATTERNS
@@ -104,4 +104,10 @@ urlpatterns = [
     path('2fa/setup/',  TwoFASetupView.as_view(),  name='2fa_setup'),
     path('2fa/enable/', TwoFAEnableView.as_view(), name='2fa_enable'),
     path('2fa/verify/', TwoFAVerifyView.as_view(), name='2fa_verify'),
+
+    # -------------------------------------------------------------------------
+    # 6. OAUTH : Social login (Google / 42)
+    # POST /api/auth/social/  { provider: "google", code: "..." }
+    # -------------------------------------------------------------------------
+    path('social/', SocialAuthView.as_view(), name='social_auth'),
 ]
