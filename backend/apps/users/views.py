@@ -112,7 +112,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 # 5. Local Experts (Custom Serializers)
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, PreAuthToken
+
+# 5b. User model (needed to fetch user by id in TwoFAVerifyView)
+from .models import User
 
 # 6. TOTP for 2FA     
 # IO : input/output -> it lets us manipulate data in memory as if it were a file.
@@ -387,3 +390,64 @@ class TwoFAEnableView(APIView):
             {'detail': '2FA successfully enabled.'},
             status=status.HTTP_200_OK
         )
+
+
+
+#* ----------------------------------------------------------------------------
+#* TwoFAVerifyView
+#  - Endpoint: POST /api/auth/2fa/verify/
+#  - User sends the pre_auth_token (from login) + the 6-digit TOTP code
+#  - Verifies the pre_auth_token to identify the user
+#  - Verifies the TOTP code with pyotp
+#  - If both valid → returns real JWT tokens + marks user online
+# ----------------------------------------------------------------------------
+class TwoFAVerifyView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        pre_auth_token = request.data.get('pre_auth_token')
+        otp_code       = request.data.get('otp_code')
+
+        if not pre_auth_token or not otp_code:
+            return Response(
+                {'detail': 'pre_auth_token and otp_code are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Decode and validate the pre_auth_token to identify the user
+        try:
+            token   = PreAuthToken(pre_auth_token)
+            user_id = token['user_id']
+        except TokenError:
+            return Response(
+                {'detail': 'Invalid or expired pre_auth_token.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Fetch the user from the database
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {'detail': 'User not found.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Verify the TOTP code against the stored secret
+        totp = pyotp.TOTP(user.otp_secret)
+        if not totp.verify(otp_code):
+            return Response(
+                {'detail': 'Invalid or expired code.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # All checks passed → mark online and issue real JWT tokens
+        user.is_online = True
+        user.save(update_fields=['is_online'])
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access':  str(refresh.access_token),
+            'refresh': str(refresh),
+            'user':    UserSerializer(user).data,
+        }, status=status.HTTP_200_OK)
