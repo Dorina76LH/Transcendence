@@ -60,7 +60,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 # - RegisterView: Handles NEW USER creation
 # - LoginView: Handles LOGIN and marks the user online
 # - LogoutView: Handles LOGOUT (invalidates the Refresh token)
-from .views import RegisterView, LoginView, LogoutView, MeView, TwoFASetupView, TwoFAEnableView, TwoFAVerifyView, SocialAuthView
+from .views import RegisterView, LoginView, LogoutView, MeView, TwoFASetupView, TwoFAEnableView, TwoFADisableView, TwoFAVerifyView, SocialAuthView
 
 #* ============================================================================
 #* URL PATTERNS
@@ -97,13 +97,15 @@ urlpatterns = [
 
     # -------------------------------------------------------------------------
     # 5. 2FA
-    # POST /api/auth/2fa/setup/  -> Generate QR code + secret
-    # POST /api/auth/2fa/enable/ -> Confirm 6-digit code, activate 2FA
-    # POST /api/auth/2fa/verify/ -> Validate code after login, get real JWT tokens
+    # POST /api/auth/2fa/setup/   -> Generate QR code + secret
+    # POST /api/auth/2fa/enable/  -> Confirm 6-digit code, activate 2FA
+    # POST /api/auth/2fa/disable/ -> Confirm 6-digit code, deactivate 2FA
+    # POST /api/auth/2fa/verify/  -> Validate code after login, get real JWT tokens
     # -------------------------------------------------------------------------
-    path('2fa/setup/',  TwoFASetupView.as_view(),  name='2fa_setup'),
-    path('2fa/enable/', TwoFAEnableView.as_view(), name='2fa_enable'),
-    path('2fa/verify/', TwoFAVerifyView.as_view(), name='2fa_verify'),
+    path('2fa/setup/',   TwoFASetupView.as_view(),   name='2fa_setup'),
+    path('2fa/enable/',  TwoFAEnableView.as_view(),  name='2fa_enable'),
+    path('2fa/disable/', TwoFADisableView.as_view(), name='2fa_disable'),
+    path('2fa/verify/',  TwoFAVerifyView.as_view(),  name='2fa_verify'),
 
     # -------------------------------------------------------------------------
     # 6. OAUTH : Social login (Google / 42)

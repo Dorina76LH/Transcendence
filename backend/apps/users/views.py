@@ -403,6 +403,53 @@ class TwoFAEnableView(APIView):
 
 
 #* ----------------------------------------------------------------------------
+#* TwoFADisableView
+#  - Endpoint: POST /api/auth/2fa/disable/
+#  - User sends the current 6-digit code from Google Authenticator
+#  - Server verifies it against the stored otp_secret
+#  - If valid → sets is_2fa_enabled = False and clears otp_secret
+# ----------------------------------------------------------------------------
+class TwoFADisableView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        # Cannot disable 2FA if it isn't enabled
+        if not user.is_2fa_enabled:
+            return Response(
+                {'detail': '2FA is not enabled.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        otp_code = request.data.get('otp_code')
+        if not otp_code:
+            return Response(
+                {'detail': 'otp_code is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Verify the code against the stored secret
+        totp = pyotp.TOTP(user.otp_secret)
+        if not totp.verify(otp_code):
+            return Response(
+                {'detail': 'Invalid or expired code.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Code is correct → deactivate 2FA and clear the secret
+        user.is_2fa_enabled = False
+        user.otp_secret = ''
+        user.save(update_fields=['is_2fa_enabled', 'otp_secret'])
+
+        return Response(
+            {'detail': '2FA successfully disabled.'},
+            status=status.HTTP_200_OK
+        )
+
+
+
+#* ----------------------------------------------------------------------------
 #* TwoFAVerifyView
 #  - Endpoint: POST /api/auth/2fa/verify/
 #  - User sends the pre_auth_token (from login) + the 6-digit TOTP code
