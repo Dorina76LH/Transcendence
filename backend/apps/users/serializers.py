@@ -413,7 +413,31 @@ class LoginSerializer(TokenObtainPairSerializer):
         return data
 
 
-
 #* ----------------------------------------------------------------------------
 #* LogoutSerializer
 #* ----------------------------------------------------------------------------
+
+
+#* ----------------------------------------------------------------------------
+#* RGPD Export Serializers
+#* ----------------------------------------------------------------------------
+#  These serializers are used exclusively for GDPR data portability compilance.
+#  They extract all data associated with a user account into a structured JSON.
+#* ----------------------------------------------------------------------------
+
+from .model import SocialAccount
+
+class SocialAccountExportSerializer(serializers.ModelSerializer):
+    """
+    Serializes linked third-party provider accounts (Google, 42) for GDPR export.
+    """
+    class Meta:
+        model = SocialAccount
+        fields = ('provider', 'uid', 'created_at')
+
+class UserExportSerializer(serializers.ModelSerializer):
+    """
+    Master GDPR serializer. Gathers base profile data and nested relationships.
+    Format enforced: Plain JSON (structured, machin-readable as requested by law).
+    """
+    

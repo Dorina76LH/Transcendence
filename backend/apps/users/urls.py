@@ -85,9 +85,11 @@ urlpatterns = [
     # 3. READ / UPDATE / DELETE : The "Me" Endpoint
     # GET    /api/auth/me/ -> Read my profile
     # PATCH  /api/auth/me/ -> Update my profile (Partial)
-    # DELETE /api/auth/me/ -> Delete my account
+    # DELETE /api/auth/me/ -> Delete my account (RGPD right to be gorgotten)
+    # GET    /api/auth/me/export/ -> Export my GDPR data (JSON portability)
     # -------------------------------------------------------------------------
     path('me/', MeView.as_view(), name='user_me'),
+    path('me/export/', UserExportView.as_view(), name='user_gdrp_export'),
 
     # -------------------------------------------------------------------------
     # 4. TOKEN MANAGEMENT : Refresh the session

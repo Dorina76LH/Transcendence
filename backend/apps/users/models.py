@@ -9,7 +9,6 @@
 """
 
 
-
 #* =============================================================================
 #* IMPORT
 #* =============================================================================
@@ -218,7 +217,7 @@ class SocialAccount(models.Model):
 		'users.User',
 		on_delete=models.CASCADE,
 		related_name='social_accounts',
-		verbose_name=_('User') # new
+		verbose_name=_('User')
 	)
 
 	provider = models.CharField(
@@ -240,7 +239,7 @@ class SocialAccount(models.Model):
 
 	created_at = models.DateTimeField(
 		auto_now_add=True,
-		verbose_name=_('Created at'), # new
+		verbose_name=_('Created at'),
 	)
 
 	def __str__(self):
