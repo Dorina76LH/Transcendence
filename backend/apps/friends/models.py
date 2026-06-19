@@ -5,6 +5,7 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
+from django.utils.translation import gettext_lazy as _
 
 
 # =====================================Class methods ========================= #
@@ -16,12 +17,21 @@ from django.core.exceptions import PermissionDenied
 
 # Persistent through-model for a friendship pair so each friendship can stor metadata(created_at)
 # Constraints: Unique constraint on user_id friend_user_id to prevent duplicate store pairs
+# ======================================================================== #
+# NOTE ON FOREIGN KEYS AND VERBOSE_NAME:                                   #
+# By default, Django generates admin labels from the field name            #
+# (e.g., "user_id" becomes "User id").                                     #
+# To hide technical database suffixes (like "_id") in the admin,           #
+# you can re-enable a clean 'verbose_name' (e.g., _('User')).              #
+# For now, we are letting Django use its default fallback names.           #
+# ======================================================================== #
 class Friendship(models.Model):
 	# One side of pair(FK)
 	user_id = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		related_name='friendships_sent',
+		verbose_name=_('User'), #new
 	)
 
 	# Other side of pair(FK)
@@ -30,12 +40,16 @@ class Friendship(models.Model):
 		# Delete if the other user removed.
 		on_delete=models.CASCADE, 
 		related_name='friendships_received',
+		verbose_name=_('Friend'), #new
 	)
-	created_at = models.DateTimeField(auto_now_add=True)
+	created_at = models.DateTimeField(
+		auto_now_add=True,
+		verbose_name=_('Created_at'),	
+	)
 
 	class Meta:
-		verbose_name = 'Friendship'
-		verbose_name_plural = 'Friendships'
+		verbose_name = _('Friendship')
+		verbose_name_plural = _('Friendships')
 		constraints = [
 			models.UniqueConstraint(
 				fields=['user_id', 'friend_user_id'],
@@ -46,7 +60,7 @@ class Friendship(models.Model):
 	# Raises an error if someone tried to create a self-friendship
 	def clean(self):
 		if self.user_id_id == self.friend_user_id_id:
-			raise ValidationError('A user cannot be friends with themselves.')
+			raise ValidationError(_('A user cannot be friends with themselves.'))
 
 
 	# Writing the users in the same order.
@@ -81,41 +95,56 @@ class FriendRequest(models.Model):
 
 	# Creates a list of allowed status.
 	class Status(models.TextChoices):
-		PENDING = 'pending', 'Pending'
-		ACCEPTED = 'accepted', 'Accepted'
-		REJECTED = 'rejected', 'Rejected'
-		CANCELED = 'canceled', 'Canceled'
+		PENDING = 'pending', _('Pending')
+		ACCEPTED = 'accepted', _('Accepted')
+		REJECTED = 'rejected', _('Rejected')
+		CANCELED = 'canceled', _('Canceled')
     
 	# The user who sends the friendrequest
 	from_user = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		related_name='sent_friend_requests',
+		verbose_name=_('Sender'), #new
 	)
 	# The user who receives the friend request
 	to_user = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		related_name='received_friend_requests',
+		verbose_name=_('Receiver'), #new
 	)
 	# Current status
 	status = models.CharField(
 		max_length=20,
 		choices=Status.choices,
 		default=Status.PENDING,
+		verbose_name=_('Status'),
 	)
 
-	accepted_at = models.DateTimeField(null=True, blank=True)
-	created_at = models.DateTimeField(auto_now_add=True)
-	updated_at = models.DateTimeField(auto_now=True)
+	accepted_at = models.DateTimeField(
+		null=True,
+		blank=True,
+		verbose_name=_('Accepted at'), #new
+	)
+
+	created_at = models.DateTimeField(
+		auto_now_add=True,
+		verbose_name=_('Created at'), #new	
+	)
+	
+	updated_at = models.DateTimeField(
+		auto_now=True,
+		verbose_name=_('Updated at'), #new
+	)
 
     
 	# Holds database-level settings for the model
 	# Constraints prevents dublicate pending requests from the same sender to the same receiver.
 	# no DUBLICATE
 	class Meta:
-		verbose_name = 'Friend Request'
-		verbose_name_plural = 'Friend Requests'
+		verbose_name = _('Friend Request')
+		verbose_name_plural = _('Friend Requests')
 		constraints = [
 			models.UniqueConstraint(
 				fields=['from_user', 'to_user'],
@@ -131,7 +160,7 @@ class FriendRequest(models.Model):
 
 	def clean(self):
 		if self.from_user_id == self.to_user_id:
-			raise ValidationError('A user cannot send a friend request to themselves.')
+			raise ValidationError(_('A user cannot send a friend request to themselves.'))
 
 	# A helper method that accepts the request
 	def accept(self, by_user):
