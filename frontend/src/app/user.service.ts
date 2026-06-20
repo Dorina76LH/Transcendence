@@ -39,4 +39,10 @@ export class UserService {
 		const refresh = localStorage.getItem('refresh');
 		return this.http.post(`${this.url}/auth/token/refresh/`, { refresh });
 	}
+	exportGdprData() {
+		return this.http.get(`${this.url}/auth/me/export/`);
+	}
+	deleteAccount() {
+		return this.http.delete(`${this.url}/auth/me/`);
+	}
 }
