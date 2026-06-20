@@ -149,7 +149,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 # 5. Local Experts (Custom Serializers)
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, PreAuthToken
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, PreAuthToken, UserExportSerializer
 
 # 5b. User model (needed to fetch user by id in TwoFAVerifyView)
 from .models import User
