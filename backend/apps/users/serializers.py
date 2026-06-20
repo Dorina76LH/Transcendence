@@ -43,8 +43,26 @@ from rest_framework import serializers
 # (is_online update, user data in response)
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+# Token base class to build a custom short-lived pre-auth token for 2FA
+from rest_framework_simplejwt.tokens import Token
+from datetime import timedelta
+
 # Import custom User model to create and query users
 from .models import User
+
+
+
+#* ----------------------------------------------------------------------------
+#* PreAuthToken
+#* ----------------------------------------------------------------------------
+# A short-lived JWT (5 min) issued after a successful password check when 2FA
+# is enabled. It carries only the user_id and gives access to nothing except
+# the /2fa/login/ endpoint. The real access + refresh tokens are only issued
+# after the TOTP code is validated.
+# ----------------------------------------------------------------------------
+class PreAuthToken(Token):
+    token_type = 'pre_auth'
+    lifetime   = timedelta(minutes=5)
 
 
 #* ----------------------------------------------------------------------------
@@ -401,6 +419,15 @@ class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         # Call parent validate() to check credentials and generate tokens
         data = super().validate(attrs)
+
+        # If 2FA is active → don't return full tokens yet
+        # Issue a short-lived pre_auth_token and let Angular show the OTP screen
+        if self.user.is_2fa_enabled:
+            pre_auth = PreAuthToken.for_user(self.user)
+            return {
+                'requires_2fa':   True,
+                'pre_auth_token': str(pre_auth),
+            }
 
         # self.user is set by parent after successful validation
         # Update is_online in the database

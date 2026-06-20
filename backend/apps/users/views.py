@@ -149,7 +149,23 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 # 5. Local Experts (Custom Serializers)
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, PreAuthToken
+
+# 5b. User model (needed to fetch user by id in TwoFAVerifyView)
+from .models import User
+
+# 6. TOTP for 2FA     
+# IO : input/output -> it lets us manipulate data in memory as if it were a file.
+# BytesIO is a fake file in RAM. Instead of saving the QR code image to disk, we write it to memory
+
+# BASE64 : an encoding system that converts binary data into text. A PNG image is binary - it cannot
+# travel inside JSON because JSON accepts only text. And Base64 converts it to plain text.
+# A png image is just the delivery method for secret. 
+
+import pyotp
+import qrcode
+import io 
+import base64
 
 # 6. HTTP client to call Google/GitHub/42 APIs server-to-server
 import requests
@@ -347,6 +363,198 @@ class LogoutView(APIView):
                 {"detail": "Invalid or expired token."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+
+#* ----------------------------------------------------------------------------
+#* TwoFASetupView
+#  - Endpoint: POST /api/auth/2fa/setup/
+#  - Generates a random TOTP secret
+#  - Saves it in user.otp_secret
+#  - Returns a QR code (base64) to scan with Google Authenticator
+# ----------------------------------------------------------------------------
+class TwoFASetupView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        # Generate a new TOTP secret
+        secret = pyotp.random_base32()
+        user.otp_secret = secret
+        user.save(update_fields=['otp_secret'])
+
+        # Build the provisionung URI for Google Authenticator
+        totp = pyotp.TOTP(secret)
+        uri = totp.provisioning_uri(
+            name=user.email,
+            issuer_name='Transcendence'
+        )
+
+        # Generate the QR code as a base64 image
+        qr = qrcode.make(uri)
+        buffer = io.BytesIO()
+        qr.save(buffer, format='PNG')
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+        return Response({
+            'secret':  secret,
+            'qr_code': f'data:image/png;base64,{qr_base64}',
+        }, status=status.HTTP_200_OK)
+
+
+
+#* ----------------------------------------------------------------------------
+#* TwoFAEnableView
+#  - Endpoint: POST /api/auth/2fa/enable/
+#  - User sends the 6-digit code from Google Authenticator
+#  - Server verifies it against the stored otp_secret
+#  - If valid → sets is_2fa_enabled = True on the user
+# ----------------------------------------------------------------------------
+class TwoFAEnableView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        # Cannot enable 2FA if setup was never started (no secret generated yet)
+        if not user.otp_secret:
+            return Response(
+                {'detail': '2FA setup not started. Call /2fa/setup/ first.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        #if otp_code isn't correct
+        otp_code = request.data.get('otp_code')
+        if not otp_code:
+            return Response(
+                {'detail': 'otp_code is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Verify the code against the stored secret
+        totp = pyotp.TOTP(user.otp_secret)
+        if not totp.verify(otp_code):
+            return Response(
+                {'detail': 'Invalid or expired code.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Code is correct → activate 2FA
+        user.is_2fa_enabled = True
+        user.save(update_fields=['is_2fa_enabled'])
+
+        return Response(
+            {'detail': '2FA successfully enabled.'},
+            status=status.HTTP_200_OK
+        )
+
+
+
+#* ----------------------------------------------------------------------------
+#* TwoFADisableView
+#  - Endpoint: POST /api/auth/2fa/disable/
+#  - User sends the current 6-digit code from Google Authenticator
+#  - Server verifies it against the stored otp_secret
+#  - If valid → sets is_2fa_enabled = False and clears otp_secret
+# ----------------------------------------------------------------------------
+class TwoFADisableView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        # Cannot disable 2FA if it isn't enabled
+        if not user.is_2fa_enabled:
+            return Response(
+                {'detail': '2FA is not enabled.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        otp_code = request.data.get('otp_code')
+        if not otp_code:
+            return Response(
+                {'detail': 'otp_code is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Verify the code against the stored secret
+        totp = pyotp.TOTP(user.otp_secret)
+        if not totp.verify(otp_code):
+            return Response(
+                {'detail': 'Invalid or expired code.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Code is correct → deactivate 2FA and clear the secret
+        user.is_2fa_enabled = False
+        user.otp_secret = ''
+        user.save(update_fields=['is_2fa_enabled', 'otp_secret'])
+
+        return Response(
+            {'detail': '2FA successfully disabled.'},
+            status=status.HTTP_200_OK
+        )
+
+
+
+#* ----------------------------------------------------------------------------
+#* TwoFAVerifyView
+#  - Endpoint: POST /api/auth/2fa/verify/
+#  - User sends the pre_auth_token (from login) + the 6-digit TOTP code
+#  - Verifies the pre_auth_token to identify the user
+#  - Verifies the TOTP code with pyotp
+#  - If both valid → returns real JWT tokens + marks user online
+# ----------------------------------------------------------------------------
+class TwoFAVerifyView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        pre_auth_token = request.data.get('pre_auth_token')
+        otp_code       = request.data.get('otp_code')
+
+        if not pre_auth_token or not otp_code:
+            return Response(
+                {'detail': 'pre_auth_token and otp_code are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Decode and validate the pre_auth_token to identify the user
+        try:
+            token   = PreAuthToken(pre_auth_token)
+            user_id = token['user_id']
+        except TokenError:
+            return Response(
+                {'detail': 'Invalid or expired pre_auth_token.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Fetch the user from the database
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {'detail': 'User not found.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Verify the TOTP code against the stored secret
+        totp = pyotp.TOTP(user.otp_secret)
+        if not totp.verify(otp_code):
+            return Response(
+                {'detail': 'Invalid or expired code.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # All checks passed → mark online and issue real JWT tokens
+        user.is_online = True
+        user.save(update_fields=['is_online'])
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access':  str(refresh.access_token),
+            'refresh': str(refresh),
+            'user':    UserSerializer(user).data,
+        }, status=status.HTTP_200_OK)
 
 
 

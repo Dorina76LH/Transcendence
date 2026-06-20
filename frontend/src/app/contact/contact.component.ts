@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink } from "@angular/router";
+import { Component } from "@angular/core";
 
-@Component({
-	selector: 'app-lang',
+@Component ({
+	selector: 'app-chat',
 	imports: [RouterLink],
 	template: `
 <header>
@@ -42,18 +42,15 @@ import { RouterLink } from '@angular/router';
 		</div>
 	</nav>
 </header>
-<main class="Languages">
+<main>
 	<div class="Content">
-		<div>
-			<h1>Languages Page</h1>
-			<h2>This is the actual languages page, still in progress, but I got the page lol</h2>
-			<h3>We'll soon have 3 more languages handled for the project, but for now we only got one</h3>
-			<h3>Which is english as you can see.</h3>
-		</div>
+		<h4>Well I think this page is made for the user to contact the people that made this project, so I mean</h4>
+		<h4>Here's my email : lpatin@student.42lehavre.fr </h4>
 	</div>
 </main>`,
-  styleUrl: './languages.css',
+styleUrl: './contact.css'
 })
-export class LanguageComponent {
+
+export class ContactComponent {
 
 }
