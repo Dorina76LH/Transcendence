@@ -60,7 +60,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 # - RegisterView: Handles NEW USER creation
 # - LoginView: Handles LOGIN and marks the user online
 # - LogoutView: Handles LOGOUT (invalidates the Refresh token)
-from .views import RegisterView, LoginView, LogoutView, MeView, SocialAuthView
+from .views import RegisterView, LoginView, LogoutView, MeView, UserExportView, SocialAuthView
 
 #* ============================================================================
 #* URL PATTERNS
