@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
 	selector: 'app-home',
-	imports: [RouterLink],
+	imports: [RouterLink, CommonModule],
 	template: `
 <header>
 	<nav class="navbar navbar-expand-lg navbar-dark">
@@ -35,8 +36,10 @@ import { RouterLink } from '@angular/router';
 					</li>
 				</ul>
 				<div class="d-flex gap-2">
-					<a routerLink="/login" class="btn btn-secondary">Login</a>
-					<a routerLink="/register" class="btn btn-primary">Register</a>
+					<ng-container *ngIf="!isLoggedIn">
+						<a routerLink="/login" class="btn btn-secondary">Login</a>
+						<a routerLink="/register" class="btn btn-primary">Register</a>
+					</ng-container>
 				</div>
 			</div>
 		</div>
@@ -127,6 +130,6 @@ import { RouterLink } from '@angular/router';
 	styleUrl: './home.css'
 })
 export class HomeComponent {
-
+	isLoggedIn = !!localStorage.getItem('token');
 }
 

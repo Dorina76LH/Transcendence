@@ -331,10 +331,13 @@ class TwoFASetupView(APIView):
     def post(self, request):
         user = request.user
 
-        # Generate a new TOTP secret
-        secret = pyotp.random_base32()
-        user.otp_secret = secret
-        user.save(update_fields=['otp_secret'])
+        # Reuse pending secret if one exists but 2FA not yet confirmed
+        if user.otp_secret and not user.is_2fa_enabled:
+            secret = user.otp_secret
+        else:
+            secret = pyotp.random_base32()
+            user.otp_secret = secret
+            user.save(update_fields=['otp_secret'])
 
         # Build the provisionung URI for Google Authenticator
         totp = pyotp.TOTP(secret)
@@ -385,7 +388,7 @@ class TwoFAEnableView(APIView):
 
         # Verify the code against the stored secret
         totp = pyotp.TOTP(user.otp_secret)
-        if not totp.verify(otp_code):
+        if not totp.verify(otp_code, valid_window=1):
             return Response(
                 {'detail': 'Invalid or expired code.'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -431,7 +434,7 @@ class TwoFADisableView(APIView):
 
         # Verify the code against the stored secret
         totp = pyotp.TOTP(user.otp_secret)
-        if not totp.verify(otp_code):
+        if not totp.verify(otp_code, valid_window=1):
             return Response(
                 {'detail': 'Invalid or expired code.'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -491,7 +494,7 @@ class TwoFAVerifyView(APIView):
 
         # Verify the TOTP code against the stored secret
         totp = pyotp.TOTP(user.otp_secret)
-        if not totp.verify(otp_code):
+        if not totp.verify(otp_code, valid_window=1):
             return Response(
                 {'detail': 'Invalid or expired code.'},
                 status=status.HTTP_400_BAD_REQUEST

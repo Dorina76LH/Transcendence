@@ -35,6 +35,22 @@ export class UserService {
 		const refresh = localStorage.getItem('refresh');
 		return this.http.post(`${this.url}/auth/logout/`, { refresh });
 	}
+
+	setup2FA() {
+		return this.http.post(`${this.url}/auth/2fa/setup/`, {});
+	}
+
+	enable2FA(otpCode: string) {
+		return this.http.post(`${this.url}/auth/2fa/enable/`, { otp_code: otpCode });
+	}
+
+	disable2FA(otpCode: string) {
+		return this.http.post(`${this.url}/auth/2fa/disable/`, { otp_code: otpCode });
+	}
+
+	verify2FA(preAuthToken: string, otpCode: string) {
+		return this.http.post(`${this.url}/auth/2fa/verify/`, { pre_auth_token: preAuthToken, otp_code: otpCode });
+	}
 	refreshToken() {
 		const refresh = localStorage.getItem('refresh');
 		return this.http.post(`${this.url}/auth/token/refresh/`, { refresh });

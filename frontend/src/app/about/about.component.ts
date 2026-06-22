@@ -1,9 +1,10 @@
 import { RouterLink } from "@angular/router";
+import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
 
 @Component({
 	selector: 'app-chat',
-	imports: [RouterLink],
+	imports: [RouterLink, CommonModule],
 	template: `
 <header>
 	<nav class="navbar navbar-expand-lg navbar-dark">
@@ -35,8 +36,10 @@ import { Component } from "@angular/core";
 					</li>
 				</ul>
 				<div class="d-flex gap-2">
-					<a routerLink="/login" class="btn btn-secondary">Login</a>
-					<a routerLink="/register" class="btn btn-primary">Register</a>
+					<ng-container *ngIf="!isLoggedIn">
+						<a routerLink="/login" class="btn btn-secondary">Login</a>
+						<a routerLink="/register" class="btn btn-primary">Register</a>
+					</ng-container>
 				</div>
 			</div>
 		</div>
@@ -73,5 +76,6 @@ styleUrl: './about.css'
 })
 
 export class AboutComponent {
+	isLoggedIn = !!localStorage.getItem('token');
 
 }
