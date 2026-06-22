@@ -18,10 +18,10 @@ export class UserService {
 	register(firstName: string, surname: string, email: string, password: string) {
 		return this.http.post(`${this.url}/auth/register/`, { firstName, surname, email, password });
 	}
-	
+
 	getProfile() {
 		return this.http.get(`${this.url}/auth/me/`);
-}
+	}
 
 	getAdmin() {
 		return this.http.get(`${this.url}/admin/`, {headers : {isAdmin: 'adminState'}} );
@@ -51,13 +51,16 @@ export class UserService {
 	verify2FA(preAuthToken: string, otpCode: string) {
 		return this.http.post(`${this.url}/auth/2fa/verify/`, { pre_auth_token: preAuthToken, otp_code: otpCode });
 	}
+
 	refreshToken() {
 		const refresh = localStorage.getItem('refresh');
 		return this.http.post(`${this.url}/auth/token/refresh/`, { refresh });
 	}
+
 	exportGdprData() {
 		return this.http.get(`${this.url}/auth/me/export/`);
 	}
+
 	deleteAccount() {
 		return this.http.delete(`${this.url}/auth/me/`);
 	}
@@ -72,5 +75,9 @@ export class UserService {
 
 	getSentFriendRequests() {
 		return this.http.get<any[]>(`${this.url}/friends/friend-requests/sent/`);
+	}
+
+	socialLogin(provider: string, code: string) {
+		return this.http.post(`${this.url}/auth/social/`, { provider, code });
 	}
 }

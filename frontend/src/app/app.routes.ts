@@ -13,11 +13,13 @@ import { FriendsComponent } from './friends/friends.component';
 import { AboutComponent } from './about/about.component';
 import { ContactComponent } from './contact/contact.component';
 import { AdminComponent } from './admin/admin.component';
+import { OAuthCallbackComponent } from './auth-callback/auth-callback.component';
 
 export const routes: Routes = [
 	{path: '', component: HomeComponent},
 	{path: 'login', component:LoginComponent},
 	{path: 'register', component:RegisterComponent},
+	{path: 'auth/callback', component: OAuthCallbackComponent},
 	{path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]},
 	{path: 'settings', component: SettingsComponent, canActivate: [AuthGuard]},
 	{path: 'languages', component: LanguageComponent},

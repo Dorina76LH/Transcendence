@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { UserService } from '../user.service';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../navbar/navbar.component';
+import { environment } from '../../environments/environment';
 
 @Component({
 	selector: 'user-login',
@@ -38,6 +39,21 @@ import { NavbarComponent } from '../navbar/navbar.component';
 				</button>
 			</div>
 		</form>
+
+		<div class="d-flex align-items-center my-3">
+			<hr class="flex-grow-1">
+			<span class="mx-2 text-secondary" style="font-size: 0.85rem;">or</span>
+			<hr class="flex-grow-1">
+		</div>
+
+		<div class="d-grid gap-2">
+			<button type="button" class="btn btn-outline-secondary rounded-pill" (click)="loginWithGoogle()">
+				Login with Google
+			</button>
+			<button type="button" class="btn btn-outline-secondary rounded-pill" (click)="loginWith42()">
+				Login with 42
+			</button>
+		</div>
 		</ng-container>
 
 		<ng-container *ngIf="requires2fa">
@@ -113,7 +129,6 @@ export class LoginComponent implements OnDestroy {
 		this.loading = true;
 		this.userService.login(this.email, this.password).subscribe({
 			next: (response: any) => {
-				//console.log('LOGIN RESPONSE:', response);
 				this.loading = false;
 				if (response.requires_2fa && response.pre_auth_token) {
 					this.preAuthToken = response.pre_auth_token;
@@ -121,7 +136,6 @@ export class LoginComponent implements OnDestroy {
 					this.cdr.detectChanges();
 					this.startTotpTimer();
 					setTimeout(() => document.getElementById('otpInput')?.focus(), 0);
-					console.log('2FA REQUIRED, requires2fa=', this.requires2fa);
 				} else {
 					localStorage.setItem('token', response.access);
 					localStorage.setItem('refresh', response.refresh);
@@ -173,5 +187,29 @@ export class LoginComponent implements OnDestroy {
 		this.otpCode = '';
 		this.errorMessage = '';
 		this.loading = false;
+	}
+
+	private redirectOAuth(provider: string, authUrl: string) {
+		const state = crypto.randomUUID();
+		sessionStorage.setItem('oauth_state', state);
+		sessionStorage.setItem('oauth_provider', provider);
+		window.location.href = authUrl + `&state=${state}`;
+	}
+
+	loginWithGoogle() {
+		const url = `https://accounts.google.com/o/oauth2/v2/auth`
+			+ `?client_id=${environment.googleClientId}`
+			+ `&redirect_uri=${encodeURIComponent(environment.oauthRedirectUri)}`
+			+ `&response_type=code`
+			+ `&scope=${encodeURIComponent('email profile')}`;
+		this.redirectOAuth('google', url);
+	}
+
+	loginWith42() {
+		const url = `https://api.intra.42.fr/oauth/authorize`
+			+ `?client_id=${environment.fortyTwoClientId}`
+			+ `&redirect_uri=${encodeURIComponent(environment.oauthRedirectUri)}`
+			+ `&response_type=code`;
+		this.redirectOAuth('42', url);
 	}
 }
