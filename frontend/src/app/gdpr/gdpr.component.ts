@@ -47,10 +47,10 @@ import { UserService } from '../user.service';
 	<div class="Content">
 		<div>
 			<h1>GDPR Page</h1>
-			<h2>TThis page allows you to manage your data and respect privacy regulations.</h2> 
+			<h2>This page allows you to manage your data and respect privacy regulations.</h2> 
 			<div class="card bg-dark text-light border-secondary p-4 mx-auto" style="max-width: 500px;">
                 <p class="small text-muted mb-4">
-                    In compliance with the GDPR law, you have the right to download all data we store about your profile, or request its permanent erasure.
+                    In compliance with the GDPR law, you have the right to download the data we store about your profile, or request its permanent erasure.
                 </p>
                 <div class="d-flex flex-column gap-3">
                     <button class="btn btn-outline-info" (click)="onExport()">
