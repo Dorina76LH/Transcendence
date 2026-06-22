@@ -242,7 +242,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         # 'id', 'username', 'email', 'is_online', 'role', 'is_2fa_enabled' -> Injected directly from DB.
         # 'avatar_url' -> Injected from the method below.
-        fields = ('id', 'username', 'email', 'avatar_url', 'is_online', 'role', 'is_2fa_enabled')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'avatar_url', 'is_online', 'role', 'is_2fa_enabled')
         # Safety: these cannot be modified via this serializer.
         read_only_fields = ('id', 'username', 'role', 'is_2fa_enabled')
     

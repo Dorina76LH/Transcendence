@@ -69,29 +69,29 @@ from .views import RegisterView, LoginView, LogoutView, MeView, TwoFASetupView, 
 urlpatterns = [
     # -------------------------------------------------------------------------
     # 1. CREATE : Register a new user
-    # POST /api/users/register/
+    # POST /api/auth/register/
     # -------------------------------------------------------------------------
     path('register/', RegisterView.as_view(), name='register'),
 
     # -------------------------------------------------------------------------
     # 2. AUTH : Login (Get Tokens) & Logout (Blacklist)
-    # POST /api/users/login/
-    # POST /api/users/logout/
+    # POST /api/auth/login/
+    # POST /api/auth/logout/
     # -------------------------------------------------------------------------
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
 
     # -------------------------------------------------------------------------
     # 3. READ / UPDATE / DELETE : The "Me" Endpoint
-    # GET    /api/users/me/ -> Read my profile
-    # PATCH  /api/users/me/ -> Update my profile (Partial)
-    # DELETE /api/users/me/ -> Delete my account
+    # GET    /api/auth/me/ -> Read my profile
+    # PATCH  /api/auth/me/ -> Update my profile (Partial)
+    # DELETE /api/auth/me/ -> Delete my account
     # -------------------------------------------------------------------------
     path('me/', MeView.as_view(), name='user_me'),
 
     # -------------------------------------------------------------------------
     # 4. TOKEN MANAGEMENT : Refresh the session
-    # POST /api/users/token/refresh/
+    # POST /api/auth/token/refresh/
     # -------------------------------------------------------------------------
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
