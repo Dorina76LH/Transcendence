@@ -191,6 +191,7 @@ export class LoginComponent implements OnDestroy {
 				} else {
 					this.errorMessage = 'Invalid or expired code. Please try again.';
 				}
+				this.cdr.detectChanges();
 			}
 		});
 	}
