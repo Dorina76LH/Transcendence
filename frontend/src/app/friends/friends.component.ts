@@ -39,8 +39,13 @@ export interface Friendship {
 					<li class="nav-item"><a routerLink="/friends" class="nav-link">Friends</a></li>
 				</ul>
 				<div class="d-flex gap-2">
-					<a routerLink="/login" class="btn btn-secondary">Login</a>
-					<a routerLink="/register" class="btn btn-primary">Register</a>
+					<ng-container *ngIf="isLoggedIn">
+						<button (click)="logout()" class="btn btn-danger">Logout</button>
+					</ng-container>
+					<ng-container *ngIf="!isLoggedIn">
+						<a routerLink="/login" class="btn btn-secondary">Login</a>
+						<a routerLink="/register" class="btn btn-primary">Register</a>
+					</ng-container>
 				</div>
 			</div>
 		</div>
@@ -92,8 +97,24 @@ export class FriendsComponent implements OnInit {
     selectedFriend: Friendship | null = null;
     loading = true;
     error = '';
+    isLoggedIn = !!localStorage.getItem('token');
 
     constructor(private userService: UserService, private router: Router) {}
+
+    logout() {
+        this.userService.logout().subscribe({
+            next: () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('refresh');
+                this.router.navigate(['/login']);
+            },
+            error: () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('refresh');
+                this.router.navigate(['/login']);
+            }
+        });
+    }
     ngOnInit() {
         this.userService.getUserFriends().subscribe({
             next: (data: any) => {

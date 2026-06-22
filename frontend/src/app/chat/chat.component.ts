@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { UserService } from '../user.service';
 
 @Component({
 	selector: 'app-chat',
@@ -37,8 +38,13 @@ import { CommonModule } from '@angular/common';
 					</li>
 				</ul>
 				<div class="d-flex gap-2">
-					<a routerLink="/login" class="btn btn-secondary">Login</a>
-					<a routerLink="/register" class="btn btn-primary">Register</a>
+					<ng-container *ngIf="isLoggedIn">
+						<button (click)="logout()" class="btn btn-danger">Logout</button>
+					</ng-container>
+					<ng-container *ngIf="!isLoggedIn">
+						<a routerLink="/login" class="btn btn-secondary">Login</a>
+						<a routerLink="/register" class="btn btn-primary">Register</a>
+					</ng-container>
 				</div>
 			</div>
 		</div>
@@ -97,6 +103,24 @@ styleUrl: './chat.css',
 })
 export class ChatComponent {
 	selectedFriend = '';
+	isLoggedIn = !!localStorage.getItem('token');
+
+	constructor(private userService: UserService, private router: Router) {}
+
+	logout() {
+		this.userService.logout().subscribe({
+			next: () => {
+				localStorage.removeItem('token');
+				localStorage.removeItem('refresh');
+				this.router.navigate(['/login']);
+			},
+			error: () => {
+				localStorage.removeItem('token');
+				localStorage.removeItem('refresh');
+				this.router.navigate(['/login']);
+			}
+		});
+	}
 
 	selectFriend(name: string) {
 		this.selectedFriend = name;

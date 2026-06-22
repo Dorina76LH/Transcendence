@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 // gives access to *ngIf
@@ -46,8 +46,13 @@ import { UserService } from '../user.service';
 					</li>
 				</ul>
 				<div class="d-flex gap-2">
-					<a routerLink="/login" class="btn btn-secondary">Login</a>
-					<a routerLink="/register" class="btn btn-primary">Register</a>
+					<ng-container *ngIf="isLoggedIn">
+						<button (click)="logout()" class="btn btn-danger">Logout</button>
+					</ng-container>
+					<ng-container *ngIf="!isLoggedIn">
+						<a routerLink="/login" class="btn btn-secondary">Login</a>
+						<a routerLink="/register" class="btn btn-primary">Register</a>
+					</ng-container>
 				</div>
 			</div>
 		</div>
@@ -160,7 +165,24 @@ export class SettingsComponent implements OnInit, OnDestroy {
 	// instead of doing it manually we inject dependencies.
 	// angular has an automatical system which handles this for us.
 	// we just need to declare what we need within the parameters of constructor.
-	constructor(private userService: UserService, private cdr: ChangeDetectorRef) {}
+	isLoggedIn = !!localStorage.getItem('token');
+
+	constructor(private userService: UserService, private router: Router, private cdr: ChangeDetectorRef) {}
+
+	logout() {
+		this.userService.logout().subscribe({
+			next: () => {
+				localStorage.removeItem('token');
+				localStorage.removeItem('refresh');
+				this.router.navigate(['/login']);
+			},
+			error: () => {
+				localStorage.removeItem('token');
+				localStorage.removeItem('refresh');
+				this.router.navigate(['/login']);
+			}
+		});
+	}
 
 	ngOnInit() {
 		document.body.classList.toggle('dark-mode', this.isDarkMode);

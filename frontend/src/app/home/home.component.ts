@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { UserService } from '../user.service';
 
 @Component({
 	selector: 'app-home',
@@ -36,6 +37,9 @@ import { CommonModule } from '@angular/common';
 					</li>
 				</ul>
 				<div class="d-flex gap-2">
+					<ng-container *ngIf="isLoggedIn">
+						<button (click)="logout()" class="btn btn-danger">Logout</button>
+					</ng-container>
 					<ng-container *ngIf="!isLoggedIn">
 						<a routerLink="/login" class="btn btn-secondary">Login</a>
 						<a routerLink="/register" class="btn btn-primary">Register</a>
@@ -131,5 +135,22 @@ import { CommonModule } from '@angular/common';
 })
 export class HomeComponent {
 	isLoggedIn = !!localStorage.getItem('token');
+
+	constructor(private userService: UserService, private router: Router) {}
+
+	logout() {
+		this.userService.logout().subscribe({
+			next: () => {
+				localStorage.removeItem('token');
+				localStorage.removeItem('refresh');
+				this.router.navigate(['/login']);
+			},
+			error: () => {
+				localStorage.removeItem('token');
+				localStorage.removeItem('refresh');
+				this.router.navigate(['/login']);
+			}
+		});
+	}
 }
 

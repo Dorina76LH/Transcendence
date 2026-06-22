@@ -38,10 +38,13 @@ import { Router } from '@angular/router';
 					</li>
 				</ul>
 				<div class="d-flex gap-2">
-					<div class="d-flex gap-2">
+					<ng-container *ngIf="isLoggedIn">
 						<button (click)="logout()" class="btn btn-danger">Logout</button>
-					</div>
-					<a routerLink="/register" class="btn btn-primary">Register</a>
+					</ng-container>
+					<ng-container *ngIf="!isLoggedIn">
+						<a routerLink="/login" class="btn btn-secondary">Login</a>
+						<a routerLink="/register" class="btn btn-primary">Register</a>
+					</ng-container>
 				</div>
 			</div>
 		</div>
@@ -69,6 +72,7 @@ styleUrl: './profile.css',
 export class ProfileComponent implements OnInit {
 	profile: any = null;
 	errorMessage = '';
+	isLoggedIn = !!localStorage.getItem('token');
 
 	constructor(private userService: UserService, private router: Router, private cdr: ChangeDetectorRef) {}
 
