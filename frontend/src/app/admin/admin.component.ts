@@ -18,7 +18,7 @@ interface LoggedUser {
       <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
           <a routerLink="/" class="nav-link">
-            <strong>TRANSCENDENCE</strong>
+            <strong>TRANSCENDENCE ADMIN</strong>
           </a>
 
           <div class="ms-auto d-flex gap-2">
@@ -32,7 +32,6 @@ interface LoggedUser {
 
     <main class="AdminPage" *ngIf="isAdmin; else accessDenied">
       <section class="admin-content">
-        <h1>Admin panel</h1>
         <app-admin-dashboard></app-admin-dashboard>
       </section>
     </main>
