@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transcendence — API Test</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a0a2e;
+      color: #e0d0ff;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #b06aff;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      color: #7a5a99;
+      margin-bottom: 40px;
+      font-size: 0.9rem;
+    }
+
+    .section-title {
+      width: 100%;
+      max-width: 1100px;
+      font-size: 0.75rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #5a3a7a;
+      margin: 32px 0 12px 0;
+      padding-left: 10px;
+      border-left: 3px solid #7a2aff;
+    }
+
+    .cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .card {
+      background: #2a1245;
+      border: 1px solid #5a2a8a;
+      border-radius: 16px;
+      padding: 28px;
+      width: 300px;
+      box-shadow: 0 0 20px rgba(180, 100, 255, 0.15);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      color: #c080ff;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #5a2a8a;
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card p.description {
+      color: #7a5a99;
+      font-size: 0.82rem;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      color: #9a7acc;
+      margin-bottom: 4px;
+      margin-top: 12px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 14px;
+      background: #1a0a2e;
+      border: 1px solid #5a2a8a;
+      border-radius: 8px;
+      color: #e0d0ff;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus { border-color: #b06aff; }
+
+    button {
+      width: 100%;
+      margin-top: 16px;
+      padding: 11px;
+      background: #7a2aff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-weight: 600;
+    }
+
+    button:hover { background: #9a4aff; }
+    button.danger { background: #8a1a3a; }
+    button.danger:hover { background: #aa2a4a; }
+    button.warning { background: #7a4a10; }
+    button.warning:hover { background: #9a6a20; }
+    button.oauth { background: #007bb5; }
+    button.oauth:hover { background: #0099e0; }
+    button.info { background: #1a6a8a; }
+    button.info:hover { background: #2a8aaa; }
+
+    .result {
+      margin-top: 14px;
+      padding: 12px;
+      background: #1a0a2e;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      min-height: 60px;
+      word-break: break-all;
+      border: 1px solid #3a1a5a;
+      white-space: pre-wrap;
+      flex-grow: 1;
+    }
+
+    .result.success { border-color: #2a8a4a; color: #6aff9a; }
+    .result.error   { border-color: #8a2a2a; color: #ff6a6a; }
+
+    .token-display {
+      background: #2a1245;
+      border: 1px solid #5a2a8a;
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 8px;
+    }
+
+    .token-box {
+      background: #1a0a2e;
+      border: 1px solid #3a1a5a;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.72rem;
+      word-break: break-all;
+      color: #9a7acc;
+      min-height: 40px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      margin-left: auto;
+    }
+    .status.connected    { background: #1a4a2a; color: #6aff9a; }
+    .status.disconnected { background: #4a1a1a; color: #ff6a6a; }
+
+    .verb {
+      font-size: 0.65rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .verb.post   { background: #1a3a5a; color: #6ab0ff; }
+    .verb.get    { background: #1a4a2a; color: #6aff9a; }
+    .verb.patch  { background: #3a3a10; color: #ffdd6a; }
+    .verb.delete { background: #4a1a1a; color: #ff6a6a; }
+  </style>
+</head>
+<body>
+
+  <h1>TRANSCENDENCE</h1>
+  <p class="subtitle">API Test Page — Django REST + JWT</p>
+
+  <p class="section-title">OAuth 2.0 — Social Authentication</p>
+  <div class="cards" style="margin-bottom: 20px;">
+    <div class="card" style="width: 100%; max-width: 1100px;">
+      <h2><span class="verb post">POST</span> /api/auth/social/</h2>
+      <p class="description">Simule l'envoi du code d'authentification reçu d'un fournisseur OAuth (42 ou Google).</p>
+      
+      <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end;">
+        <div style="flex: 1; min-width: 200px;">
+          <label>Provider</label>
+          <select id="oauth-provider">
+            <option value="42">42 Intra</option>
+            <option value="google">Google</option>
+          </select>
+        </div>
+        <div style="flex: 3; min-width: 300px;">
+          <label>OAuth Authorization Code</label>
+          <input type="text" id="oauth-code" placeholder="Colle le paramètre ?code= obtenu après la connexion">
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+          <button class="oauth" onclick="sendOAuth()">Verify Code</button>
+        </div>
+      </div>
+      <div class="result" id="oauth-result" style="margin-top: 20px;">Waiting for actions...</div>
+    </div>
+  </div>
+
+  <p class="section-title">Auth — Register / Login / Logout</p>
+  <div class="cards">
+    <div class="card">
+      <h2><span class="verb post">POST</span> Register</h2>
+      <p class="description">Creates a new user account.</p>
+      <label>Username</label><input type="text" id="reg-username" placeholder="Username">
+      <label>Email</label><input type="email" id="reg-email" placeholder="Email">
+      <label>Password</label><input type="password" id="reg-password" placeholder="Min 8 chars">
+      <button onclick="register()">Register</button>
+      <div class="result" id="reg-result">Waiting...</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="verb post">POST</span> Login</h2>
+      <p class="description">Validates credentials.</p>
+      <label>Email</label><input type="text" id="login-username" placeholder="marvin@student.42.fr">
+      <label>Password</label><input type="password" id="login-password" placeholder="Password">
+      <button onclick="login()">Login</button>
+      <div class="result" id="login-result">Waiting...</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="verb post">POST</span> Logout <span class="status disconnected" id="auth-status">Disconnected</span></h2>
+      <p class="description">Blacklists the refresh token.</p>
+      <button class="danger" onclick="logout()">Logout</button>
+      <div class="result" id="logout-result">Waiting...</div>
+    </div>
+  </div>
+
+  <p class="section-title">Profile — Read / Update / Delete / GDPR Portability</p>
+  <div class="cards">
+    <div class="card">
+      <h2><span class="verb get">GET</span> My Profile</h2>
+      <p class="description">Fetches user data.</p>
+      <button onclick="getMe()">Get My Profile</button>
+      <div class="result" id="me-result">Waiting...</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="verb patch">PATCH</span> Update Profile</h2>
+      <p class="description">Partially updates profile.</p>
+      <label>New Email</label><input type="email" id="patch-email">
+      <label>New First Name</label><input type="text" id="patch-firstname">
+      <label>New Last Name</label><input type="text" id="patch-lastname">
+      <button class="warning" onclick="updateMe()">Update Profile</button>
+      <div class="result" id="patch-result">Waiting...</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="verb get">GET</span> GDPR Export</h2>
+      <p class="description">Downloads monolithic data bundle (Users, Friends, Chat) as a local JSON file.</p>
+      <button class="info" onclick="getExport()">Export My Data</button>
+      <div class="result" id="export-result">Waiting...</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="verb delete">DELETE</span> Delete Account</h2>
+      <p class="description">Permanently deletes account.</p>
+      <button class="danger" onclick="deleteMe()">Delete My Account</button>
+      <div class="result" id="delete-result">Waiting...</div>
+    </div>
+  </div>
+
+  <p class="section-title">Current JWT Tokens</p>
+  <div class="token-display">
+    <label>Access Token</label><div class="token-box" id="access-token">No token yet</div>
+    <label style="margin-top:14px;">Refresh Token</label><div class="token-box" id="refresh-token">No token yet</div>
+  </div>
+
+  <script>
+    const API = 'https://localhost:8443/api/auth';
+
+    let accessToken  = null;
+    let refreshToken = null;
+
+    function setResult(id, message, isSuccess) {
+      const el = document.getElementById(id);
+      el.textContent = JSON.stringify(message, null, 2);
+      el.className = 'result ' + (isSuccess ? 'success' : 'error');
+    }
+
+    function updateTokenDisplay() {
+      document.getElementById('access-token').textContent  = accessToken  || 'No token yet';
+      document.getElementById('refresh-token').textContent = refreshToken || 'No token yet';
+      const status = document.getElementById('auth-status');
+      if (accessToken) {
+        status.textContent = 'Connected'; status.className = 'status connected';
+      } else {
+        status.textContent = 'Disconnected'; status.className = 'status disconnected';
+      }
+    }
+
+    function authHeaders() {
+      return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` };
+    }
+
+    function requireLogin(resultId) {
+      if (!accessToken) { setResult(resultId, { error: 'No token — please login first' }, false); return false; }
+      return true;
+    }
+
+    async function sendOAuth() {
+      const provider = document.getElementById('oauth-provider').value;
+      const code = document.getElementById('oauth-code').value;
+
+      try {
+        const response = await fetch(`${API}/social/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider, code })
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          accessToken  = data.access;
+          refreshToken = data.refresh;
+          updateTokenDisplay();
+          setResult('oauth-result', { message: 'OAuth Login successful!', tokens: data }, true);
+        } else {
+          setResult('oauth-result', data, false);
+        }
+      } catch (err) {
+        setResult('oauth-result', { error: err.message, tip: "Assure-toi d'avoir accepté le certificat HTTPS auto-signé sur https://localhost:8443" }, false);
+      }
+    }
+
+    async function register() {
+      const username = document.getElementById('reg-username').value;
+      const email    = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      try {
+        const response = await fetch(`${API}/register/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, email, password }) });
+        const data = await response.json(); setResult('reg-result', data, response.ok);
+      } catch (err) { setResult('reg-result', { error: err.message }, false); }
+    }
+
+    async function login() {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      try {
+        const response = await fetch(`${API}/login/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: username, password }) });
+        const data = await response.json();
+        if (response.ok) { accessToken = data.access; refreshToken = data.refresh; updateTokenDisplay(); setResult('login-result', { message: 'Login successful !' }, true); }
+        else { setResult('login-result', data, false); }
+      } catch (err) { setResult('login-result', { error: err.message }, false); }
+    }
+
+    async function logout() {
+      if (!requireLogin('logout-result')) return;
+      try {
+        const response = await fetch(`${API}/logout/`, { method: 'POST', headers: authHeaders(), body: JSON.stringify({ refresh: refreshToken }) });
+        if (response.ok || response.status === 205) { accessToken = null; refreshToken = null; updateTokenDisplay(); setResult('logout-result', { message: 'Logged out.' }, true); }
+        else { const data = await response.json(); setResult('logout-result', data, false); }
+      } catch (err) { setResult('logout-result', { error: err.message }, false); }
+    }
+
+    async function getMe() {
+      if (!requireLogin('me-result')) return;
+      try {
+        const response = await fetch(`${API}/me/`, { method: 'GET', headers: authHeaders() });
+        const data = await response.json(); setResult('me-result', data, response.ok);
+      } catch (err) { setResult('me-result', { error: err.message }, false); }
+    }
+
+    async function updateMe() {
+      if (!requireLogin('patch-result')) return;
+      const email = document.getElementById('patch-email').value;
+      const firstName = document.getElementById('patch-firstname').value;
+      const lastName = document.getElementById('patch-lastname').value;
+      const payload = {};
+      if (email) payload.email = email; if (firstName) payload.first_name = firstName; if (lastName) payload.last_name = lastName;
+      try {
+        const response = await fetch(`${API}/me/`, { method: 'PATCH', headers: authHeaders(), body: JSON.stringify(payload) });
+        const data = await response.json(); setResult('patch-result', data, response.ok);
+      } catch (err) { setResult('patch-result', { error: err.message }, false); }
+    }
+
+    async function deleteMe() {
+      if (!requireLogin('delete-result')) return;
+      try {
+        const response = await fetch(`${API}/me/`, { method: 'DELETE', headers: authHeaders() });
+        if (response.status === 204) { accessToken = null; refreshToken = null; updateTokenDisplay(); setResult('delete-result', { message: 'Deleted.' }, true); }
+        else { const data = await response.json(); setResult('delete-result', data, false); }
+      } catch (err) { setResult('delete-result', { error: err.message }, false); }
+    }
+
+    async function getExport() {
+      if (!requireLogin('export-result')) return;
+      try {
+        const response = await fetch(`${API}/me/export/`, { method: 'GET', headers: authHeaders() });
+        const data = await response.json();
+        
+        if (response.ok) {
+          setResult('export-result', { message: 'Compilation successful! Download triggered.' }, true);
+          
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `gdpr_export_${data.username || 'profile'}.json`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+        } else {
+          setResult('export-result', data, false);
+        }
+      } catch (err) { 
+        setResult('export-result', { error: err.message }, false); 
+      }
+    }
+  </script>
+</body>
+</html>
