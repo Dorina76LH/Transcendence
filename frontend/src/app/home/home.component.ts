@@ -1,54 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { UserService } from '../user.service';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
 	selector: 'app-home',
-	imports: [RouterLink, CommonModule],
+	imports: [NavbarComponent],
 	template: `
-<header>
-	<nav class="navbar navbar-expand-lg navbar-dark">
-		<div class="container-fluid">
-			<a routerLink="/" class="nav-link">
-				<strong>TRANSCENDENCE</strong>
-			</a>
-			<button class="navbar-toggler" type="button" 
-						data-bs-toggle="collapse" 
-						data-bs-target="#navbar" 
-						aria-controls="navbar" 
-						aria-expanded="false" 
-						aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbar">
-				<ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
-					<li class="nav-item hover-underline">
-						<a routerLink="/profile" class="nav-link">Profile</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/settings" class="nav-link">Settings</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/chat" class="nav-link">Chat</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/friends" class="nav-link">Friends</a>
-					</li>
-				</ul>
-				<div class="d-flex gap-2">
-					<ng-container *ngIf="isLoggedIn">
-						<button (click)="logout()" class="btn btn-danger">Logout</button>
-					</ng-container>
-					<ng-container *ngIf="!isLoggedIn">
-						<a routerLink="/login" class="btn btn-secondary">Login</a>
-						<a routerLink="/register" class="btn btn-primary">Register</a>
-					</ng-container>
-				</div>
-			</div>
-		</div>
-	</nav>
-</header>
+<app-navbar></app-navbar>
 <main class="main">
 	<div class="content">
 	<!-- <h1> Welcome to our project !</h1>
@@ -113,44 +70,24 @@ import { UserService } from '../user.service';
 			<img src="favicon.ico" style="min-height: calc(20vh - 56px);">
 			<h1>Welcome to our <b><i>Transcendence</i></b> project !</h1>
 			<h2 class="mt-4">This project is the biggest project of the common core in the 42 shcool, one of the last projects.</h2>
-			<h4 class="mt-3"><i>Transcendence</i> is a group project, which is intended to boost our 
+			<h4 class="mt-3"><i>Transcendence</i> is a group project, which is intended to boost our
 				creativity, self-confidence, adaptability to new technologies, and teamwork skills.</h4>
 			<h4 class="mt-3">In this project, the main goal is to make a website, which is made by mixing frontend and backend abilities.</h4>
 			<h4 class="mt-2">For the frontend, we used Angular, a framework to make a website that is communicating with the backend easily.</h4>
 			<h4 class="mt-2">This framework is mainly used for its ability to make components, which are the pages themselves
 				for this project, since the structure of a page in this project is written inside of a component.</h4>
-			<h4 class="mt-2">For the backend, we used the Django framework, which is a framework that is using the python 
-				language. We mainly used Django for the communication between the database and the frontend, also, we have 
+			<h4 class="mt-2">For the backend, we used the Django framework, which is a framework that is using the python
+				language. We mainly used Django for the communication between the database and the frontend, also, we have
 				an admin panel that is used to monitor everything on the website.</h4>
-			<h4 class="mt-2">Also, we used a framework for the database that is PostGreSQL, that allows us to have a panel, 
+			<h4 class="mt-2">Also, we used a framework for the database that is PostGreSQL, that allows us to have a panel,
 				that makes us able to add new tables and new values to the table with a graphical
 				 user interface, which makes work even easier.</h4>
-			<h4 class="mt-2">This project's goal is to make a completely working chat between 2 users, that are friends, 
-				making a fully working login and register system, and making a complete profile customization and overview 
+			<h4 class="mt-2">This project's goal is to make a completely working chat between 2 users, that are friends,
+				making a fully working login and register system, and making a complete profile customization and overview
 				system, which makes the website user friendly, easy to use, and instinctive.</h4>
 		</div>
 	</div>
 </main>`,
 	styleUrl: './home.css'
 })
-export class HomeComponent {
-	isLoggedIn = !!localStorage.getItem('token');
-
-	constructor(private userService: UserService, private router: Router) {}
-
-	logout() {
-		this.userService.logout().subscribe({
-			next: () => {
-				localStorage.removeItem('token');
-				localStorage.removeItem('refresh');
-				this.router.navigate(['/login']);
-			},
-			error: () => {
-				localStorage.removeItem('token');
-				localStorage.removeItem('refresh');
-				this.router.navigate(['/login']);
-			}
-		});
-	}
-}
-
+export class HomeComponent {}

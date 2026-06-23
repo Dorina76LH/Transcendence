@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../user.service';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 export interface FriendUser {
     id: number;
@@ -17,40 +18,9 @@ export interface Friendship {
 
 @Component ({
 	selector: "app-root",
-	imports: [RouterLink, CommonModule],
+	imports: [CommonModule, NavbarComponent],
 	template: `
-<header>
-	<nav class="navbar navbar-expand-lg navbar-dark">
-		<div class="container-fluid">
-			<a routerLink="/" class="nav-link"><strong>TRANSCENDENCE</strong></a>
-			<button class="navbar-toggler" type="button"
-					data-bs-toggle="collapse"
-					data-bs-target="#navbar"
-					aria-controls="navbar"
-					aria-expanded="false"
-					aria-label="Toggle navigation">
-			  <span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbar">
-				<ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
-					<li class="nav-item"><a routerLink="/profile" class="nav-link">Profile</a></li>
-					<li class="nav-item"><a routerLink="/settings" class="nav-link">Settings</a></li>
-					<li class="nav-item"><a routerLink="/chat" class="nav-link">Chat</a></li>
-					<li class="nav-item"><a routerLink="/friends" class="nav-link">Friends</a></li>
-				</ul>
-				<div class="d-flex gap-2">
-					<ng-container *ngIf="isLoggedIn">
-						<button (click)="logout()" class="btn btn-danger">Logout</button>
-					</ng-container>
-					<ng-container *ngIf="!isLoggedIn">
-						<a routerLink="/login" class="btn btn-secondary">Login</a>
-						<a routerLink="/register" class="btn btn-primary">Register</a>
-					</ng-container>
-				</div>
-			</div>
-		</div>
-	</nav>
-</header>
+<app-navbar></app-navbar>
 <main class="d-flex justify-content-center py-5" style="min-height: calc(100vh - 56px);">
 	<div class="card border-secondary p-4 w-100" style="max-width: 1000px;">
 		<h4 class="mb-3">Friend list</h4>
@@ -89,32 +59,16 @@ export interface Friendship {
 	</div>
 </div>
 </main>`,
-styleUrl: "./friends.css",
+	styleUrl: "./friends.css",
 })
-
 export class FriendsComponent implements OnInit {
     friends: Friendship[] = [];
     selectedFriend: Friendship | null = null;
     loading = true;
     error = '';
-    isLoggedIn = !!localStorage.getItem('token');
 
     constructor(private userService: UserService, private router: Router) {}
 
-    logout() {
-        this.userService.logout().subscribe({
-            next: () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('refresh');
-                this.router.navigate(['/login']);
-            },
-            error: () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('refresh');
-                this.router.navigate(['/login']);
-            }
-        });
-    }
     ngOnInit() {
         this.userService.getUserFriends().subscribe({
             next: (data: any) => {
@@ -128,9 +82,11 @@ export class FriendsComponent implements OnInit {
             }
         });
 	}
+
     toggleMenu(friendship: Friendship) {
         this.selectedFriend = this.selectedFriend?.id === friendship.id ? null : friendship;
     }
+
     action(type: string, friendship: Friendship) {
         switch (type) {
             case 'profile':

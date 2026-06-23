@@ -1,55 +1,14 @@
 import { Component } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { UserService } from '../user.service';
+import { Router } from '@angular/router';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
 	selector: 'app-chat',
-	imports: [RouterLink, FormsModule, CommonModule],
+	imports: [FormsModule, CommonModule, NavbarComponent],
 	template: `
-<header>
-	<nav class="navbar navbar-expand-lg navbar-dark">
-		<div class="container-fluid">
-			<a routerLink="/" class="nav-link">
-				<strong>TRANSCENDENCE</strong>
-			</a>
-			<button class="navbar-toggler" type="button" 
-						data-bs-toggle="collapse" 
-						data-bs-target="#navbar" 
-						aria-controls="navbar" 
-						aria-expanded="false" 
-						aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbar">
-				<ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
-					<li class="nav-item hover-underline">
-						<a routerLink="/profile" class="nav-link">Profile</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/settings" class="nav-link">Settings</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/chat" class="nav-link">Chat</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/friends" class="nav-link">Friends</a>
-					</li>
-				</ul>
-				<div class="d-flex gap-2">
-					<ng-container *ngIf="isLoggedIn">
-						<button (click)="logout()" class="btn btn-danger">Logout</button>
-					</ng-container>
-					<ng-container *ngIf="!isLoggedIn">
-						<a routerLink="/login" class="btn btn-secondary">Login</a>
-						<a routerLink="/register" class="btn btn-primary">Register</a>
-					</ng-container>
-				</div>
-			</div>
-		</div>
-	</nav>
-</header>
+<app-navbar></app-navbar>
 <main class="main">
 	<div class="container-fluid h-100">
 		<div class="row h-100">
@@ -99,36 +58,15 @@ import { UserService } from '../user.service';
 		</div>
 	</div>
 </main>`,
-styleUrl: './chat.css',
+	styleUrl: './chat.css',
 })
 export class ChatComponent {
 	selectedFriend = '';
-	isLoggedIn = !!localStorage.getItem('token');
-
-	constructor(private userService: UserService, private router: Router) {}
-
-	logout() {
-		this.userService.logout().subscribe({
-			next: () => {
-				localStorage.removeItem('token');
-				localStorage.removeItem('refresh');
-				this.router.navigate(['/login']);
-			},
-			error: () => {
-				localStorage.removeItem('token');
-				localStorage.removeItem('refresh');
-				this.router.navigate(['/login']);
-			}
-		});
-	}
-
-	selectFriend(name: string) {
-		this.selectedFriend = name;
-	}
-
 	private socket!: WebSocket;
 	messages: string[] = [];
 	inputMessage = '';
+
+	constructor(private router: Router) {}
 
 	ngOnInit() {
 		this.socket = new WebSocket('wss://localhost:8443/ws/chat/test');
@@ -137,27 +75,32 @@ export class ChatComponent {
 			this.messages.push(data.message);
 		};
 	}
-	sendMessage() {
-	const messageToSend = this.inputMessage.trim();
-	if (messageToSend && this.selectedFriend) {
-		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-			const payload = {
-				message: messageToSend,
-				to: this.selectedFriend,
-				timestamp: new Date().toISOString()
-			};
-			this.socket.send(JSON.stringify(payload));
-			this.messages.push(`Me : ${messageToSend}`);
-			this.inputMessage = '';
-		} else {
-			console.log("Connection lost. Can't send the message.");
-		}
-	} else if (!this.selectedFriend) {
-		console.log("Choose a friend first.");
+
+	selectFriend(name: string) {
+		this.selectedFriend = name;
 	}
-}
+
+	sendMessage() {
+		const messageToSend = this.inputMessage.trim();
+		if (messageToSend && this.selectedFriend) {
+			if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+				const payload = {
+					message: messageToSend,
+					to: this.selectedFriend,
+					timestamp: new Date().toISOString()
+				};
+				this.socket.send(JSON.stringify(payload));
+				this.messages.push(`Me : ${messageToSend}`);
+				this.inputMessage = '';
+			} else {
+				console.log("Connection lost. Can't send the message.");
+			}
+		} else if (!this.selectedFriend) {
+			console.log("Choose a friend first.");
+		}
+	}
+
 	ngOnDestroy() {
 		this.socket.close();
 	}
 }
-

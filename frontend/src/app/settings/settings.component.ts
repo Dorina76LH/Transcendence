@@ -1,63 +1,15 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
-
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
-// gives access to *ngIf
-// CommonModule no longer needed with Angular 17+ @if syntax
-
-// gives access to [(ngModel)]
 import { FormsModule } from '@angular/forms';
-
-// for our services with setup2FA, enable2FA etc.
 import { UserService } from '../user.service';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
 	selector: 'user-settings',
-	imports: [RouterLink, FormsModule, CommonModule],
+	imports: [FormsModule, CommonModule, NavbarComponent],
 	template: `
-<header>
-	<nav class="navbar navbar-expand-lg navbar-dark">
-		<div class="container-fluid">
-			<a routerLink="/" class="nav-link">
-				<strong>TRANSCENDENCE</strong>
-			</a>
-			<button class="navbar-toggler" type="button" 
-						data-bs-toggle="collapse" 
-						data-bs-target="#navbar" 
-						aria-controls="navbar" 
-						aria-expanded="false" 
-						aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbar">
-				<ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
-					<li class="nav-item hover-underline">
-						<a routerLink="/profile" class="nav-link">Profile</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/settings" class="nav-link">Settings</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/chat" class="nav-link">Chat</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/friends" class="nav-link">Friends</a>
-					</li>
-				</ul>
-				<div class="d-flex gap-2">
-					<ng-container *ngIf="isLoggedIn">
-						<button (click)="logout()" class="btn btn-danger">Logout</button>
-					</ng-container>
-					<ng-container *ngIf="!isLoggedIn">
-						<a routerLink="/login" class="btn btn-secondary">Login</a>
-						<a routerLink="/register" class="btn btn-primary">Register</a>
-					</ng-container>
-				</div>
-			</div>
-		</div>
-	</nav>
-</header>
+<app-navbar></app-navbar>
 <main class="Settings">
 	<div class="Content">
 		<div>
@@ -68,7 +20,6 @@ import { UserService } from '../user.service';
 			<button class="btn btn-secondary me-3" (click)="toggleDarkMode()">
 				{{ isDarkMode ? ' ☀️ ' : ' 🌙 ' }}
 			</button>
-			<!-- <a routerLink="/profile-settings" class="btn btn-secondary"> ⚙️ </a> -->
 		</div>
 
 		<!-- 2FA SECTION -->
@@ -77,14 +28,10 @@ import { UserService } from '../user.service';
 
 			<span *ngIf="profileLoading" class="spinner-border spinner-border-sm me-2"></span>
 
-			<!-- Success / error messages -->
 			<p *ngIf="twoFaMessage" class="text-success">{{ twoFaMessage }}</p>
 			<p *ngIf="twoFaError" class="text-danger">{{ twoFaError }}</p>
 
-			<!-- 2FA is NOT enabled : show activation flow -->
 			<ng-container *ngIf="!profileLoading && !is2faEnabled">
-
-				<!-- Step 1 : button to generate QR code -->
 				<ng-container *ngIf="!qrCode">
 					<button class="btn btn-primary" [disabled]="setupLoading" (click)="startTwoFaSetup()">
 						<span *ngIf="setupLoading" class="spinner-border spinner-border-sm me-2"></span>
@@ -92,7 +39,6 @@ import { UserService } from '../user.service';
 					</button>
 				</ng-container>
 
-				<!-- Step 2 : QR code displayed after clicking "Enable 2FA" -->
 				<ng-container *ngIf="qrCode">
 					<p>Scan this QR code with Google Authenticator :</p>
 					<img [src]="qrCode" alt="QR Code 2FA" width="200" />
@@ -117,7 +63,6 @@ import { UserService } from '../user.service';
 				</ng-container>
 			</ng-container>
 
-			<!-- 2FA IS enabled : show deactivation flow -->
 			<ng-container *ngIf="!profileLoading && is2faEnabled">
 				<p class="text-success">2FA is currently active on your account.</p>
 				<div class="mt-2">
@@ -142,52 +87,26 @@ import { UserService } from '../user.service';
 
 	</div>
 </main>`,
-styleUrl: './settings.css',
-encapsulation: ViewEncapsulation.None,
+	styleUrl: './settings.css',
+	encapsulation: ViewEncapsulation.None,
 })
 export class SettingsComponent implements OnInit, OnDestroy {
 	isDarkMode = localStorage.getItem('darkMode') === 'true';
-
-	// --- 2FA state ---
-	is2faEnabled = false; // 2FA is active on this account ?
-	profileLoading = true; // true until getProfile() completes (prevents premature enable click)
-	qrCode: string | null = null; // received image, code QR(base64) received de 2fa/setup/
-	otpCode = ''; //  // 6 digit code, typed by user
-	twoFaMessage = ''; // success message
-	twoFaError = ''; // error message
+	is2faEnabled = false;
+	profileLoading = true;
+	qrCode: string | null = null;
+	otpCode = '';
+	twoFaMessage = '';
+	twoFaError = '';
 	totpSeconds = 30;
 	setupLoading = false;
 	confirmLoading = false;
 	private totpTimer: any;
 
-	// In settings.component.ts, we wanna use UserServices'methodes like setup2FA()
-	// we need to create an instance of Userservice for this.
-	// instead of doing it manually we inject dependencies.
-	// angular has an automatical system which handles this for us.
-	// we just need to declare what we need within the parameters of constructor.
-	isLoggedIn = !!localStorage.getItem('token');
-
 	constructor(private userService: UserService, private router: Router, private cdr: ChangeDetectorRef) {}
-
-	logout() {
-		this.userService.logout().subscribe({
-			next: () => {
-				localStorage.removeItem('token');
-				localStorage.removeItem('refresh');
-				this.router.navigate(['/login']);
-			},
-			error: () => {
-				localStorage.removeItem('token');
-				localStorage.removeItem('refresh');
-				this.router.navigate(['/login']);
-			}
-		});
-	}
 
 	ngOnInit() {
 		document.body.classList.toggle('dark-mode', this.isDarkMode);
-
-		// Fetch current profile to know if 2FA is already enabled
 		this.userService.getProfile().subscribe({
 			next: (user: any) => {
 				this.is2faEnabled = user.is_2fa_enabled;
@@ -223,15 +142,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
 		this.isDarkMode = !this.isDarkMode;
 		localStorage.setItem('darkMode', String(this.isDarkMode));
 		document.body.classList.toggle('dark-mode', this.isDarkMode);
-		console.log("The website is now on darkmode");
 	}
 
-	// Step 1: ask the server for a QR code to scan
-	// we delete the old success message if there is one
-	// we delete the old error message if there is one
-	// we send the POST /2fa/setup/ request to the server
-	// next:(..) The server's answer
-	// we store the the received QR code to display it on the HTML
 	startTwoFaSetup() {
 		this.twoFaMessage = '';
 		this.twoFaError = '';
@@ -251,10 +163,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
 		});
 	}
 
-	// Step 2: confirm the code from the authenticator app
-	// deletes the old success message
-	// deletes the old error message
-	// sends POST /2fa/enable/ with the typed code by user
 	confirmEnableTwoFa() {
 		this.twoFaMessage = '';
 		this.twoFaError = '';
@@ -276,12 +184,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
 		});
 	}
 
-	// Disable 2FA (requires a valid code too)
-	// why the branches : next ? error ?
-	// a http request can have 2 issues 
-		// the server answered successfully 
-		// the server answered with an error 
-	// its like the frontend version of try/except in python/django
 	confirmDisableTwoFa() {
 		this.twoFaMessage = '';
 		this.twoFaError = '';
