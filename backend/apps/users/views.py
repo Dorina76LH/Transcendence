@@ -85,6 +85,43 @@
 #?   Since we want to CUSTOMIZE the Login (to add is_online), we need the 
 #?   original Login "engine" to extend it. Without this import, we'd have 
 #?   to rewrite the entire login logic from scratch.
+#?
+#? VISUALIZING THE MONOLITHIC GDPR EXPORT FLOW
+#? -------------------------------------------
+#? When Angular requests an export, the view acts as a data compiler.
+#? Instead of hitting 1 table, it queries 3 different apps and bundles
+#? everything into a single, clean JSON "furniture".
+#?
+#?   [Angular GET Request]
+#?            │
+#?            ▼
+#?     ┌────────────────┐
+#?     │ UserExportView │ ──(1) Queries Profile & Social data ──> [PostgreSQL]
+#?     └────────────────┘ ──(2) Queries Network & Requests   ──> [PostgreSQL]
+#?            │           ──(3) Queries Chats & Sent Messages ──> [PostgreSQL]
+#?            ▼
+#?   ┌──────────────────┐
+#?   │ export_data ({}) │ <── Aggregates all Serializer.data results
+#?   └──────────────────┘
+#?            │
+#?            ▼
+#?   [Serialized Monolithic JSON Response] ──> Sent back to Angular
+#?
+#? THE JSON "FURNITURE" ARCHITECTURE (Dicts & Lists)
+#? -------------------------------------------------
+#? export_data = {                         <── The big main Object (The Furniture)
+#?     "id": 1, "username": "alice",...    <── Raw base profile data (Top shelves)
+#?     
+#?     "friends_data": {                   <── Drawer 1 (Network)
+#?          "active_friendships": [...],   <── Organizer A (List of friend objects)
+#?          "friend_requests_history": []  <── Organizer B (List of request history)
+#?     },
+#?     
+#?     "chat_data": {                      <── Drawer 2 (Communications)
+#?          "conversations_joined": [...], <── Organizer A (List of rooms joined)
+#?          "messages_sent": [...]         <── Organizer B (List of actual texts sent)
+#?     }
+#? }
 #? -----------------------------------------------------------------------------
 
 
@@ -112,7 +149,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 # 5. Local Experts (Custom Serializers)
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, PreAuthToken
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, PreAuthToken, UserExportSerializer
 
 # 5b. User model (needed to fetch user by id in TwoFAVerifyView)
 from .models import User
@@ -138,6 +175,17 @@ from django.conf import settings
 
 # 8. SocialAccount model to store provider + uid links
 from .models import SocialAccount
+
+# 9. Cross-App Models and Serializers for GDPR Monolithic Export
+from django.db.models import Q
+from apps.friends.models import Friendship, FriendRequest
+from apps.friends.serializer import FriendshipSerializer, FriendRequestSerializer
+from apps.chat.models import Conversation, Message
+from apps.chat.serializers import ConversationSerializer, MessageSerializer
+
+# 10. User model for get_or_create
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 
@@ -657,3 +705,73 @@ class SocialAuthView(APIView):
             extra=profile
         )
         return user
+
+
+#* ----------------------------------------------------------------------------
+#* UserExportView (MANUAL DRIVE - GDPR PORTABILITY)
+#* ----------------------------------------------------------------------------
+# Endpoint: GET /api/auth/me/export/
+#
+# ACTION:
+#   - READ: Extracts all account data into a single structured JSON.
+#
+# WHY APIVIEW?
+#   To fully comply with GDPR, this export must be a single monolithic JSON 
+#   containing data from multiple separate apps (Users, Chat, Friends).
+#   APIView gives us manual control to compile everything in one response.
+#
+# STEP-BY-STEP CHRONOLOGICAL FLOW:
+# --------------------------------
+#   1. PERMISSION CHECK  -> [IsAuthenticated] shields the view. DRF intercepts 
+#                           the request and ensures a valid JWT Token is present.
+#   2. USER EXTRACTION   -> 'request.user' extracts the precise User object 
+#                           from the token, preventing any data leak or cross-user access.
+#   3. PROFILE CORNER    -> Baseline User & Social Account data is passed to the 
+#                           Master Serializer to initialize the 'export_data' dictionary.
+#   4. FRIENDS CORNER    -> Queries target friendships and requests using 'Q' objects (OR filtering).
+#                           The filtered data is sent to the serializers (.data) and injected
+#                           into a dedicated nested drawer: 'friends_data'.
+#   5. CHAT CORNER       -> Queries conversations and sent messages, sorts them, serializes them,
+#                           and injects the content into the second nested drawer: 'chat_data'.
+#   6. BULK SHIPMENT     -> The fully aggregated 'export_data' dictionary is wrapped in a 
+#                           DRF Response and sent as a single monolithic JSON payload (200 OK).
+# ----------------------------------------------------------------------------
+class UserExportView(APIView):
+
+    # STEP 1: Permission check
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        # STEP 2: User extraction
+        user = request.user
+        
+        # STEP 3: User Account & Social Data (from apps/users)
+        user_serializer = UserExportSerializer(user)
+        export_data = user_serializer.data
+
+        # STEP 4: Friends Data (Friendships & Requests from apps/friends)
+        friendships = Friendship.objects.filter(Q(user_id=user) | Q(friend_user_id=user))
+        friendships_serializer = FriendshipSerializer(friendships, many=True, context={'request': request})
+        
+        friend_requests = FriendRequest.objects.filter(Q(from_user=user) | Q(to_user=user))
+        requests_serializer = FriendRequestSerializer(friend_requests, many=True, context={'request': request})
+
+        export_data['friends_data'] = {
+            'active_friendships': friendships_serializer.data,
+            'friend_requests_history': requests_serializer.data
+        }
+
+        # STEP 5: Chat Data (Conversations & Sent Messages from apps/chat)
+        conversations = Conversation.objects.filter(participants=user).order_by('-created_at')
+        conversations_serializer = ConversationSerializer(conversations, many=True)
+
+        messages_sent = Message.objects.filter(sender=user).order_by('-created_at')
+        messages_serializer = MessageSerializer(messages_sent, many=True)
+
+        export_data['chat_data'] = {
+            'conversations_joined': conversations_serializer.data,
+            'messages_sent': messages_serializer.data
+        }
+
+        # STEP 6: Return the final multi-app compiled JSON (200 OK)
+        return Response(export_data, status=status.HTTP_200_OK)

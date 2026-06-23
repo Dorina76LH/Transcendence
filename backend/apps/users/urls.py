@@ -60,7 +60,18 @@ from rest_framework_simplejwt.views import TokenRefreshView
 # - RegisterView: Handles NEW USER creation
 # - LoginView: Handles LOGIN and marks the user online
 # - LogoutView: Handles LOGOUT (invalidates the Refresh token)
-from .views import RegisterView, LoginView, LogoutView, MeView, TwoFASetupView, TwoFAEnableView, TwoFADisableView, TwoFAVerifyView, SocialAuthView
+from .views import  (
+    RegisterView,
+    LoginView,
+    LogoutView,
+    MeView,
+    UserExportView,
+    TwoFASetupView,
+    TwoFAEnableView,
+    TwoFADisableView,
+    TwoFAVerifyView,
+    SocialAuthView
+)
 
 #* ============================================================================
 #* URL PATTERNS
@@ -85,9 +96,11 @@ urlpatterns = [
     # 3. READ / UPDATE / DELETE : The "Me" Endpoint
     # GET    /api/auth/me/ -> Read my profile
     # PATCH  /api/auth/me/ -> Update my profile (Partial)
-    # DELETE /api/auth/me/ -> Delete my account
+    # DELETE /api/auth/me/ -> Delete my account (RGPD right to be gorgotten)
+    # GET    /api/auth/me/export/ -> Export my GDPR data (JSON portability)
     # -------------------------------------------------------------------------
     path('me/', MeView.as_view(), name='user_me'),
+    path('me/export/', UserExportView.as_view(), name='user_gdrp_export'),
 
     # -------------------------------------------------------------------------
     # 4. TOKEN MANAGEMENT : Refresh the session

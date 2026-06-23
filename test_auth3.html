@@ -124,6 +124,8 @@
     button.warning:hover { background: #9a6a20; }
     button.oauth { background: #007bb5; }
     button.oauth:hover { background: #0099e0; }
+    button.info { background: #1a6a8a; }
+    button.info:hover { background: #2a8aaa; }
 
     .result {
       margin-top: 14px;
@@ -231,7 +233,7 @@
     <div class="card">
       <h2><span class="verb post">POST</span> Login</h2>
       <p class="description">Validates credentials.</p>
-      <label>Username</label><input type="text" id="login-username" placeholder="Username">
+      <label>Email</label><input type="text" id="login-username" placeholder="marvin@student.42.fr">
       <label>Password</label><input type="password" id="login-password" placeholder="Password">
       <button onclick="login()">Login</button>
       <div class="result" id="login-result">Waiting...</div>
@@ -245,7 +247,7 @@
     </div>
   </div>
 
-  <p class="section-title">Profile — Read / Update / Delete</p>
+  <p class="section-title">Profile — Read / Update / Delete / GDPR Portability</p>
   <div class="cards">
     <div class="card">
       <h2><span class="verb get">GET</span> My Profile</h2>
@@ -265,6 +267,13 @@
     </div>
 
     <div class="card">
+      <h2><span class="verb get">GET</span> GDPR Export</h2>
+      <p class="description">Downloads monolithic data bundle (Users, Friends, Chat) as a local JSON file.</p>
+      <button class="info" onclick="getExport()">Export My Data</button>
+      <div class="result" id="export-result">Waiting...</div>
+    </div>
+
+    <div class="card">
       <h2><span class="verb delete">DELETE</span> Delete Account</h2>
       <p class="description">Permanently deletes account.</p>
       <button class="danger" onclick="deleteMe()">Delete My Account</button>
@@ -279,7 +288,6 @@
   </div>
 
   <script>
-    // Utilisation du port HTTPS 8443 configuré dans le Nginx du projet
     const API = 'https://localhost:8443/api/auth';
 
     let accessToken  = null;
@@ -311,9 +319,6 @@
       return true;
     }
 
-    // -------------------------------------------------------------------------
-    // OAUTH ACTION
-    // -------------------------------------------------------------------------
     async function sendOAuth() {
       const provider = document.getElementById('oauth-provider').value;
       const code = document.getElementById('oauth-code').value;
@@ -353,7 +358,7 @@
       const username = document.getElementById('login-username').value;
       const password = document.getElementById('login-password').value;
       try {
-        const response = await fetch(`${API}/login/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+        const response = await fetch(`${API}/login/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: username, password }) });
         const data = await response.json();
         if (response.ok) { accessToken = data.access; refreshToken = data.refresh; updateTokenDisplay(); setResult('login-result', { message: 'Login successful !' }, true); }
         else { setResult('login-result', data, false); }
@@ -397,6 +402,30 @@
         if (response.status === 204) { accessToken = null; refreshToken = null; updateTokenDisplay(); setResult('delete-result', { message: 'Deleted.' }, true); }
         else { const data = await response.json(); setResult('delete-result', data, false); }
       } catch (err) { setResult('delete-result', { error: err.message }, false); }
+    }
+
+    async function getExport() {
+      if (!requireLogin('export-result')) return;
+      try {
+        const response = await fetch(`${API}/me/export/`, { method: 'GET', headers: authHeaders() });
+        const data = await response.json();
+        
+        if (response.ok) {
+          setResult('export-result', { message: 'Compilation successful! Download triggered.' }, true);
+          
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `gdpr_export_${data.username || 'profile'}.json`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+        } else {
+          setResult('export-result', data, false);
+        }
+      } catch (err) { 
+        setResult('export-result', { error: err.message }, false); 
+      }
     }
   </script>
 </body>
