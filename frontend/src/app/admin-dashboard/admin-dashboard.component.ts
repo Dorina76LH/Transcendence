@@ -8,7 +8,7 @@ import { AdminDashboard, AdminDashboardService } from './admin-dashboard.service
   selector: 'app-admin-dashboard',
   imports: [CommonModule, FormsModule],
   template: `
-    <section class="AdminDashboard">
+    <section class="AdminDashboard" [attr.aria-busy]="refreshing">
       <div class="dashboard-header">
         <div>
           <p class="dashboard-kicker">Administration</p>
@@ -49,12 +49,14 @@ import { AdminDashboard, AdminDashboardService } from './admin-dashboard.service
       </form>
 
       <p *ngIf="initialLoading">Loading...</p>
-      <p *ngIf="refreshing && dashboard">Updating dashboard...</p>
       <p class="text-danger" *ngIf="errorMessage">{{ errorMessage }}</p>
 
       <ng-container *ngIf="dashboard">
         <div class="dashboard-grid">
-          <div class="metric-card card border-secondary p-3" *ngFor="let stat of statCards">
+          <div
+            class="metric-card card border-secondary p-3"
+            *ngFor="let stat of statCards; trackBy: trackStatCard"
+          >
             <p class="metric-label">{{ stat.label }}</p>
             <p class="metric-value">{{ stat.value }}</p>
           </div>
@@ -67,7 +69,7 @@ import { AdminDashboard, AdminDashboardService } from './admin-dashboard.service
               <polyline [attr.points]="getLinePoints()"></polyline>
             </svg>
             <div class="chart-labels">
-              <span *ngFor="let point of dashboard.messages_by_day">
+              <span *ngFor="let point of dashboard.messages_by_day; trackBy: trackMessagePoint">
                 {{ point.date }}: {{ point.count }}
               </span>
             </div>
@@ -75,7 +77,10 @@ import { AdminDashboard, AdminDashboardService } from './admin-dashboard.service
 
           <div class="chart-card card border-secondary p-4">
             <h2 class="chart-title">Top active users</h2>
-            <div class="bar-row" *ngFor="let user of dashboard.top_active_users">
+            <div
+              class="bar-row"
+              *ngFor="let user of dashboard.top_active_users; trackBy: trackActiveUser"
+            >
               <span>{{ user.username }}</span>
               <div class="bar-track">
                 <div class="bar-fill" [style.width]="getUserBarWidth(user.messages_count)">
@@ -187,6 +192,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.refreshing = false;
       },
     });
+  }
+
+  trackStatCard(_index: number, stat: { label: string }): string {
+    return stat.label;
+  }
+
+  trackMessagePoint(_index: number, point: { date: string }): string {
+    return point.date;
+  }
+
+  trackActiveUser(_index: number, user: { id: number }): number {
+    return user.id;
   }
 
   getLinePoints(): string {

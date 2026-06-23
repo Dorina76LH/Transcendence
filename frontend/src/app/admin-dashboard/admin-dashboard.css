@@ -278,3 +278,108 @@
     grid-template-columns: 1fr;
   }
 }
+
+@page {
+  size: A4 portrait;
+  margin: 12mm;
+}
+
+@media print {
+  :host,
+  .AdminDashboard {
+    color: #111827;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .AdminDashboard h1,
+  .AdminDashboard h2,
+  .AdminDashboard h3,
+  .AdminDashboard h4,
+  .AdminDashboard h5,
+  .AdminDashboard p,
+  .AdminDashboard span,
+  .AdminDashboard label {
+    color: #111827 !important;
+  }
+
+  .dashboard-kicker {
+    color: #6f42c1 !important;
+  }
+
+  .admin-actions,
+  .filters .btn,
+  .auto-refresh {
+    display: none !important;
+  }
+
+  .dashboard-header {
+    break-after: avoid;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 0;
+  }
+
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 0.75rem;
+  }
+
+  .dashboard-panel,
+  .metric-card,
+  .chart-card {
+    background: #ffffff !important;
+    border-color: #9ca3af !important;
+    box-shadow: none !important;
+  }
+
+  .filters input {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: #d1d5db;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    break-after: page;
+  }
+
+  .metric-card {
+    min-height: 5.5rem;
+    padding: 0.75rem !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .metric-value {
+    font-size: 2rem;
+  }
+
+  .charts-grid {
+    display: block;
+    margin: 0;
+  }
+
+  .chart-card {
+    display: block;
+    margin: 0 0 6mm;
+    padding: 1rem !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .line-chart {
+    height: 65mm;
+  }
+
+  .chart-labels {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    font-size: 0.7rem;
+  }
+
+  .pie-chart {
+    width: 42mm;
+    margin: 0.5rem auto;
+  }
+}
