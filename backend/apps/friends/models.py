@@ -31,7 +31,7 @@ class Friendship(models.Model):
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		related_name='friendships_sent',
-		verbose_name=_('User'), #new
+		verbose_name=_('User'),
 	)
 
 	# Other side of pair(FK)
@@ -40,7 +40,7 @@ class Friendship(models.Model):
 		# Delete if the other user removed.
 		on_delete=models.CASCADE, 
 		related_name='friendships_received',
-		verbose_name=_('Friend'), #new
+		verbose_name=_('Friend'),
 	)
 	created_at = models.DateTimeField(
 		auto_now_add=True,
@@ -105,14 +105,14 @@ class FriendRequest(models.Model):
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		related_name='sent_friend_requests',
-		verbose_name=_('Sender'), #new
+		verbose_name=_('Sender'),
 	)
 	# The user who receives the friend request
 	to_user = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		related_name='received_friend_requests',
-		verbose_name=_('Receiver'), #new
+		verbose_name=_('Receiver'),
 	)
 	# Current status
 	status = models.CharField(
@@ -125,17 +125,17 @@ class FriendRequest(models.Model):
 	accepted_at = models.DateTimeField(
 		null=True,
 		blank=True,
-		verbose_name=_('Accepted at'), #new
+		verbose_name=_('Accepted at'),
 	)
 
 	created_at = models.DateTimeField(
 		auto_now_add=True,
-		verbose_name=_('Created at'), #new	
+		verbose_name=_('Created at'),
 	)
 	
 	updated_at = models.DateTimeField(
 		auto_now=True,
-		verbose_name=_('Updated at'), #new
+		verbose_name=_('Updated at'),
 	)
 
     

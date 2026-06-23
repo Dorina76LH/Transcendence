@@ -32,19 +32,6 @@ To discover which HTTP verbs (`GET`, `POST`, `PATCH`, `DELETE`) a route actually
 | `UpdateAPIView` | **PUT** / **PATCH** | **Update:** Both verbs trigger the same underlying action. |
 | `DestroyAPIView` | **DELETE** | **Destroy:** Handles resource deletion. The handler can override this behavior (e.g., soft-delete instead of real delete—the row stays in the base, we only change its status to `CANCELED`). |
 | `RetrieveUpdateDestroyAPIView` | **GET** / **PATCH** / **PUT** / **DELETE** | **Read, Update, and Destroy:** Encompasses the full lifecycle of a single specific resource. |
-
-<!-- * **Manual Views (`APIView`):** Look at the explicit Python function names.
-  * `def get(self, request):` $\rightarrow$ Accepts **GET**
-  * `def post(self, request):` $\rightarrow$ Accepts **POST**
-* **Generic Views (`generics.XXXXAPIView`):** DRF handles the verbs automatically based on the class name:
-  * `CreateAPIView` $\rightarrow$ Accepts **POST** (Create)
-  * `ListAPIView` $\rightarrow$ Accepts **GET** (List)
-  * `ListCreateAPIView` $\rightarrow$ Accepts **GET** (List) + **POST** (Create)
-  * `UpdateAPIView` $\rightarrow$ Accepts **PUT + PATCH** (Update - both verbs, same action)
-  * `DestroyAPIView` $\rightarrow$ Accepts **DELETE** (Destroy)
-    : the handler can override the same behavior(e.g. soft-delete instead of real delete - the row stays in the base, we only change its status to CANCELED)
-  * `RetrieveUpdateDestroyAPIView` $\rightarrow$ Accepts **GET** (Read), **PATCH/PUT** (Update), and **DELETE** (Destroy).-->
-
   
 ### Step 3: Verifying Access Control (Permissions)
 Authentication requirements are explicitly enforced in the view via the `permission_classes` attribute. Always check this list to document access constraints:
@@ -77,6 +64,7 @@ Authentication requirements are explicitly enforced in the view via the `permiss
 | **GET** | `api/auth/me/` |  Yes | *None* | `200` | Fetch current user profile |
 | **PATCH**| `api/auth/me/` |  Yes | Username&nbsp;(opt),<br>Email&nbsp;(opt),<br>First_name&nbsp;(opt),<br>Last_name&nbsp;(opt),<br>Avatar&nbsp;(file, opt) | `200` | Update profile / avatar |
 | **DELETE**| `api/auth/me/` |  Yes | *None* | `204` | Delete&nbsp;account (GDPR&nbsp;compliance)|
+| **GET** | `api/auth/me/export/` |  Yes | *None* | `200` | Monolithic JSON account export (GDPR portability) |
 | **POST** | `api/auth/token/refresh/` | ❌ No | Refresh token | `200` | Generate new Access Token |
 
 ### 🔍 Backend Implementation Mapping (Users)
@@ -89,6 +77,7 @@ Authentication requirements are explicitly enforced in the view via the `permiss
 | `api/auth/login/` | `LoginView` | `APIView` | **POST** | Custom handling for email/password validation against `USERNAME_FIELD`. |
 | `api/auth/logout/` | `LogoutView` | `APIView` | **POST** | Updates `is_online = False` and blacklists the refresh token. |
 | `api/auth/me/` | `MeView` | `RetrieveUpdateDestroyAPIView` | **GET** / **PATCH** / **PUT** / **DELETE** | Context-driven. Routes all actions without exposing user IDs in the URL. |
+| `api/auth/me/export/` | `UserExportView` | `APIView` | **GET** | Monolithic manual drive compilation aggregation across Users, Friends, and Chat apps. |
 | `api/auth/token/refresh/`| `TokenRefreshView` | SimpleJWT Base | **POST** | Standard SimpleJWT token rotation implementation. |
 
 ### 💡 Important Architecture Notes for Frontend Integration
@@ -103,6 +92,9 @@ Authentication requirements are explicitly enforced in the view via the `permiss
 #### C. Stateful Synchronization during Stateless Logout (`api/auth/logout/`)
 * **Dual-Action:** Clicking logout triggers an instant database update setting your status to `is_online: false` (notifying chat WebSockets) and blacklists your Refresh Token simultaneously.
 * **Token Invalidation:** Once a refresh token is sent to this endpoint, it is permanently killed. Your Frontend application must immediately clear the tokens from local storage or cookies and redirect the user to the landing page.
+
+#### D. GDPR Multi-App Monolithic Export (`api/auth/me/export/`)
+* **Single Request Portability:** In compliance with GDPR Article 20, hitting this route returns all profile data, social connections, active friendships, friend requests, rooms joined, and textual history in a singular nested JSON object.
 
 ### 🔍 JSON Structures Detail (Users)
 
@@ -183,6 +175,57 @@ Note: All fields are optional. Content-Type must be multipart/form-data if an av
   "avatar_url": "https://api.dicebear.com/9.x/bottts/svg?seed=marvin",
   "is_online": true,
   "role": "user"
+}
+```
+
+**Success Response - 200 OK (GET api/auth/suer/me/export):**
+```json
+{
+  "id": 42,
+  "username": "marvin",
+  "email": "marvin@student.42.fr",
+  "role": "user",
+  "is_online": true,
+  "date_joined": "2026-06-19T13:20:00Z",
+  "last_login": "2026-06-19T14:15:22Z",
+  "social_accounts": [
+    {
+      "provider": "google",
+      "uid": "123456789",
+      "created_at": "2026-06-19T13:20:00Z"
+    }
+  ],
+  "friends_data": {
+    "active_friendships": [
+      {
+        "id": 1,
+        "friend": { "id": 5, "username": "Arthur", "email": "dent@earth.com" },
+        "created_at": "2026-06-19T13:25:00Z"
+      }
+    ],
+    "friend_requests_history": []
+  },
+  "chat_data": {
+    "conversations_joined": [
+      {
+        "id": 12,
+        "participants": [
+          { "id": 42, "username": "marvin", "email": "marvin@student.42.fr" },
+          { "id": 5, "username": "Arthur", "email": "dent@earth.com" }
+        ],
+        "created_at": "2026-06-19T13:24:00Z"
+      }
+    ],
+    "messages_sent": [
+      {
+        "id": 156,
+        "conversation": 12,
+        "sender": { "id": 42, "username": "marvin" },
+        "content": "J'ai la capacité de calculer l'itinéraire idéal, mais vous préférez parler météo.",
+        "created_at": "2026-06-19T13:24:30Z"
+      }
+    ]
+  }
 }
 ```
 

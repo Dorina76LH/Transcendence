@@ -440,7 +440,66 @@ class LoginSerializer(TokenObtainPairSerializer):
         return data
 
 
-
 #* ----------------------------------------------------------------------------
 #* LogoutSerializer
 #* ----------------------------------------------------------------------------
+
+
+#* ----------------------------------------------------------------------------
+#* RGPD Export Serializers
+#* ----------------------------------------------------------------------------
+#  These serializers are used exclusively for GDPR data portability compliance.
+#  They extract ALL data associated with a user account into a structured JSON.
+#
+#  WHY TWO SERIALIZERS?
+#  --------------------
+#  To build a complete export, we use nested serialization:
+#  1. SocialAccountExportSerializer translates the linked social profiles
+#  2. UserExportSerializer acts as the Master, embedding the social list inside
+#     the main user profile JSON.
+#* ----------------------------------------------------------------------------
+
+from .models import SocialAccount
+
+class SocialAccountExportSerializer(serializers.ModelSerializer):
+    """
+    Serializes linked third-party provider accounts (Google, 42) for GDPR export.
+    """
+    class Meta:
+        model = SocialAccount
+        # Only expose safe OAuth identifiers to the user
+        fields = ('provider', 'uid', 'created_at')
+
+class UserExportSerializer(serializers.ModelSerializer):
+    """
+    Master GDPR serializer. Gathers base profile data and nested relationships.
+    Format enforced: Plain JSON (structured, machine-readable as requested by law).
+    """
+
+    # NESTED RELATIONSHIP:
+    # Look for 'related_name=social_accounts' in SocialAccount model.
+    # many=True tells DRF to expect a list of linked accounts (0, 1 or more).
+    social_accounts = SocialAccountExportSerializer(many=True, read_only=True)
+
+    # HUMAN-READABLE DATE FORMATTING:
+    # To override Django's default timestamp, enforce a clean 'YYYY-MM-DD HH:MM:SS'
+    # layout in the final raw JSON.
+    date_joined = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    last_login = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+
+    class Meta:
+        model = User
+        # THE GDPR "WHITE LIST":
+        # Explicit definition of what the user is allowed to extract.
+        # Security : Sensitive data (like hashed passwords or 2FA secret key)
+        # are strictly omitted from this tuple so they never leak in the JSON.
+        fields = (
+            'id',
+            'username',
+            'email',
+            'role',
+            'is_online',
+            'date_joined',
+            'last_login',
+            'social_accounts'
+        )
