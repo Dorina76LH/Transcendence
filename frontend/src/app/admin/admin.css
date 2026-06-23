@@ -1,0 +1,36 @@
+:host {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+main.AdminPage {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem;
+    text-align: left;
+}
+
+.admin-content{
+    width: min(1200px,100%);
+
+}
+
+.AdminPageAccess {
+    width: 100%;
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items: center;
+    padding: 2rem;
+}
+
+@media print {
+    header,
+    .admin-actions {
+        display:none !important;
+    }
+}
