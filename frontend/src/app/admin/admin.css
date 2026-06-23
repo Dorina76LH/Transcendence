@@ -1,36 +1,37 @@
 :host {
-    display: flex;
-    min-height: 100vh;
-    flex-direction: column;
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
 }
 
 main.AdminPage {
-    width: 100%;
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 2rem;
-    text-align: left;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: clamp(1.25rem, 2vw, 3rem);
+  box-sizing: border-box;
+  text-align: left;
 }
 
-.admin-content{
-    width: min(1200px,100%);
-
+.admin-content {
+  width: 100%;
+  min-width: 0;
 }
 
 .AdminPageAccess {
-    width: 100%;
-    flex:1;
-    display:flex;
-    justify-content:center;
-    align-items: center;
-    padding: 2rem;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
 }
 
 @media print {
-    header,
-    .admin-actions {
-        display:none !important;
-    }
+  header,
+  .admin-actions {
+    display: none !important;
+  }
 }

@@ -11,8 +11,11 @@ import { AdminDashboard, AdminDashboardService } from './admin-dashboard.service
     <section class="AdminDashboard">
       <div class="dashboard-header">
         <div>
+          <p class="dashboard-kicker">Administration</p>
           <h1>Admin dashboard</h1>
-          <p *ngIf="dashboard">Last update: {{ dashboard.generated_at }}</p>
+          <p class="last-updated" *ngIf="dashboard">
+            Last updated: {{ dashboard.generated_at | date: 'dd/MM/yyyy, HH:mm:ss' }}
+          </p>
         </div>
 
         <div class="admin-actions">
@@ -21,7 +24,7 @@ import { AdminDashboard, AdminDashboardService } from './admin-dashboard.service
         </div>
       </div>
 
-      <form class="filters card border-secondary p-3" (ngSubmit)="applyFilters()">
+      <form class="filters dashboard-panel card border-secondary p-3" (ngSubmit)="applyFilters()">
         <label>
           Start date
           <input class="form-control" type="date" name="startDate" [(ngModel)]="startDate" />
@@ -51,15 +54,15 @@ import { AdminDashboard, AdminDashboardService } from './admin-dashboard.service
 
       <ng-container *ngIf="dashboard">
         <div class="dashboard-grid">
-          <div class="card border-secondary p-3" *ngFor="let stat of statCards">
-            <h5>{{ stat.label }}</h5>
-            <h2>{{ stat.value }}</h2>
+          <div class="metric-card card border-secondary p-3" *ngFor="let stat of statCards">
+            <p class="metric-label">{{ stat.label }}</p>
+            <p class="metric-value">{{ stat.value }}</p>
           </div>
         </div>
 
         <div class="charts-grid">
-          <div class="card border-secondary p-4">
-            <h2>Messages by day</h2>
+          <div class="chart-card card border-secondary p-4">
+            <h2 class="chart-title">Messages by day</h2>
             <svg class="line-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
               <polyline [attr.points]="getLinePoints()"></polyline>
             </svg>
@@ -70,8 +73,8 @@ import { AdminDashboard, AdminDashboardService } from './admin-dashboard.service
             </div>
           </div>
 
-          <div class="card border-secondary p-4">
-            <h2>Top active users</h2>
+          <div class="chart-card card border-secondary p-4">
+            <h2 class="chart-title">Top active users</h2>
             <div class="bar-row" *ngFor="let user of dashboard.top_active_users">
               <span>{{ user.username }}</span>
               <div class="bar-track">
@@ -83,8 +86,8 @@ import { AdminDashboard, AdminDashboardService } from './admin-dashboard.service
             <p *ngIf="dashboard.top_active_users.length === 0">No active users yet.</p>
           </div>
 
-          <div class="card border-secondary p-4">
-            <h2>Users status</h2>
+          <div class="chart-card status-card card border-secondary p-4">
+            <h2 class="chart-title">Users status</h2>
             <div class="pie-chart" [style.background]="getPieGradient()"></div>
             <p>Online: {{ dashboard.online_users }}</p>
             <p>Offline: {{ dashboard.offline_users }}</p>
@@ -180,8 +183,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.errorMessage = 'Unable to load admin dashboard.';
-      this.initialLoading = false;
-      this.refreshing = false;
+        this.initialLoading = false;
+        this.refreshing = false;
       },
     });
   }
