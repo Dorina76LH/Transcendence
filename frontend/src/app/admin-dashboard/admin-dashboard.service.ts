@@ -53,12 +53,13 @@ export class AdminDashboardService {
     let params = new HttpParams();
 
     if (startDate) {
-      params = params.set('stard_date', startDate);
+      params = params.set('start_date', startDate);
     }
 
     if (endDate) {
       params = params.set('end_date', endDate);
     }
+
     return this.http.get<AdminDashboard>(this.url, {
       headers: { Authorization: `Bearer ${token}` },
       params,
