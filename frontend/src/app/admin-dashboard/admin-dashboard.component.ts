@@ -243,9 +243,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       ['Pending friend requests', this.dashboard.pending_friend_requests],
     ];
 
-    const csv = rows
-      .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+    const csv =
+      '\uFEFFsep=;\r\n' +
+      rows
+        .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(';'))
+        .join('\r\n');
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
