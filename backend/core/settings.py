@@ -336,11 +336,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #     },
 # }
 
-
+# Configures the real-time communication layer for Django Channels.
+# Uses Redis's built-in Publish/Subscribe system to send chat messages.
+# This makes the chat faster and uses less server memory.
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'BACKEND': 'channels_redis.pubsub.RedisPubSubChannelLayer',
         'CONFIG': {
             'hosts': [('redis', 6379)],
         },
