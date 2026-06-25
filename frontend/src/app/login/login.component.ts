@@ -79,16 +79,21 @@ export class LoginComponent {
 
 	constructor(private userService: UserService, private router: Router) {}
 
-	login() {
-		this.userService.login(this.email, this.password).subscribe({
-			next: (response: any) => {
-				localStorage.setItem('token', response.access);
-				localStorage.setItem('refresh', response.refresh);
-				this.router.navigate(['/']);
-			},
-			error: (err: any) => {
-				this.errorMessage = 'Email ou mot de passe incorrect.';
-			}
-		});
-	}
+  login() {
+    this.userService.login(this.email, this.password).subscribe({
+      next: (response: any) => {
+        localStorage.setItem('token', response.access);
+        localStorage.setItem('refresh', response.refresh);
+				localStorage.setItem('user', JSON.stringify(response.user));
+        if (response.user?.role === 'admin') {
+					this.router.navigate(['/admin-panel']);
+				} else {
+					this.router.navigate(['/']);
+				}
+      },
+      error: (err) => {
+        this.errorMessage = 'Email ou mot de passe incorrect.';
+      }
+    });
+  }
 }
