@@ -81,6 +81,8 @@ export class GDPRComponent {
                 link.download = `transcendence_export_${data.username || 'user'}.json`;
                 link.click();
                 window.URL.revokeObjectURL(url);
+
+                alert("Your data has been successfully exported! A confirmation email has also been sent to your inbox.");
             },
             error: (err: any) => {
                 console.error("Failed to export user data:", err);
@@ -102,7 +104,7 @@ export class GDPRComponent {
             next: () => {
                 localStorage.removeItem('access');
                 localStorage.removeItem('refresh');
-                alert("Your account has been successfully deleted. Goodbye!");
+                alert("Your account has been successfully deleted. A confirmation email has been sent to your inbox. Goodbye!");
                 this.router.navigate(['/login']);
             },
             error: (err:any) => {
