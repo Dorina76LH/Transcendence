@@ -93,18 +93,19 @@ user-login,
 app-lang,
 app-home,
 app-chat,
-user-settings, 
+user-settings,
 user-profile-settings,
-main, 
+main,
 .Content,
 .container-fluid {
 	background-color: transparent !important;
 }
 
-html, body {
-	height: 100%;
-	margin: 0;
-	padding: 0;
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 main {
@@ -140,9 +141,16 @@ textarea {
 	background-color: var(--input-bg) !important;
 }
 
-h1, h2, h3, h4, h5, p, span, label{
-	color: var(--text-color) !important;
-	margin-bottom: 1.5rem !important;
+h1,
+h2,
+h3,
+h4,
+h5,
+p,
+span,
+label {
+  color: var(--text-color) !important;
+  margin-bottom: 1.5rem !important;
 }
 
 h1 {
@@ -169,7 +177,6 @@ h4 {
 	font-weight: 500;
 }
 
-
 p {
 	font-size: 1rem;
 	margin-bottom: 1rem;
@@ -179,7 +186,6 @@ a {
 	font-size: 1rem;
 	margin-right: 1rem;
 }
-
 
 input {
 	background-color: var(--input-bg) !important;
@@ -192,9 +198,9 @@ input {
 	transition: all 0.2s ease;
 }
 
-form:focus{
-	border-color: #8400ff;
-	box-shadow: 0 0 5px rgba(80, 11, 170, 0.945);
+form:focus {
+  border-color: #8400ff;
+  box-shadow: 0 0 5px rgba(80, 11, 170, 0.945);
 }
 
 ::placeholder {
@@ -217,4 +223,10 @@ body.logged-in a[routerLink="/register"],
 body.logged-in a[href="/login"],
 body.logged-in a[href="/register"] {
     display: none !important;
+}
+
+@media print {
+  app-root > footer {
+    display: none !important;
+  }
 }

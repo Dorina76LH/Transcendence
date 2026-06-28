@@ -125,7 +125,12 @@ export class LoginComponent implements OnDestroy {
 				} else {
 					localStorage.setItem('token', response.access);
 					localStorage.setItem('refresh', response.refresh);
-					this.router.navigate(['/']);
+					localStorage.setItem('user', JSON.stringify(response.user));
+					if (response.user?.role === 'admin') {
+						this.router.navigate(['/admin-panel']);
+					} else {
+						this.router.navigate(['/']);
+					}
 				}
 			},
 			error: () => {
