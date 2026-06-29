@@ -113,7 +113,7 @@ export class LoginComponent implements OnDestroy {
 		this.loading = true;
 		this.userService.login(this.email, this.password).subscribe({
 			next: (response: any) => {
-				console.log('LOGIN RESPONSE:', response);
+				#console.log('LOGIN RESPONSE:', response);
 				this.loading = false;
 				if (response.requires_2fa && response.pre_auth_token) {
 					this.preAuthToken = response.pre_auth_token;
