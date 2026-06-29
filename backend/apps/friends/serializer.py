@@ -6,7 +6,7 @@ from rest_framework import serializers
 from .models import FriendRequest, Friendship
 
 # Works with a custom User instead of hardcoding auth.User
-User = get_user_model() 
+User = get_user_model()
 
 # A DRF ModelSerializer that exposes id, username,email from the User model.
 class UserSimpleSerializer(serializers.ModelSerializer):
@@ -16,7 +16,7 @@ class UserSimpleSerializer(serializers.ModelSerializer):
 
 # Converts Friendship model objects into API response data.
 # Used for the friends list endpoint where the app needs to return the authenticated user's accepted friends
-# it exposes only id: friend: created_at: 
+# it exposes only id: friend: created_at:
 # it figures out the other user in the friendship, based on who is making the request
 # it uses UserSimpleSerializer to return the friend as a simple user object with username,id,email
 # GET/friends/
@@ -42,11 +42,23 @@ class FriendshipSerializer(serializers.ModelSerializer):
         return UserSimpleSerializer(friend_user).data
 
 
+# Added 'avatar_url' via SerializerMethodField so the front-end (Angular)
+# can fetch and display the friend's profile picture directly in the chat component.
+class UserSimpleSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'avatar_url']
+
+    def get_avatar_url(self, obj):
+        return obj.avatar_url
+
 # Validate incoming data
     # authentication check, no self-request, target exists,
     # not already friends, no dublicate pending
-# JSON input -> PYTHON object 
-# Create and return a FriendRequest instance 
+# JSON input -> PYTHON object
+# Create and return a FriendRequest instance
 class FriendRequestSerializer(serializers.ModelSerializer):
 
     # The client sends a plain numeric user id in the POST body /its only for input / wont appear in the response JSON
