@@ -106,7 +106,6 @@ INSTALLED_APPS = [
 
     # personnal apps
     "apps.users",
-    "apps.api",
     "apps.friends",
 	"apps.analytics.apps.AnalyticsConfig"
     #"apps.chat",
