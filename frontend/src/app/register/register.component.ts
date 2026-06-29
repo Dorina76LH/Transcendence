@@ -1,50 +1,15 @@
 import { Component } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../user.service';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
 	selector: 'user-register',
-	imports: [RouterLink, FormsModule, CommonModule],
+	imports: [FormsModule, CommonModule, NavbarComponent],
 	template: `
-<header>
-	<nav class="navbar navbar-expand-lg navbar-dark">
-		<div class="container-fluid">
-			<a routerLink="/" class="nav-link">
-				<strong>TRANSCENDENCE</strong>
-			</a>
-			<button class="navbar-toggler" type="button" 
-						data-bs-toggle="collapse" 
-						data-bs-target="#navbar" 
-						aria-controls="navbar" 
-						aria-expanded="false" 
-						aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbar">
-				<ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-4 ms-4">
-					<li class="nav-item hover-underline">
-						<a routerLink="/profile" class="nav-link">Profile</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/settings" class="nav-link">Settings</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/chat" class="nav-link">Chat</a>
-					</li>
-					<li class="nav-item hover-underline">
-						<a routerLink="/friends" class="nav-link">Friends</a>
-					</li>
-				</ul>
-				<div class="d-flex gap-2">
-					<a routerLink="/login" class="btn btn-secondary">Login</a>
-					<a routerLink="/register" class="btn btn-primary">Register</a>
-				</div>
-			</div>
-		</div>
-	</nav>
-</header>
+<app-navbar></app-navbar>
 <main class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 56px);">
 	<div class="card border-secondary p-4" style="width: 450px;">
 		<h2 class="text-center mb-4">Register</h2>
@@ -85,9 +50,9 @@ import { UserService } from '../user.service';
 		</div>
 	</div>
 </main>`,
-styleUrl: './register.css',
+	styleUrl: './register.css',
 })
-	export class RegisterComponent {
+export class RegisterComponent {
 	firstName = '';
 	surname = '';
 	email = '';
@@ -100,15 +65,15 @@ styleUrl: './register.css',
 
 	register() {
 		this.userService.register(this.firstName, this.surname, this.email, this.password).subscribe({
-		next: (response: any) => {
-			localStorage.setItem('token', response.access);
-			localStorage.setItem('refresh', response.refresh);
-			this.router.navigate(['/profile']);
-		},
-		error: (err : any) => {
-			console.log('register error:', err.error);
-			this.errorMessage = 'Registration failed. Please try again.';
-		}
+			next: (response: any) => {
+				localStorage.setItem('token', response.access);
+				localStorage.setItem('refresh', response.refresh);
+				this.router.navigate(['/profile']);
+			},
+			error: (err: any) => {
+				console.log('register error:', err.error);
+				this.errorMessage = 'Registration failed. Please try again.';
+			}
 		});
 	}
-	}
+}

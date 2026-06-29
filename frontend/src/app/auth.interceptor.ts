@@ -19,6 +19,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 						.set('Authorization', token ? `Bearer ${token}` : '')
 						.set('X-CSRFToken', csrfToken || '')
 	});
+
+	if (req.url.includes('/api/auth/token/refresh/')) {
+		return next(authReq);
+	}
+
 	return next(authReq).pipe(
 		catchError((error) => {
 		console.log('catchError triggered, status:', error.status);
@@ -43,6 +48,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 				switchMap((response) => {
 					console.log('token refreshed:', response);
 					localStorage.setItem('token', response.access);
+					if (response.refresh) localStorage.setItem('refresh', response.refresh);
 					const retryReq = req.clone({
 						headers: req.headers.set('Authorization', `Bearer ${response.access}`)
 				});

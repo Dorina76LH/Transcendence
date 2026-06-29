@@ -213,8 +213,16 @@ input:focus {
 }
 
 input::placeholder {
-  color: var(--text-color);
-  opacity: 0.5;
+	color: var(--text-color);
+	opacity: 0.5;
+}
+
+/* When a user is logged in, hide login/register buttons rendered as links. */
+body.logged-in a[routerLink="/login"],
+body.logged-in a[routerLink="/register"],
+body.logged-in a[href="/login"],
+body.logged-in a[href="/register"] {
+    display: none !important;
 }
 
 @media print {

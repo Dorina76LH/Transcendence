@@ -240,11 +240,11 @@ class UserSerializer(serializers.ModelSerializer):
     #& STEP 2 : Meta Definition
     class Meta:
         model = User
-        # 'id', 'username', 'email', 'is_online', 'role' -> Injected directly from DB.
+        # 'id', 'username', 'email', 'is_online', 'role', 'is_2fa_enabled' -> Injected directly from DB.
         # 'avatar_url' -> Injected from the method below.
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'avatar_url', 'is_online', 'role')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'avatar_url', 'is_online', 'role', 'is_2fa_enabled')
         # Safety: these cannot be modified via this serializer.
-        read_only_fields = ('id', 'role')
+        read_only_fields = ('id', 'username', 'role', 'is_2fa_enabled')
     
     #& STEP 3 : Custom Handlers
     def get_avatar_url(self, obj):
