@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 	template: `
 <body>
 	<main class="Profile">
-		<div class="card border-secondary p-4" style="width: 450px;">
+		<div class="card border-secondary p-4" style="max-width:450px; width: 100%;">
 			<h2 class="text-center mb-4">Profile overview</h2>
 			<div class="text-center mb-4">
 				<img [src]="profile?.avatar_url || 'Zoliac.png'" class="rounded-circle border border-secondary" style="width:100px; height:100px; object-fit: cover;">

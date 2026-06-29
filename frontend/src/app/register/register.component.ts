@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../user.service';
@@ -10,7 +10,7 @@ import { UserService } from '../user.service';
 	template: `
 <body>
 	<main class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 56px);">
-		<div class="card border-secondary p-4" style="width: 450px;">
+		<div class="card border-secondary p-4" style="max-width:450px; width: 100%;">
 			<h2 class="text-center mb-4">Register</h2>
 			<div class="mb-3">
 				<label class="form-label">First name</label>

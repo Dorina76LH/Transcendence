@@ -9,6 +9,7 @@ main.Settings {
 	flex: 1;
 	display: flex;
 	justify-content: center;
+	text-align: justify;
 	align-items: center;
 	padding: 1rem;
 }

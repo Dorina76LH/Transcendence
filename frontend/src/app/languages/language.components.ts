@@ -1,17 +1,32 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
 	selector: 'app-lang',
-	imports: [],
+	imports: [CommonModule],
 	template: `
 <body>
-	<main class="Languages">
-		<div class="Content">
-			<div>
-				<h1>Languages Page</h1>
-				<h2>This is the actual languages page, still in progress, but I got the page lol</h2>
-				<h3>We'll soon have 3 more languages handled for the project, but for now we only got one</h3>
-				<h3>Which is english as you can see.</h3>
+	<main>
+		<div class="p-4">
+			<h4 class="mb-1">Language</h4>
+			<p class="mb-4 allign-items-center justify-content-center" style="font-size: 0.9rem;">Choose your preferred language.</p>
+			<div class="d-flex flex-row gap-2 justify-content-center" style="max-width: 500px;">
+				<button class="btn d-flex align-items-center gap-3 border border-secondary text-start"
+					[class.btn-secondary]="selectedLang === 'en'"
+					[class.btn-outline-secondary]="selectedLang !== 'en'"
+					(click)="selectedLang = 'en'">
+					<span style="font-size: 1.4rem;">🇬🇧</span>
+					<span>English</span>
+					<span *ngIf="selectedLang === 'en'" class="ms-auto">✓</span>
+				</button>
+				<button class="btn d-flex align-items-center gap-3 border border-secondary text-start">
+					<span style="font-size: 1.4rem;">🇫🇷</span>
+					<span>Français</span>
+				</button>
+				<button class="btn d-flex align-items-center gap-3 border border-secondary text-start">
+					<span style="font-size: 1.4rem;">🇪🇸</span>
+					<span>Español</span>
+				</button>
 			</div>
 		</div>
 	</main>
@@ -19,5 +34,5 @@ import { Component } from '@angular/core';
   styleUrl: './languages.css',
 })
 export class LanguageComponent {
-
+	selectedLang = 'en';
 }

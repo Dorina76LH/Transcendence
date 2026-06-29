@@ -84,6 +84,11 @@ header {
 	color: var(--text-color) !important;
 }
 
+footer {
+	background-color: var(--bg-color) !important;
+	color: var(--text-color) !important;
+}
+
 body {
 	min-height: 100vh;
 	background-color: var(--bg-color) !important;

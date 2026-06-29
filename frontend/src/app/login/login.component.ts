@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
 	template: `
 <body>
 	<main class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 56px);">
-		<div class="card border-secondary p-4" style="width: 450px;">
+		<div class="card border-secondary p-4" style="max-width:450px; width: 100%;">
 			<h2 class="text-center mb-4">Login</h2>
 			<form (ngSubmit)="login()">
 				<div class="mb-3">
