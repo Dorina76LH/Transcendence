@@ -736,6 +736,18 @@ class SocialAuthView(APIView):
 #   6. BULK SHIPMENT     -> The fully aggregated 'export_data' dictionary is wrapped in a 
 #                           DRF Response and sent as a single monolithic JSON payload (200 OK).
 # ----------------------------------------------------------------------------
+class UserSearchView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        query = request.query_params.get('search', '').strip()
+        if len(query) < 1:
+            return Response([], status=status.HTTP_200_OK)
+        users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)[:10]
+        data = [{'id': u.id, 'username': u.username} for u in users]
+        return Response(data, status=status.HTTP_200_OK)
+
+
 class UserExportView(APIView):
 
     # STEP 1: Permission check

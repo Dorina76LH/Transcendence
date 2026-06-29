@@ -61,4 +61,16 @@ export class UserService {
 	deleteAccount() {
 		return this.http.delete(`${this.url}/auth/me/`);
 	}
+
+	searchUsers(query: string) {
+		return this.http.get<{id: number, username: string}[]>(`${this.url}/auth/users/?search=${encodeURIComponent(query)}`);
+	}
+
+	sendFriendRequest(toUserId: number) {
+		return this.http.post(`${this.url}/friends/friend-requests/`, { to_user_id: toUserId });
+	}
+
+	getSentFriendRequests() {
+		return this.http.get<any[]>(`${this.url}/friends/friend-requests/sent/`);
+	}
 }
