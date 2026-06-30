@@ -12,6 +12,7 @@ import { GDPRComponent } from './gdpr/gdpr.component';
 import { FriendsComponent } from './friends/friends.component';
 import { AboutComponent } from './about/about.component';
 import { ContactComponent } from './contact/contact.component';
+import { PPTSComponent } from './ppts/ppts.component';
 import { AdminComponent } from './admin/admin.component';
 
 export const routes: Routes = [
@@ -27,5 +28,6 @@ export const routes: Routes = [
 	{path : 'friends', component: FriendsComponent, canActivate: [AuthGuard]},
 	{path : 'contact', component: ContactComponent},
 	{path : 'about', component: AboutComponent},
-  {path : 'admin-panel', component: AdminComponent, canActivate: [AuthGuard]}
+	{path : 'ppts', component: PPTSComponent},
+	{path : 'admin-panel', component: AdminComponent, canActivate: [AuthGuard]}
 ];

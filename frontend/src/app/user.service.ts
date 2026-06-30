@@ -15,9 +15,13 @@ export class UserService {
 		return this.http.post(`${this.url}/auth/login/`, { email, password });
 	}
 
-	register(firstName: string, surname: string, email: string, password: string) {
-		return this.http.post(`${this.url}/auth/register/`, { firstName, surname, email, password });
-	}
+	register(username: string, email: string, password: string) {
+		return this.http.post(`${this.url}/auth/register/`, {
+			username,
+			email,
+			password
+		});
+}
 	
 	getProfile() {
 		return this.http.get(`${this.url}/auth/me/`);

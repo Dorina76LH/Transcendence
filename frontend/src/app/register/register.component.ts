@@ -10,61 +10,58 @@ import { NavbarComponent } from '../navbar/navbar.component';
 	imports: [FormsModule, CommonModule, NavbarComponent],
 	template: `
 <app-navbar></app-navbar>
-<main class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 56px);">
-	<div class="card border-secondary p-4" style="width: 450px;">
-		<h2 class="text-center mb-4">Register</h2>
-		<div class="mb-3">
-			<label class="form-label">First name</label>
-			<input class="form-control border-secondary rounded-pill"
-					type="text" placeholder="Enter your first name"
-					[(ngModel)]="firstName">
+	<main class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 56px);">
+		<div class="card border-secondary p-4" style="max-width:450px; width: 100%;">
+			<h2 class="text-center mb-4">Register</h2>
+			<div class="mb-3">
+				<label class="form-label">Username</label>
+				<input class="form-control border-secondary rounded-pill"
+						type="text" placeholder="Enter your username"
+						[(ngModel)]="username">
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Email</label>
+				<input class="form-control border-secondary rounded-pill"
+						type="email" placeholder="Enter your email"
+						[(ngModel)]="email">
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Password</label>
+				<input class="form-control border-secondary rounded-pill"
+						type="password" placeholder="Enter your password"
+						[(ngModel)]="password">
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Confirm password</label>
+				<input class="form-control border-secondary rounded-pill"
+						type="password" placeholder="Confirm your password"
+						[(ngModel)]="confirmPassword">
+			</div>
+			<p class="text-danger text-center" *ngIf="errorMessage">{{ errorMessage }}</p>
+			<p class="text-success text-center" *ngIf="successMessage">{{ successMessage }}</p>
+			<div class="d-grid mt-4">
+				<button (click)="register()" class="btn btn-primary rounded-pill">Register</button>
+			</div>
 		</div>
-		<div class="mb-3">
-			<label class="form-label">Surname</label>
-			<input class="form-control border-secondary rounded-pill"
-					type="text" placeholder="Enter your surname"
-					[(ngModel)]="surname">
-		</div>
-		<div class="mb-3">
-			<label class="form-label">Username</label>
-			<input class="form-control border-secondary rounded-pill"
-					type="text" placeholder="Enter your surname"
-					[(ngModel)]="username">
-		</div>
-		<div class="mb-3">
-			<label class="form-label">Email</label>
-			<input class="form-control border-secondary rounded-pill"
-					type="email" placeholder="Enter your email"
-					[(ngModel)]="email">
-		</div>
-		<div class="mb-3">
-			<label class="form-label">Password</label>
-			<input class="form-control border-secondary rounded-pill"
-					type="password" placeholder="Enter your password"
-					[(ngModel)]="password">
-		</div>
-		<p class="text-danger text-center" *ngIf="errorMessage">{{ errorMessage }}</p>
-		<p class="text-success text-center" *ngIf="successMessage">{{ successMessage }}</p>
-		<div class="d-grid mt-4">
-			<button (click)="register()" class="btn btn-primary rounded-pill">Register</button>
-		</div>
-	</div>
-</main>`,
-	styleUrl: './register.css',
+	</main>`,
+styleUrl: './register.css',
 })
 export class RegisterComponent {
-	firstName = '';
-	surname = '';
 	email = '';
 	username = '';
 	password = '';
+	confirmPassword = '';
 	errorMessage = '';
 	successMessage = '';
 
 	constructor(private userService: UserService, private router: Router) {}
 
 	register() {
-		this.userService.register(this.firstName, this.surname, this.email, this.password).subscribe({
+		if (this.password !== this.confirmPassword) {
+			this.errorMessage = 'Passwords do not match.';
+			return;
+		}
+		this.userService.register(this.username, this.email, this.password).subscribe({
 			next: (response: any) => {
 				localStorage.setItem('token', response.access);
 				localStorage.setItem('refresh', response.refresh);
