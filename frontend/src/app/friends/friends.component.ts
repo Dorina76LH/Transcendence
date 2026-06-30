@@ -29,16 +29,16 @@ interface SearchUser { id: number; username: string; }
 
 		<!-- Section recherche -->
 		<div class="section">
-			<h5 class="section-title">Ajouter un ami</h5>
+			<h5 class="section-title">Add Friend</h5>
 			<div class="search-row">
 				<input
 					class="search-input"
 					[(ngModel)]="searchQuery"
 					(ngModelChange)="onSearchInput()"
 					(keyup.enter)="searchUsers()"
-					placeholder="Rechercher un pseudo...">
+					placeholder="Search a username...">
 				<button class="btn-search" (click)="searchUsers()" [disabled]="searchQuery.length < 1">
-					Rechercher
+					Search
 				</button>
 			</div>
 			<div *ngIf="searchError" class="search-error">{{ searchError }}</div>
@@ -52,7 +52,7 @@ interface SearchUser { id: number; username: string; }
 						[class.sent]="requestSent[user.id]"
 						[disabled]="requestSent[user.id]"
 						(click)="addFriend(user)">
-						{{ requestSent[user.id] ? '✓ Envoyée' : '+ Ajouter' }}
+						{{ requestSent[user.id] ? '✓ Sent' : '+ Add' }}
 					</button>
 				</div>
 			</div>
@@ -65,7 +65,7 @@ interface SearchUser { id: number; username: string; }
 
 		<!-- Liste d'amis -->
 		<div class="section">
-			<h5 class="section-title">Mes amis</h5>
+			<h5 class="section-title">My friends</h5>
 			<div *ngIf="loading" class="state-text">Chargement...</div>
 			<div *ngIf="error" class="state-text error">{{ error }}</div>
 			<div class="friends-list" *ngIf="!loading && !error">
@@ -84,7 +84,7 @@ interface SearchUser { id: number; username: string; }
 					</div>
 				</div>
 				<div *ngIf="friends.length === 0" class="state-text">
-					Aucun ami pour le moment.
+					No friends yet.
 				</div>
 			</div>
 		</div>
@@ -146,7 +146,7 @@ export class FriendsComponent implements OnInit {
                 this.searched = true;
             },
             error: () => {
-                this.searchError = 'Erreur lors de la recherche.';
+                this.searchError = 'Error during search.';
             }
         });
     }
