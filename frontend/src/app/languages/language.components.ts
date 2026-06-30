@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
+import { NavbarComponent } from '../navbar/navbar.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
 	selector: 'app-lang',
-	imports: [CommonModule],
+	imports: [NavbarComponent, CommonModule],
 	template: `
-<body>
+<app-navbar></app-navbar>
 	<main>
 		<div class="p-4">
 			<h4 class="mb-1">Language</h4>
@@ -29,8 +30,7 @@ import { CommonModule } from '@angular/common';
 				</button>
 			</div>
 		</div>
-	</main>
-</body>`,
+	</main>`,
   styleUrl: './languages.css',
 })
 export class LanguageComponent {

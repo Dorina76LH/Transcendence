@@ -1,10 +1,11 @@
 import { Component } from "@angular/core";
+import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
 	selector: 'app-about',
-	imports: [],
+	imports: [NavbarComponent],
 	template: `
-<body>
+	<app-navbar></app-navbar>
 	<main>
 		<div class="content">
 			<section>
@@ -37,11 +38,7 @@ import { Component } from "@angular/core";
 			</section>
 			</div>
 		</div>
-	</main>
-</body>`,
+	</main>`,
 styleUrl: './about.css'
 })
-
-export class AboutComponent {
-
-}
+export class AboutComponent {}

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../user.service';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 export interface FriendUser {
 	id: number;
@@ -25,9 +26,9 @@ export interface FriendRequest {
 
 @Component({
 	selector: "app-friends",
-	imports: [CommonModule, FormsModule],
+	imports: [CommonModule, NavbarComponent, FormsModule],
 	template: `
-<body>
+<app-navbar></app-navbar>
 	<main class="d-flex justify-content-center py-5" style="min-height: calc(100vh - 56px);">
 		<div class="card border-secondary p-4 w-100" style="max-width: 1000px;">
 			<h4 class="mb-3">Friend list</h4>
@@ -97,8 +98,7 @@ export interface FriendRequest {
 				</div>
 			</div>
 		</div>
-	</main>
-</body>`,
+	</main>`,
 	styleUrl: "./friends.css",
 })
 export class FriendsComponent implements OnInit {

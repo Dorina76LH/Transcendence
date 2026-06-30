@@ -3,12 +3,13 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../user.service';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
 	selector: 'user-register',
-	imports: [FormsModule, CommonModule],
+	imports: [FormsModule, CommonModule, NavbarComponent],
 	template: `
-<body>
+<app-navbar></app-navbar>
 	<main class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 56px);">
 		<div class="card border-secondary p-4" style="max-width:450px; width: 100%;">
 			<h2 class="text-center mb-4">Register</h2>
@@ -42,8 +43,7 @@ import { UserService } from '../user.service';
 				<button (click)="register()" class="btn btn-primary rounded-pill">Register</button>
 			</div>
 		</div>
-	</main>
-</body>`,
+	</main>`,
 styleUrl: './register.css',
 })
 export class RegisterComponent {

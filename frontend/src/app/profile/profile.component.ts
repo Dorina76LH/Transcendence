@@ -2,12 +2,13 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../user.service';
 import { Router } from '@angular/router';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
 	selector: 'user-profile',
-	imports: [CommonModule],
+	imports: [CommonModule, NavbarComponent],
 	template: `
-<body>
+<app-navbar></app-navbar>
 	<main class="Profile">
 		<div class="card border-secondary p-4" style="max-width:450px; width: 100%;">
 			<h2 class="text-center mb-4">Profile overview</h2>
@@ -24,8 +25,7 @@ import { Router } from '@angular/router';
 			</div>
 			<p class="text-danger text-center" *ngIf="errorMessage">{{ errorMessage }}</p>
 		</div>
-	</main>
-</body>`,
+	</main>>`,
 styleUrl: './profile.css',
 })
 export class ProfileComponent implements OnInit {
@@ -34,24 +34,8 @@ export class ProfileComponent implements OnInit {
 
 	constructor(private userService: UserService, private router: Router, private cdr: ChangeDetectorRef) {}
 
-
-	logout() {
-		this.userService.logout().subscribe({
-			next: () => {
-			localStorage.removeItem('token');
-			localStorage.removeItem('refresh');
-			this.router.navigate(['/login']);
-			},
-			error: () => {
-			localStorage.removeItem('token');
-			localStorage.removeItem('refresh');
-			this.router.navigate(['/login']);
-			}
-		});
-	}
-
 	ngOnInit() {
-			this.userService.getProfile().subscribe({
+		this.userService.getProfile().subscribe({
 			next: (data: any) => {
 				this.profile = data;
 				this.cdr.detectChanges();
@@ -60,6 +44,6 @@ export class ProfileComponent implements OnInit {
 				this.errorMessage = 'Unable to load profile';
 				this.cdr.detectChanges();
 			}
-			});
-		}
+		});
+	}
 }

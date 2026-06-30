@@ -12,7 +12,8 @@ WORKDIR /usr/src/app
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
-    netcat-traditional && \
+    netcat-traditional \
+    gettext && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy only the requirements first to leverage Docker's cache layers.
