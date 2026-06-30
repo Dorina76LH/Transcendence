@@ -19,7 +19,7 @@ export const routes: Routes = [
 	{path: 'login', component:LoginComponent},
 	{path: 'register', component:RegisterComponent},
 	{path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]},
-	{path: 'settings', component: SettingsComponent},
+	{path: 'settings', component: SettingsComponent, canActivate: [AuthGuard]},
 	{path: 'languages', component: LanguageComponent},
 	{path: 'chat', component:ChatComponent, canActivate: [AuthGuard]},
 	// {path: 'profile-settings', component:ProfileSettingsComponent, canActivate: [AuthGuard]},

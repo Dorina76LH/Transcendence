@@ -29,7 +29,7 @@ class FriendshipAdmin(admin.ModelAdmin):
 	ordering = ('-created_at',)
 	
 	def has_add_permission(self, request):
-		return False
+		return True
 
 
 
