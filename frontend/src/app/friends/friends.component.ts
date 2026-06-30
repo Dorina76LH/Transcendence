@@ -35,28 +35,25 @@ export interface FriendRequest {
 			<div *ngIf="loading">Loading...</div>
 			<div *ngIf="error" class="text-danger">{{ error }}</div>
 			<div class="d-flex flex-column gap-2" *ngIf="!loading && !error">
-				<div *ngFor="let friendship of friends" class="position-relative">
-					<button class="btn d-flex align-items-center w-100 border border-secondary rounded"
-						(click)="toggleMenu(friendship)">
-						<div class="rounded-circle bg-secondary me-3 flex-shrink-0" style="width:40px;height:40px;"></div>
-						<span class="fw-semibold">{{ friendship.friend.username }}</span>
-						<span class="ms-auto">
-							<span class="badge rounded-circle"
-								style="width:10px;height:10px;display:inline-block;">
-							</span>
-						</span>
-					</button>
-					<div *ngIf="selectedFriend?.id === friendship.id"
-						class="card border-secondary p-2 position-absolute start-0 w-100"
-						style="z-index: 1000; top: 100%;">
-						<div class="d-flex flex-column gap-1 justify-content-center align-items-center">
-							<button class="btn btn-sm btn-outline-light text-start" (click)="action('profile', friendship)">👤 View profile</button>
-							<button class="btn btn-sm btn-outline-primary text-start" (click)="action('chat', friendship)">💬 Send message</button>
-							<button class="btn btn-sm btn-outline-danger text-start" (click)="action('remove', friendship)">❌ Remove friend</button>
+				<div *ngFor="let friendship of friends" class="mb-2">
+					<div class="d-flex align-items-center w-100 border border-secondary rounded p-2 bg-dark">
+						<div class="d-flex align-items-center flex-grow-1" (click)="toggleMenu(friendship)" style="cursor: pointer;">
+							<div class="rounded-circle bg-secondary me-3 flex-shrink-0" style="width:40px;height:40px;"></div>
+							<span class="fw-semibold text-white">{{ friendship.friend.username }}</span>
 						</div>
+						<span class="me-3">
+							<span class="badge rounded-circle bg-success" style="width:10px;height:10px;display:inline-block;"></span>
+						</span>
+						<div *ngIf="selectedFriend?.id === friendship.id" class="d-flex gap-1 align-items-center animate__animated animate__fadeIn">
+							<button class="btn btn-sm btn-outline-primary" (click)="action('chat', friendship)">💬 Chat</button>
+							<button class="btn btn-sm btn-outline-danger" (click)="action('remove', friendship)">❌ Remove</button>
+						</div>
+						<button *ngIf="selectedFriend?.id !== friendship.id" class="btn btn-sm btn-outline-secondary" (click)="toggleMenu(friendship)">
+							⚙️ Actions
+						</button>
 					</div>
 				</div>
-				<div *ngIf="friends.length === 0" class="text-muted">You don't have any friends right now.</div>
+				<div *ngIf="friends.length === 0">You don't have any friends right now.</div>
 			</div>
 			<hr class="border-secondary my-4">
 			<h4 class="mb-3">Add a friend</h4>
@@ -201,18 +198,19 @@ export class FriendsComponent implements OnInit {
 
 	action(type: string, friendship: Friendship) {
 		switch (type) {
-			case 'profile':
-				this.router.navigate(['/profile', friendship.friend.id]);
-				break;
 			case 'chat':
 				this.router.navigate(['/chat'], { queryParams: { with: friendship.friend.id } });
 				break;
 			case 'remove':
-				this.userService.removeFriend(friendship.friend.id).subscribe({
-					next: () => this.friends = this.friends.filter(f => f.id !== friendship.id),
-					error: (err) => console.error(err)
-				});
+			const hasConfirmed = confirm(`Are you sure you want to remove ${friendship.friend.username} from your friends?`);
+			if (!hasConfirmed) {
 				break;
+			}
+			this.userService.removeFriend(friendship.friend.id).subscribe({
+				next: () => this.friends = this.friends.filter(f => f.id !== friendship.id),
+				error: (err) => console.error(err)
+			});
+			break;
 		}
 		this.selectedFriend = null;
 	}

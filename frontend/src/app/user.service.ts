@@ -21,7 +21,7 @@ export class UserService {
 			email,
 			password
 		});
-}
+	}
 
 	getProfile() {
 		return this.http.get(`${this.url}/auth/me/`);
@@ -61,7 +61,7 @@ export class UserService {
 	}
 
 	removeFriend(friendUserId: number) {
-		return this.http.delete(`${this.url}/friends/${friendUserId}/`);
+		return this.http.delete(`${this.url}/friends/friends/${friendUserId}/`);
 	}
 
 	searchUsers(query: string) {
@@ -81,11 +81,11 @@ export class UserService {
 	}
 
 	acceptFriendRequest(requestId: number) {
-		return this.http.post(`${this.url}/friends/friend-requests/${requestId}/accept/`, {});
+		return this.http.put(`${this.url}/friends/friend-requests/${requestId}/accept/`, {});
 	}
 
 	declineFriendRequest(requestId: number) {
-		return this.http.post(`${this.url}/friends/friend-requests/${requestId}/reject/`, {});
+		return this.http.put(`${this.url}/friends/friend-requests/${requestId}/reject/`, {});
 	}
 
 	cancelFriendRequest(requestId: number) {
