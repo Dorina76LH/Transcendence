@@ -13,21 +13,9 @@ import { UserService } from '../user.service';
 		<div class="card border-secondary p-4" style="max-width:450px; width: 100%;">
 			<h2 class="text-center mb-4">Register</h2>
 			<div class="mb-3">
-				<label class="form-label">First name</label>
-				<input class="form-control border-secondary rounded-pill"
-						type="text" placeholder="Enter your first name"
-						[(ngModel)]="firstName">
-			</div>
-			<div class="mb-3">
-				<label class="form-label">Surname</label>
-				<input class="form-control border-secondary rounded-pill"
-						type="text" placeholder="Enter your surname"
-						[(ngModel)]="surname">
-			</div>
-			<div class="mb-3">
 				<label class="form-label">Username</label>
 				<input class="form-control border-secondary rounded-pill"
-						type="text" placeholder="Enter your surname"
+						type="text" placeholder="Enter your username"
 						[(ngModel)]="username">
 			</div>
 			<div class="mb-3">
@@ -42,6 +30,12 @@ import { UserService } from '../user.service';
 						type="password" placeholder="Enter your password"
 						[(ngModel)]="password">
 			</div>
+			<div class="mb-3">
+				<label class="form-label">Confirm password</label>
+				<input class="form-control border-secondary rounded-pill"
+						type="password" placeholder="Confirm your password"
+						[(ngModel)]="confirmPassword">
+			</div>
 			<p class="text-danger text-center" *ngIf="errorMessage">{{ errorMessage }}</p>
 			<p class="text-success text-center" *ngIf="successMessage">{{ successMessage }}</p>
 			<div class="d-grid mt-4">
@@ -52,28 +46,31 @@ import { UserService } from '../user.service';
 </body>`,
 styleUrl: './register.css',
 })
-	export class RegisterComponent {
-	firstName = '';
-	surname = '';
+export class RegisterComponent {
 	email = '';
 	username = '';
 	password = '';
+	confirmPassword = '';
 	errorMessage = '';
 	successMessage = '';
 
 	constructor(private userService: UserService, private router: Router) {}
 
 	register() {
-		this.userService.register(this.firstName, this.surname, this.email, this.password).subscribe({
-		next: (response: any) => {
-			localStorage.setItem('token', response.access);
-			localStorage.setItem('refresh', response.refresh);
-			this.router.navigate(['/profile']);
-		},
-		error: (err : any) => {
-			console.log('register error:', err.error);
-			this.errorMessage = 'Registration failed. Please try again.';
+		if (this.password !== this.confirmPassword) {
+			this.errorMessage = 'Passwords do not match.';
+			return;
 		}
+		this.userService.register(this.username, this.email, this.password).subscribe({
+			next: (response: any) => {
+				localStorage.setItem('token', response.access);
+				localStorage.setItem('refresh', response.refresh);
+				this.router.navigate(['/profile']);
+			},
+			error: (err: any) => {
+				console.log('register error:', err.error);
+				this.errorMessage = 'Registration failed. Please try again.';
+			}
 		});
 	}
-	}
+}
