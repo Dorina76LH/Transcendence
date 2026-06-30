@@ -85,6 +85,43 @@
 #?   Since we want to CUSTOMIZE the Login (to add is_online), we need the 
 #?   original Login "engine" to extend it. Without this import, we'd have 
 #?   to rewrite the entire login logic from scratch.
+#?
+#? VISUALIZING THE MONOLITHIC GDPR EXPORT FLOW
+#? -------------------------------------------
+#? When Angular requests an export, the view acts as a data compiler.
+#? Instead of hitting 1 table, it queries 3 different apps and bundles
+#? everything into a single, clean JSON "furniture".
+#?
+#?   [Angular GET Request]
+#?            │
+#?            ▼
+#?     ┌────────────────┐
+#?     │ UserExportView │ ──(1) Queries Profile & Social data ──> [PostgreSQL]
+#?     └────────────────┘ ──(2) Queries Network & Requests   ──> [PostgreSQL]
+#?            │           ──(3) Queries Chats & Sent Messages ──> [PostgreSQL]
+#?            ▼
+#?   ┌──────────────────┐
+#?   │ export_data ({}) │ <── Aggregates all Serializer.data results
+#?   └──────────────────┘
+#?            │
+#?            ▼
+#?   [Serialized Monolithic JSON Response] ──> Sent back to Angular
+#?
+#? THE JSON "FURNITURE" ARCHITECTURE (Dicts & Lists)
+#? -------------------------------------------------
+#? export_data = {                         <── The big main Object (The Furniture)
+#?     "id": 1, "username": "alice",...    <── Raw base profile data (Top shelves)
+#?     
+#?     "friends_data": {                   <── Drawer 1 (Network)
+#?          "active_friendships": [...],   <── Organizer A (List of friend objects)
+#?          "friend_requests_history": []  <── Organizer B (List of request history)
+#?     },
+#?     
+#?     "chat_data": {                      <── Drawer 2 (Communications)
+#?          "conversations_joined": [...], <── Organizer A (List of rooms joined)
+#?          "messages_sent": [...]         <── Organizer B (List of actual texts sent)
+#?     }
+#? }
 #? -----------------------------------------------------------------------------
 
 
@@ -112,7 +149,23 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 # 5. Local Experts (Custom Serializers)
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, PreAuthToken, UserExportSerializer
+
+# 5b. User model (needed to fetch user by id in TwoFAVerifyView)
+from .models import User
+
+# 6. TOTP for 2FA     
+# IO : input/output -> it lets us manipulate data in memory as if it were a file.
+# BytesIO is a fake file in RAM. Instead of saving the QR code image to disk, we write it to memory
+
+# BASE64 : an encoding system that converts binary data into text. A PNG image is binary - it cannot
+# travel inside JSON because JSON accepts only text. And Base64 converts it to plain text.
+# A png image is just the delivery method for secret. 
+
+import pyotp
+import qrcode
+import io 
+import base64
 
 # 6. HTTP client to call Google/GitHub/42 APIs server-to-server
 import requests
@@ -123,7 +176,14 @@ from django.conf import settings
 # 8. SocialAccount model to store provider + uid links
 from .models import SocialAccount
 
-# 9. User model for get_or_create
+# 9. Cross-App Models and Serializers for GDPR Monolithic Export
+from django.db.models import Q
+from apps.friends.models import Friendship, FriendRequest
+from apps.friends.serializer import FriendshipSerializer, FriendRequestSerializer
+from apps.chat.models import Conversation, Message
+from apps.chat.serializers import ConversationSerializer, MessageSerializer
+
+# 10. User model for get_or_create
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -307,6 +367,201 @@ class LogoutView(APIView):
 
 
 #* ----------------------------------------------------------------------------
+#* TwoFASetupView
+#  - Endpoint: POST /api/auth/2fa/setup/
+#  - Generates a random TOTP secret
+#  - Saves it in user.otp_secret
+#  - Returns a QR code (base64) to scan with Google Authenticator
+# ----------------------------------------------------------------------------
+class TwoFASetupView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        # Reuse pending secret if one exists but 2FA not yet confirmed
+        if user.otp_secret and not user.is_2fa_enabled:
+            secret = user.otp_secret
+        else:
+            secret = pyotp.random_base32()
+            user.otp_secret = secret
+            user.save(update_fields=['otp_secret'])
+
+        # Build the provisionung URI for Google Authenticator
+        totp = pyotp.TOTP(secret)
+        uri = totp.provisioning_uri(
+            name=user.email,
+            issuer_name='Transcendence'
+        )
+
+        # Generate the QR code as a base64 image
+        qr = qrcode.make(uri)
+        buffer = io.BytesIO()
+        qr.save(buffer, format='PNG')
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+        return Response({
+            'secret':  secret,
+            'qr_code': f'data:image/png;base64,{qr_base64}',
+        }, status=status.HTTP_200_OK)
+
+
+
+#* ----------------------------------------------------------------------------
+#* TwoFAEnableView
+#  - Endpoint: POST /api/auth/2fa/enable/
+#  - User sends the 6-digit code from Google Authenticator
+#  - Server verifies it against the stored otp_secret
+#  - If valid → sets is_2fa_enabled = True on the user
+# ----------------------------------------------------------------------------
+class TwoFAEnableView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        # Cannot enable 2FA if setup was never started (no secret generated yet)
+        if not user.otp_secret:
+            return Response(
+                {'detail': '2FA setup not started. Call /2fa/setup/ first.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        #if otp_code isn't correct
+        otp_code = request.data.get('otp_code')
+        if not otp_code:
+            return Response(
+                {'detail': 'otp_code is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Verify the code against the stored secret
+        totp = pyotp.TOTP(user.otp_secret)
+        if not totp.verify(otp_code, valid_window=1):
+            return Response(
+                {'detail': 'Invalid or expired code.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Code is correct → activate 2FA
+        user.is_2fa_enabled = True
+        user.save(update_fields=['is_2fa_enabled'])
+
+        return Response(
+            {'detail': '2FA successfully enabled.'},
+            status=status.HTTP_200_OK
+        )
+
+
+
+#* ----------------------------------------------------------------------------
+#* TwoFADisableView
+#  - Endpoint: POST /api/auth/2fa/disable/
+#  - User sends the current 6-digit code from Google Authenticator
+#  - Server verifies it against the stored otp_secret
+#  - If valid → sets is_2fa_enabled = False and clears otp_secret
+# ----------------------------------------------------------------------------
+class TwoFADisableView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        # Cannot disable 2FA if it isn't enabled
+        if not user.is_2fa_enabled:
+            return Response(
+                {'detail': '2FA is not enabled.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        otp_code = request.data.get('otp_code')
+        if not otp_code:
+            return Response(
+                {'detail': 'otp_code is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Verify the code against the stored secret
+        totp = pyotp.TOTP(user.otp_secret)
+        if not totp.verify(otp_code, valid_window=1):
+            return Response(
+                {'detail': 'Invalid or expired code.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Code is correct → deactivate 2FA and clear the secret
+        user.is_2fa_enabled = False
+        user.otp_secret = ''
+        user.save(update_fields=['is_2fa_enabled', 'otp_secret'])
+
+        return Response(
+            {'detail': '2FA successfully disabled.'},
+            status=status.HTTP_200_OK
+        )
+
+
+
+#* ----------------------------------------------------------------------------
+#* TwoFAVerifyView
+#  - Endpoint: POST /api/auth/2fa/verify/
+#  - User sends the pre_auth_token (from login) + the 6-digit TOTP code
+#  - Verifies the pre_auth_token to identify the user
+#  - Verifies the TOTP code with pyotp
+#  - If both valid → returns real JWT tokens + marks user online
+# ----------------------------------------------------------------------------
+class TwoFAVerifyView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        pre_auth_token = request.data.get('pre_auth_token')
+        otp_code       = request.data.get('otp_code')
+
+        if not pre_auth_token or not otp_code:
+            return Response(
+                {'detail': 'pre_auth_token and otp_code are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Decode and validate the pre_auth_token to identify the user
+        try:
+            token   = PreAuthToken(pre_auth_token)
+            user_id = token['user_id']
+        except TokenError:
+            return Response(
+                {'detail': 'Invalid or expired pre_auth_token.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Fetch the user from the database
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {'detail': 'User not found.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Verify the TOTP code against the stored secret
+        totp = pyotp.TOTP(user.otp_secret)
+        if not totp.verify(otp_code, valid_window=1):
+            return Response(
+                {'detail': 'Invalid or expired code.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # All checks passed → mark online and issue real JWT tokens
+        user.is_online = True
+        user.save(update_fields=['is_online'])
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access':  str(refresh.access_token),
+            'refresh': str(refresh),
+            'user':    UserSerializer(user).data,
+        }, status=status.HTTP_200_OK)
+
+
+
+#* ----------------------------------------------------------------------------
 #* SocialAuthView (MANUAL DRIVE - APIVIEW)
 #* ----------------------------------------------------------------------------
 # Endpoint: POST /api/auth/social/
@@ -450,3 +705,73 @@ class SocialAuthView(APIView):
             extra=profile
         )
         return user
+
+
+#* ----------------------------------------------------------------------------
+#* UserExportView (MANUAL DRIVE - GDPR PORTABILITY)
+#* ----------------------------------------------------------------------------
+# Endpoint: GET /api/auth/me/export/
+#
+# ACTION:
+#   - READ: Extracts all account data into a single structured JSON.
+#
+# WHY APIVIEW?
+#   To fully comply with GDPR, this export must be a single monolithic JSON 
+#   containing data from multiple separate apps (Users, Chat, Friends).
+#   APIView gives us manual control to compile everything in one response.
+#
+# STEP-BY-STEP CHRONOLOGICAL FLOW:
+# --------------------------------
+#   1. PERMISSION CHECK  -> [IsAuthenticated] shields the view. DRF intercepts 
+#                           the request and ensures a valid JWT Token is present.
+#   2. USER EXTRACTION   -> 'request.user' extracts the precise User object 
+#                           from the token, preventing any data leak or cross-user access.
+#   3. PROFILE CORNER    -> Baseline User & Social Account data is passed to the 
+#                           Master Serializer to initialize the 'export_data' dictionary.
+#   4. FRIENDS CORNER    -> Queries target friendships and requests using 'Q' objects (OR filtering).
+#                           The filtered data is sent to the serializers (.data) and injected
+#                           into a dedicated nested drawer: 'friends_data'.
+#   5. CHAT CORNER       -> Queries conversations and sent messages, sorts them, serializes them,
+#                           and injects the content into the second nested drawer: 'chat_data'.
+#   6. BULK SHIPMENT     -> The fully aggregated 'export_data' dictionary is wrapped in a 
+#                           DRF Response and sent as a single monolithic JSON payload (200 OK).
+# ----------------------------------------------------------------------------
+class UserExportView(APIView):
+
+    # STEP 1: Permission check
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        # STEP 2: User extraction
+        user = request.user
+        
+        # STEP 3: User Account & Social Data (from apps/users)
+        user_serializer = UserExportSerializer(user)
+        export_data = user_serializer.data
+
+        # STEP 4: Friends Data (Friendships & Requests from apps/friends)
+        friendships = Friendship.objects.filter(Q(user_id=user) | Q(friend_user_id=user))
+        friendships_serializer = FriendshipSerializer(friendships, many=True, context={'request': request})
+        
+        friend_requests = FriendRequest.objects.filter(Q(from_user=user) | Q(to_user=user))
+        requests_serializer = FriendRequestSerializer(friend_requests, many=True, context={'request': request})
+
+        export_data['friends_data'] = {
+            'active_friendships': friendships_serializer.data,
+            'friend_requests_history': requests_serializer.data
+        }
+
+        # STEP 5: Chat Data (Conversations & Sent Messages from apps/chat)
+        conversations = Conversation.objects.filter(participants=user).order_by('-created_at')
+        conversations_serializer = ConversationSerializer(conversations, many=True)
+
+        messages_sent = Message.objects.filter(sender=user).order_by('-created_at')
+        messages_serializer = MessageSerializer(messages_sent, many=True)
+
+        export_data['chat_data'] = {
+            'conversations_joined': conversations_serializer.data,
+            'messages_sent': messages_serializer.data
+        }
+
+        # STEP 6: Return the final multi-app compiled JSON (200 OK)
+        return Response(export_data, status=status.HTTP_200_OK)

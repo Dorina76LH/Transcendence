@@ -43,8 +43,26 @@ from rest_framework import serializers
 # (is_online update, user data in response)
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+# Token base class to build a custom short-lived pre-auth token for 2FA
+from rest_framework_simplejwt.tokens import Token
+from datetime import timedelta
+
 # Import custom User model to create and query users
 from .models import User
+
+
+
+#* ----------------------------------------------------------------------------
+#* PreAuthToken
+#* ----------------------------------------------------------------------------
+# A short-lived JWT (5 min) issued after a successful password check when 2FA
+# is enabled. It carries only the user_id and gives access to nothing except
+# the /2fa/login/ endpoint. The real access + refresh tokens are only issued
+# after the TOTP code is validated.
+# ----------------------------------------------------------------------------
+class PreAuthToken(Token):
+    token_type = 'pre_auth'
+    lifetime   = timedelta(minutes=5)
 
 
 #* ----------------------------------------------------------------------------
@@ -222,11 +240,11 @@ class UserSerializer(serializers.ModelSerializer):
     #& STEP 2 : Meta Definition
     class Meta:
         model = User
-        # 'id', 'username', 'email', 'is_online', 'role' -> Injected directly from DB.
+        # 'id', 'username', 'email', 'is_online', 'role', 'is_2fa_enabled' -> Injected directly from DB.
         # 'avatar_url' -> Injected from the method below.
-        fields = ('id', 'username', 'email', 'avatar_url', 'is_online', 'role')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'avatar_url', 'is_online', 'role', 'is_2fa_enabled')
         # Safety: these cannot be modified via this serializer.
-        read_only_fields = ('id', 'username', 'role')
+        read_only_fields = ('id', 'username', 'role', 'is_2fa_enabled')
     
     #& STEP 3 : Custom Handlers
     def get_avatar_url(self, obj):
@@ -402,6 +420,15 @@ class LoginSerializer(TokenObtainPairSerializer):
         # Call parent validate() to check credentials and generate tokens
         data = super().validate(attrs)
 
+        # If 2FA is active → don't return full tokens yet
+        # Issue a short-lived pre_auth_token and let Angular show the OTP screen
+        if self.user.is_2fa_enabled:
+            pre_auth = PreAuthToken.for_user(self.user)
+            return {
+                'requires_2fa':   True,
+                'pre_auth_token': str(pre_auth),
+            }
+
         # self.user is set by parent after successful validation
         # Update is_online in the database
         self.user.is_online = True
@@ -413,7 +440,66 @@ class LoginSerializer(TokenObtainPairSerializer):
         return data
 
 
-
 #* ----------------------------------------------------------------------------
 #* LogoutSerializer
 #* ----------------------------------------------------------------------------
+
+
+#* ----------------------------------------------------------------------------
+#* RGPD Export Serializers
+#* ----------------------------------------------------------------------------
+#  These serializers are used exclusively for GDPR data portability compliance.
+#  They extract ALL data associated with a user account into a structured JSON.
+#
+#  WHY TWO SERIALIZERS?
+#  --------------------
+#  To build a complete export, we use nested serialization:
+#  1. SocialAccountExportSerializer translates the linked social profiles
+#  2. UserExportSerializer acts as the Master, embedding the social list inside
+#     the main user profile JSON.
+#* ----------------------------------------------------------------------------
+
+from .models import SocialAccount
+
+class SocialAccountExportSerializer(serializers.ModelSerializer):
+    """
+    Serializes linked third-party provider accounts (Google, 42) for GDPR export.
+    """
+    class Meta:
+        model = SocialAccount
+        # Only expose safe OAuth identifiers to the user
+        fields = ('provider', 'uid', 'created_at')
+
+class UserExportSerializer(serializers.ModelSerializer):
+    """
+    Master GDPR serializer. Gathers base profile data and nested relationships.
+    Format enforced: Plain JSON (structured, machine-readable as requested by law).
+    """
+
+    # NESTED RELATIONSHIP:
+    # Look for 'related_name=social_accounts' in SocialAccount model.
+    # many=True tells DRF to expect a list of linked accounts (0, 1 or more).
+    social_accounts = SocialAccountExportSerializer(many=True, read_only=True)
+
+    # HUMAN-READABLE DATE FORMATTING:
+    # To override Django's default timestamp, enforce a clean 'YYYY-MM-DD HH:MM:SS'
+    # layout in the final raw JSON.
+    date_joined = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    last_login = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+
+    class Meta:
+        model = User
+        # THE GDPR "WHITE LIST":
+        # Explicit definition of what the user is allowed to extract.
+        # Security : Sensitive data (like hashed passwords or 2FA secret key)
+        # are strictly omitted from this tuple so they never leak in the JSON.
+        fields = (
+            'id',
+            'username',
+            'email',
+            'role',
+            'is_online',
+            'date_joined',
+            'last_login',
+            'social_accounts'
+        )

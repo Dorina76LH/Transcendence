@@ -13,13 +13,14 @@ import { FriendsComponent } from './friends/friends.component';
 import { AboutComponent } from './about/about.component';
 import { ContactComponent } from './contact/contact.component';
 import { PPTSComponent } from './ppts/ppts.component';
+import { AdminComponent } from './admin/admin.component';
 
 export const routes: Routes = [
 	{path: '', component: HomeComponent},
 	{path: 'login', component:LoginComponent},
 	{path: 'register', component:RegisterComponent},
 	{path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]},
-	{path: 'settings', component: SettingsComponent},
+	{path: 'settings', component: SettingsComponent, canActivate: [AuthGuard]},
 	{path: 'languages', component: LanguageComponent},
 	{path: 'chat', component:ChatComponent, canActivate: [AuthGuard]},
 	// {path: 'profile-settings', component:ProfileSettingsComponent, canActivate: [AuthGuard]},
@@ -28,4 +29,5 @@ export const routes: Routes = [
 	{path : 'contact', component: ContactComponent},
 	{path : 'about', component: AboutComponent},
 	{path : 'ppts', component: PPTSComponent},
+	{path : 'admin-panel', component: AdminComponent, canActivate: [AuthGuard]}
 ];

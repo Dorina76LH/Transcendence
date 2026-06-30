@@ -1,11 +1,12 @@
 import { Component } from "@angular/core";
+import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component ({
-	selector: 'app-contact',
-	imports: [],
+	selector: 'app-chat',
+	imports: [NavbarComponent],
 	template: `
-<body>
-	<main>
+<app-navbar></app-navbar>
+<main>
 		<div class="Content" style="max-width=450px;">
 			<h4>This page is for the people that have a problem, or<br> 
 				that want to contact us about an issue on the website.</h4>
@@ -18,11 +19,7 @@ import { Component } from "@angular/core";
 				llangana@student.42lehavre.fr <br>
 				jvega@student.42lehavre.fr</h4>
 		</div>
-	</main>
-</body>`,
-styleUrl: './contact.css'
+</main>`,
+	styleUrl: './contact.css'
 })
-
-export class ContactComponent {
-
-}
+export class ContactComponent {}

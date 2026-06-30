@@ -68,6 +68,12 @@ export class AppComponent {
 		if (localStorage.getItem('darkMode') === 'true') {
 			document.body.classList.add('dark-mode');
 		}
+		// add a class when user is logged in so global styles can hide login/register links
+		if (localStorage.getItem('token')) {
+			document.body.classList.add('logged-in');
+		} else {
+			document.body.classList.remove('logged-in');
+		}
 	}
 
 	logout() {
