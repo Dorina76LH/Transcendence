@@ -17,13 +17,13 @@ urlpatterns = [
     
     # Main endpoints
     path('friend-requests/', FriendRequestView.as_view(), name='friend-request-list'),
-    path('friends/', FriendListView.as_view(), name='friend-list'),
+    path('', FriendListView.as_view(), name='friend-list'),
     
     # Action endpoints
     path('friend-requests/<int:pk>/accept/', FriendRequestAcceptView.as_view(), name='friend-request-accept'),
     path('friend-requests/<int:pk>/reject/', FriendRequestRejectView.as_view(), name='friend-request-reject'),
     path('friend-requests/<int:pk>/cancel/', FriendRequestCancelView.as_view(), name='friend-request-cancel'),
-    path('friends/<int:friend_id>/', FriendUnfriendView.as_view(), name='friend-unfriend'),
+    path('<int:friend_id>/', FriendUnfriendView.as_view(), name='friend-unfriend'),
 ]
 
 

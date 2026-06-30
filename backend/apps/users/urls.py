@@ -66,6 +66,7 @@ from .views import  (
     LogoutView,
     MeView,
     UserExportView,
+    UserSearchView,
     TwoFASetupView,
     TwoFAEnableView,
     TwoFADisableView,
@@ -125,4 +126,10 @@ urlpatterns = [
     # POST /api/auth/social/  { provider: "google", code: "..." }
     # -------------------------------------------------------------------------
     path('social/', SocialAuthView.as_view(), name='social_auth'),
+
+    # -------------------------------------------------------------------------
+    # 7. USER SEARCH : Search users by username (for add friend)
+    # GET /api/auth/users/?search=<username>
+    # -------------------------------------------------------------------------
+    path('users/', UserSearchView.as_view(), name='user_search'),
 ]
