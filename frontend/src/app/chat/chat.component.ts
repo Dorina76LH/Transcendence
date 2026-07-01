@@ -168,7 +168,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 	}
 
 	initChatDashboard() {
-		this.http.get<any[]>('https://localhost:8443/api/friends/friends/').subscribe({
+		this.http.get<any[]>('https://localhost:8443/api/friends/').subscribe({
 			next: (friendships) => {
 				this.friends = friendships.map(f => ({
 					id: f.friend.id,

@@ -15,7 +15,6 @@
 .friends-container {
 	width: 100%;
 	max-width: 680px;
-	background: rgba(255, 255, 255, 0.05);
 	backdrop-filter: blur(12px);
 	border: 1px solid rgba(255, 255, 255, 0.1);
 	border-radius: 16px;
@@ -43,17 +42,12 @@
 
 .search-input {
 	flex: 1;
-	background: rgba(255, 255, 255, 0.07);
 	border: 1px solid rgba(255, 255, 255, 0.15);
 	border-radius: 8px;
 	padding: 0.5rem 0.9rem;
 	font-size: 0.9rem;
 	outline: none;
 	transition: border-color 0.2s;
-}
-
-.search-input::placeholder {
-	color: rgba(255, 255, 255, 0.35);
 }
 
 .search-input:focus {
@@ -76,11 +70,6 @@
 	background: #4f46e5;
 }
 
-.btn-search:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
-}
-
 .search-error {
 	color: #f87171;
 	font-size: 0.82rem;
@@ -88,7 +77,6 @@
 }
 
 .no-results {
-	color: rgba(255, 255, 255, 0.4);
 	font-size: 0.85rem;
 	margin-top: 0.75rem;
 }
@@ -106,8 +94,6 @@
 	align-items: center;
 	gap: 0.75rem;
 	padding: 0.6rem 0.9rem;
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.08);
 	border-radius: 10px;
 }
 

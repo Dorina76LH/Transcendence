@@ -21,11 +21,11 @@ export class UserService {
 			email,
 			password
 		});
-}
+	}
 	
 	getProfile() {
 		return this.http.get(`${this.url}/auth/me/`);
-}
+	}
 
 	getAdmin() {
 		return this.http.get(`${this.url}/admin/`, {headers : {isAdmin: 'adminState'}} );

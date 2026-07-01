@@ -38,24 +38,20 @@ interface SearchUser {
 <app-navbar></app-navbar>
 	<main class="d-flex justify-content-center py-5" style="min-height: calc(100vh - 56px);">
 		<div class="card border-secondary p-4 w-100" style="max-width: 1000px;">
-			
 			<h4 class="mb-3">Friend list</h4>
 			<div *ngIf="loading">Loading...</div>
 			<div *ngIf="error" class="text-danger">{{ error }}</div>
 			<div class="d-flex flex-column gap-2" *ngIf="!loading && !error">
 				<div *ngFor="let friendship of friends" class="mb-2">
-					<div class="d-flex align-items-center w-100 border border-secondary rounded p-2 bg-dark">
+					<div class="d-flex align-items-center w-100 border border-secondary rounded p-2">
 						<div class="d-flex align-items-center flex-grow-1" (click)="toggleMenu(friendship)" style="cursor: pointer;">
 							
 							<img [src]="friendship.friend.avatar_url || 'Zoliac.png'" 
 								 class="rounded-circle border border-secondary me-3 flex-shrink-0" 
 								 style="width:40px; height:40px; object-fit: cover;">
 							
-							<span class="fw-semibold text-white">{{ friendship.friend.username }}</span>
+							<span class="fw-semibold">{{ friendship.friend.username }}</span>
 						</div>
-						<span class="me-3">
-							<span class="badge rounded-circle bg-success" style="width:10px;height:10px;display:inline-block;"></span>
-						</span>
 						<div *ngIf="selectedFriend?.id === friendship.id" class="d-flex gap-1 align-items-center animate__animated animate__fadeIn">
 							<button class="btn btn-sm btn-outline-primary" (click)="action('chat', friendship)">💬 Chat</button>
 							<button class="btn btn-sm btn-outline-danger" (click)="action('remove', friendship)">❌ Remove</button>

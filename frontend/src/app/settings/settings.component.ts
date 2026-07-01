@@ -12,10 +12,9 @@ import { NavbarComponent } from '../navbar/navbar.component';
 	<app-navbar></app-navbar>
 	<main class="Settings">
 		<div class="d-flex" style="min-height: calc(100vh - 56px);">
-			<!-- Volet gauche -->
-			<div class="border-end border-secondary pe-3 pt-3" style="width: 220px; min-width: 220px;">
+			<div class="pe-3 pt-3" style="width: 200px; min-width: 220px;">
 				<h6 class="text-uppercase mb-3" style="font-size: 0.75rem; letter-spacing: 0.1em;">Settings</h6>
-				<ul class="nav flex-column gap-1">
+				<ul class="nav flex-column gap-1 border-end border-secondary pe-3">
 					<li class="nav-item">
 						<button class="btn btn-sm w-100 text-start" 
 							[class.btn-secondary]="activeTab === 'appearance'"
@@ -29,13 +28,13 @@ import { NavbarComponent } from '../navbar/navbar.component';
 							(click)="activeTab = 'account'">👤 Account</button>
 					</li>
 					<li class="nav-item">
-						<button class="btn btn-sm w100 text-start"
+						<button class="btn btn-sm w-100 text-start"
 							[class.btn-secondary]="activeTab == '2fa'"
 							[class.btn-outline-secondary]="activeTab !== '2fa'"
-							(click)="activeTab = '2fa'">2fa</button>
+							(click)="activeTab = '2fa'">📝​ 2fa</button>
+					</li>
 				</ul>
 			</div>
-			<!-- Contenu droite -->
 			<div class="p-4 flex-grow-1">
 				<div *ngIf="activeTab === 'appearance'">
 					<h4 class="mb-3">Appearance</h4>
