@@ -9,6 +9,7 @@ interface Friend {
   username: string;
   avatar: string | null;
   conversation_id: number | null;
+  is_online: boolean;
 }
 
 interface Conversation {
@@ -42,7 +43,7 @@ interface ChatMessage {
 
 		<div class="col-12 col-md-3 border-end border-secondary py-3 text-start list-container"
 			 [class.hide-on-mobile]="selectedFriend !== null">
-		  <h5 class="text-white mb-4 px-2 tracking-wider">Mes Amis</h5>
+		  <h5 class="text-white mb-4 px-2 tracking-wider">My Friends</h5>
 
 		  <div class="d-flex flex-column gap-1 list-box" style="overflow-y: auto; height: 430px;">
 
@@ -53,9 +54,15 @@ interface ChatMessage {
 
 			  <div class="active-indicator"></div>
 
-			  <div class="avatar-circle me-3 bg-gradient d-flex align-items-center justify-content-center shadow-sm fw-bold overflow-hidden" style="width: 40px; height: 40px; min-width: 40px; border-radius: 50%;">
-				<img *ngIf="friend.avatar" [src]="friend.avatar" alt="avatar" style="width: 100%; height: 100%; object-fit: cover;">
+			  <div class="avatar-circle me-3 bg-gradient d-flex align-items-center justify-content-center shadow-sm fw-bold position-relative"
+				   style="width: 40px; height: 40px; min-width: 40px; border-radius: 50%;">
+
+				<img *ngIf="friend.avatar" [src]="friend.avatar" alt="avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
 				<span *ngIf="!friend.avatar">{{ friend.username.charAt(0).toUpperCase() }}</span>
+
+				<span *ngIf="friend.is_online"
+					  class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-dark rounded-circle online-badge">
+				</span>
 			  </div>
 
 			  <div class="flex-grow-1 overflow-hidden me-2">
@@ -63,7 +70,7 @@ interface ChatMessage {
 				  {{ friend.username }}
 				</h6>
 				<small class="text-white-50 text-truncate d-block" style="font-size: 0.75rem;">
-				  {{ friend.conversation_id ? '💬 Discussion active' : '✉️ Nouvelle discussion' }}
+				  {{ friend.conversation_id ? '💬 Active chat' : '✉️ New chat' }}
 				</small>
 			  </div>
 
@@ -71,7 +78,7 @@ interface ChatMessage {
 
 			<div *ngIf="friends.length === 0" class="text-center text-white-50 py-4">
 			  <i class="bi bi-people-fill d-block fs-3 mb-2"></i>
-			  <small>Aucun ami dans votre liste.</small>
+			  <small>No friends in your list.</small>
 			</div>
 		  </div>
 		</div>
@@ -83,7 +90,7 @@ interface ChatMessage {
 			<div class="d-flex align-items-center overflow-hidden w-100">
 			  <button class="btn back-button-mobile" (click)="closeChatMobile()">←</button>
 			  <i class="bi bi-chat-right-text text-primary-emphasis d-none d-md-inline me-2"></i>
-			  <span class="text-truncate">{{ selectedFriend ? selectedFriend.username : 'Sélectionnez un ami' }}</span>
+			  <span class="text-truncate">{{ selectedFriend ? selectedFriend.username : 'Select a friend' }}</span>
 			</div>
 		  </h5>
 
@@ -93,8 +100,8 @@ interface ChatMessage {
 			  <div class="bg-dark bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
 				<i class="bi bi-chat-square-quote fs-1 text-secondary"></i>
 			  </div>
-			  <h5>Vos messages en direct</h5>
-			  <p class="small">Sélectionnez un de vos amis à gauche pour lancer la connexion sécurisée.</p>
+			  <h5>Your Live Messages</h5>
+			  <p class="small">Select one of your friends on the left to start a secure connection.</p>
 			</div>
 
 			<div *ngFor="let msg of messages" class="mb-3 d-flex flex-column w-100"
@@ -102,7 +109,7 @@ interface ChatMessage {
 				 [class.align-items-start]="!isMe(msg.sender)">
 
 			  <small class="text-white-50 mb-1 px-2" style="font-size: 0.75rem; font-weight: 500;">
-				{{ msg.sender?.username || msg.sender }} • {{ msg.created_at | date:'shortTime' }}
+				{{ msg.sender.username || msg.sender }} • {{ msg.created_at | date:'shortTime' }}
 			  </small>
 
 			  <div class="p-2 px-3 rounded-4 shadow-sm message-bubble border text-start"
@@ -174,6 +181,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 					id: f.friend.id,
 					username: f.friend.username,
 					avatar: f.friend.avatar_url || null,
+					is_online: f.friend.is_online || false,
 					conversation_id: null
 				}));
 
@@ -182,10 +190,10 @@ export class ChatComponent implements OnInit, OnDestroy {
 						this.mapFriendsToConversations(convsData);
 						this.cdr.detectChanges();
 					},
-					error: (err) => console.error('Erreur chargement conversations:', err)
+					error: (err) => console.error('Error loading conversations:', err)
 				});
 			},
-			error: (err) => console.error('Erreur chargement amis backend:', err)
+			error: (err) => console.error('Error loading friends from backend:', err)
 		});
 	}
 
@@ -224,7 +232,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 						this.cdr.detectChanges();
 						this.scrollToBottom();
 					},
-					error: (err) => console.error('Erreur historique:', err)
+					error: (err) => console.error('Error loading chat history:', err)
 				});
 		}
 	}
@@ -243,7 +251,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 							setTimeout(() => this.sendViaSocket(newConv.id, messageToSend), 150);
 						}
 					},
-					error: (err) => console.error('Erreur création discussion automatique:', err)
+					error: (err) => console.error('Error automatically creating chat session:', err)
 				});
 		} else {
 			this.sendViaSocket(this.selectedFriend.conversation_id, messageToSend);
@@ -257,7 +265,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 			this.inputMessage = '';
 			this.cdr.detectChanges();
 		} else {
-			console.error('Le WebSocket n\'est pas prêt ou déconnecté pour la discussion:', convId);
+			console.error('WebSocket is not ready or disconnected for conversation:', convId);
 		}
 	}
 
@@ -276,6 +284,16 @@ export class ChatComponent implements OnInit, OnDestroy {
 
 		socket.onmessage = (event) => {
 			const data = JSON.parse(event.data);
+
+			if (data.type === 'status_change') {
+				const targetFriend = this.friends.find(f => f.id === data.user_id);
+				if (targetFriend) {
+					targetFriend.is_online = data.is_online;
+					this.cdr.detectChanges();
+				}
+				return;
+			}
+
 			const extractedUsername = data.username || data.sender?.username || 'Friend';
 
 			const formattedMessage: ChatMessage = {
@@ -292,7 +310,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 			this.cdr.detectChanges();
 		};
 
-		socket.onerror = (err) => console.error(`Erreur WS:`, err);
+		socket.onerror = (err) => console.error(`WebSocket Error:`, err);
 		socket.onclose = () => { delete this.activeSockets[conversationId]; };
 	}
 

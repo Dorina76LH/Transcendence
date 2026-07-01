@@ -21,7 +21,7 @@ class ChatTestConsumer(AsyncWebsocketConsumer):
 				}))
 
 class ChatConversationConsumer(AsyncWebsocketConsumer):
-		
+
 		async def connect(self):
 				self.user = self.scope['user']
 				self.conversation_id = self.scope['url_route']['kwargs']['conversation_id']
@@ -33,13 +33,32 @@ class ChatConversationConsumer(AsyncWebsocketConsumer):
 				if not has_access:
 						await self.close()
 						return
+				await self.set_user_online_status(True)
 				await self.channel_layer.group_add(
 						self.room_group_name,
 						self.channel_name
 				)
 				await self.accept()
+				await self.channel_layer.group_send(
+						self.room_group_name,
+						{
+								'type': 'user_status_update',
+								'user_id': self.user.id,
+								'is_online': True
+						}
+				)
 
 		async def disconnect(self, close_code):
+				if not self.user.is_anonymous:
+						await self.set_user_online_status(False)
+						await self.channel_layer.group_send(
+								self.room_group_name,
+								{
+										'type': 'user_status_update',
+										'user_id': self.user.id,
+										'is_online': False
+								}
+						)
 				await self.channel_layer.group_discard(
 						self.room_group_name,
 						self.channel_name
@@ -72,13 +91,20 @@ class ChatConversationConsumer(AsyncWebsocketConsumer):
 						'created_at': event['created_at']
 				}))
 
+		async def user_status_update(self, event):
+				await self.send(text_data=json.dumps({
+						'type': 'status_change',
+						'user_id': event['user_id'],
+						'is_online': event['is_online']
+				}))
+
 		@database_sync_to_async
 		def user_has_access(self):
 				return Conversation.objects.filter(
 						id=self.conversation_id,
 						participants=self.user
 				).exists()
-		
+
 		@database_sync_to_async
 		def create_message(self, content):
 				conversation = Conversation.objects.get(id=self.conversation_id)
@@ -94,3 +120,8 @@ class ChatConversationConsumer(AsyncWebsocketConsumer):
 						'username': self.user.username,
 						'created_at': message.created_at.isoformat()
 				}
+
+		@database_sync_to_async
+		def set_user_online_status(self, status):
+				self.user.is_online = status
+				self.user.save(update_fields=['is_online'])
