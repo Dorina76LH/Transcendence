@@ -171,7 +171,6 @@ export class FriendsComponent implements OnInit {
 		this.userService.getUserFriends().subscribe({
 			next: (data: any) => {
 				this.friends = data.results ?? data;
-				this.friends.forEach(f => this.requestSent[f.friend.id] = true);
 				this.loading = false;
 			},
 			error: (err: any) => {
@@ -216,7 +215,9 @@ export class FriendsComponent implements OnInit {
 		this.searched = false;
 		this.userService.searchUsers(this.searchQuery).subscribe({
 			next: (results: any) => {
-				this.searchResults = results.results ?? results;
+				const friendIds = new Set(this.friends.map(f => f.friend.id));
+				const all = results.results ?? results;
+				this.searchResults = all.filter((u: any) => !friendIds.has(u.id));
 				this.searched = true;
 			},
 			error: () => {
