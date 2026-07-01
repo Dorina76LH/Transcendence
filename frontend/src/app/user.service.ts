@@ -35,6 +35,38 @@ export class UserService {
 		return this.http.get(`${this.url}/friends/`);
 	}
 
+	searchUsers(query: string) {
+		return this.http.get<{id: number, username: string}[]>(`${this.url}/auth/users/?search=${encodeURIComponent(query)}`);
+	}
+
+	sendFriendRequest(toUserId: number) {
+		return this.http.post(`${this.url}/friends/friend-requests/`, { "to_user_id": toUserId });
+	}
+
+	getSentFriendRequests() {
+		return this.http.get<any[]>(`${this.url}/friends/friend-requests/sent/`);
+	}
+
+	getReceivedFriendRequests() {
+		return this.http.get(`${this.url}/friends/friend-requests/received/`);
+	}
+
+	acceptFriendRequest(requestId: number) {
+		return this.http.patch(`${this.url}/friends/friend-requests/${requestId}/accept/`, {});
+	}
+
+	declineFriendRequest(requestId: number) {
+		return this.http.patch(`${this.url}/friends/friend-requests/${requestId}/reject/`, {});
+	}
+
+	cancelFriendRequest(requestId: number) {
+		return this.http.delete(`${this.url}/friends/friend-requests/${requestId}/cancel/`);
+	}
+
+	removeFriend(friendUserId: number) {
+		return this.http.delete(`${this.url}/friends/${friendUserId}/`);
+	}
+
 	logout() {
 		const refresh = localStorage.getItem('refresh');
 		return this.http.post(`${this.url}/auth/logout/`, { refresh });
@@ -66,15 +98,4 @@ export class UserService {
 		return this.http.delete(`${this.url}/auth/me/`);
 	}
 
-	searchUsers(query: string) {
-		return this.http.get<{id: number, username: string}[]>(`${this.url}/auth/users/?search=${encodeURIComponent(query)}`);
-	}
-
-	sendFriendRequest(toUserId: number) {
-		return this.http.post(`${this.url}/friends/friend-requests/`, { to_user_id: toUserId });
-	}
-
-	getSentFriendRequests() {
-		return this.http.get<any[]>(`${this.url}/friends/friend-requests/sent/`);
-	}
 }
