@@ -57,8 +57,6 @@ export class GDPRComponent {
 
 	onDeleteAccount() {
 		console.log('Delete button clicked');
-		const firstConfirm = confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.");
-		if (!firstConfirm) return;
 
         const firstConfirm = confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.");
         if (!firstConfirm) return;
@@ -78,19 +76,5 @@ export class GDPRComponent {
                 alert("An error occurred. Your account could not be deleted.");
             }
         });
-    }
-
-		this.userService.deleteAccount().subscribe({
-			next: () => {
-				localStorage.removeItem('access');
-				localStorage.removeItem('refresh');
-				alert("Your account has been successfully deleted. Goodbye!");
-				this.router.navigate(['/login']);
-			},
-			error: (err: any) => {
-				console.error("Failed to delete account:", err);
-				alert("An error occurred. Your account could not be deleted.");
-			}
-		});
 	}
 }
