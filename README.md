@@ -64,7 +64,7 @@ The platform uses **PostgreSQL** as its primary data store. The schema is manage
 ## 👥 Team Information
 | Member | Role | Responsibilities |
 | :--- | :--- | :--- |
-| **[Your Name]** | Tech Lead / Backend | Microservices architecture, Django/PostgreSQL setup, and Security Hardening. |
+| **[aeudes]** | Developer / Backend | OAuth 2.0 (Google & 42) (backend + frontend), Two-Factor Authentication (2FA) (backend + frontend), Friends system (backend), Logout, Navbar centralization. |
 | **[Name 2]** | Frontend Developer | Angular components, Design System, and i18n implementation. |
 | **[Name 3]** | PM / DevOps | Task coordination, Vault/WAF setup, and OAuth integration. |
 
@@ -111,10 +111,19 @@ We followed a strict **"1 Trello card = 1 branch = 1 PR"** policy to ensure code
 ---
 
 ## 💡 Individual Contributions
-### [Your Name]
-*   **Contributions:** Designed the Backend Microservices architecture and implemented the core Authentication service.
-*   **Challenges:** Managing cross-origin resource sharing (CORS) and authentication headers between micro-units.
-*   **Solution:** Configured a centralized gateway and used a shared JWT secret across services for token verification.
+
+### [aeudes] — Ada
+*   **Branches:** `feature/backend-users-auth`, `feature/backend-friends-auth`, `feature/backend-oauth`, `feature/backend-2fa`, `feature/frontend-oauth`, `feature/frontend-add-friend`, `feature/frontend-2fa`
+*   **Contributions:**
+    *   **Logout:** Logout endpoint.
+    *   **OAuth 2.0 (backend + frontend):** Google and 42 intra login integration — backend OAuth views with CSRF state validation, and frontend redirect handling, callback processing, and OAuth login buttons.
+    *   **Two-Factor Authentication (2FA) (backend + frontend):** TOTP setup endpoint with QR code generation (`pyotp`), OTP verification, enable/disable endpoints. Pre-auth token gate: users with 2FA enabled receive a temporary `pre_auth_token` and must complete OTP before a real JWT is issued. Frontend: QR code display, OTP input form, and 2FA enable/disable UI.
+    *   **Friends system (backend):** Complete `FriendRequest` CRUD (send, accept, reject, cancel), `Friendship` creation on acceptance, filtered list endpoints (sent / received / all). Add-friend button Angular component.
+    *   **Navbar:** Centralized all navigation into a single `NavbarComponent`, eliminating duplicated code across pages.
+*   **Challenges:**
+    *   *Pre-auth 2FA gate:* Needed to block JWT issuance mid-login without breaking the request flow. Solved by issuing a short-lived `pre_auth_token` exchanged for a real JWT only after the user submits a valid OTP.
+    *   *OAuth CSRF protection:* Each OAuth redirect generates a random `state` parameter verified server-side before processing the authorization code.
+
 
 ---
 
