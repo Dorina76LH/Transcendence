@@ -154,6 +154,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 	private localUsername: string | null = null;
 	private activeSockets: { [key: number]: WebSocket } = {};
 	private scrollContainer!: ElementRef;
+	private pollingInterval: any;
 
 	@ViewChild('scrollContainer') set content(content: ElementRef) {
 		if (content) this.scrollContainer = content;
@@ -164,6 +165,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		this.localUsername = localStorage.getItem('username');
 		this.initChatDashboard();
+		this.pollingInterval = setInterval(() => {
+			this.checkForNewConversations();
+		}, 3000);
 	}
 
 	isMe(sender: any): boolean {
@@ -175,7 +179,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 	}
 
 	initChatDashboard() {
-		this.http.get<any[]>('https://localhost:8443/api/friends/friends/').subscribe({
+		this.http.get<any[]>('https://localhost:8443/api/friends/friends').subscribe({
 			next: (friendships) => {
 				this.friends = friendships.map(f => ({
 					id: f.friend.id,
@@ -194,6 +198,15 @@ export class ChatComponent implements OnInit, OnDestroy {
 				});
 			},
 			error: (err) => console.error('Error loading friends from backend:', err)
+		});
+	}
+
+	checkForNewConversations() {
+		this.http.get<Conversation[]>('https://localhost:8443/api/chat/conversations/').subscribe({
+			next: (convsData) => {
+				this.mapFriendsToConversations(convsData);
+				this.cdr.detectChanges();
+			}
 		});
 	}
 
@@ -225,16 +238,29 @@ export class ChatComponent implements OnInit, OnDestroy {
 		this.messages = [];
 
 		if (friend.conversation_id) {
-			this.http.get<ChatMessage[]>(`https://localhost:8443/api/chat/conversations/${friend.conversation_id}/messages/`)
-				.subscribe({
-					next: (history) => {
-						this.messages = history;
-						this.cdr.detectChanges();
-						this.scrollToBottom();
-					},
-					error: (err) => console.error('Error loading chat history:', err)
-				});
+			this.fetchMessages(friend.conversation_id);
+		} else {
+			this.http.get<Conversation[]>('https://localhost:8443/api/chat/conversations/').subscribe({
+				next: (convsData) => {
+					this.mapFriendsToConversations(convsData);
+					if (this.selectedFriend && this.selectedFriend.conversation_id) {
+						this.fetchMessages(this.selectedFriend.conversation_id);
+					}
+				}
+			});
 		}
+	}
+
+	private fetchMessages(convId: number) {
+		this.http.get<ChatMessage[]>(`https://localhost:8443/api/chat/conversations/${convId}/messages/`)
+			.subscribe({
+				next: (history) => {
+					this.messages = history;
+					this.cdr.detectChanges();
+					this.scrollToBottom();
+				},
+				error: (err) => console.error('Erreur historique:', err)
+			});
 	}
 
 	sendMessage() {
@@ -247,11 +273,23 @@ export class ChatComponent implements OnInit, OnDestroy {
 					next: (newConv) => {
 						if (this.selectedFriend) {
 							this.selectedFriend.conversation_id = newConv.id;
+							const friendInList = this.friends.find(f => f.id === this.selectedFriend!.id);
+							if (friendInList) {
+								friendInList.conversation_id = newConv.id;
+							}
 							this.connectToWebSocket(newConv.id);
-							setTimeout(() => this.sendViaSocket(newConv.id, messageToSend), 150);
+							const checkSocketAndSend = setInterval(() => {
+								const socket = this.activeSockets[newConv.id];
+								if (socket && socket.readyState === WebSocket.OPEN) {
+									this.sendViaSocket(newConv.id, messageToSend);
+									clearInterval(checkSocketAndSend);
+								}
+							}, 50);
+
+							this.cdr.detectChanges();
 						}
 					},
-					error: (err) => console.error('Error automatically creating chat session:', err)
+					error: (err) => console.error('Error automatic discussion creation:', err)
 				});
 		} else {
 			this.sendViaSocket(this.selectedFriend.conversation_id, messageToSend);
@@ -323,6 +361,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnDestroy() {
+		if (this.pollingInterval) {
+			clearInterval(this.pollingInterval);
+		}
 		Object.keys(this.activeSockets).forEach(key => {
 			this.activeSockets[Number(key)].close();
 		});
