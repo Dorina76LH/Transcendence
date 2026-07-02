@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
+import { UserService } from '../user.service';
 
 interface LoggedUser {
   id: number;
@@ -17,7 +18,7 @@ interface LoggedUser {
     <header>
       <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-          <a routerLink="/" class="nav-link">
+          <a routerLink="/admin-panel" class="nav-link">
             <strong>TRANSCENDENCE ADMIN</strong>
           </a>
 
@@ -25,6 +26,7 @@ interface LoggedUser {
             <a href="/admin/" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">
               Django admin
             </a>
+            <button type="button" class="btn btn-danger" (click)="logout()">Logout</button>
           </div>
         </div>
       </nav>
@@ -51,6 +53,9 @@ interface LoggedUser {
 export class AdminComponent implements OnInit {
   currentUser: LoggedUser | null = null;
   isAdmin = false;
+
+  constructor(private userService: UserService, private router: Router) {}
+
   ngOnInit() {
     this.loadCurrentUser();
   }
@@ -62,5 +67,19 @@ export class AdminComponent implements OnInit {
     }
     this.currentUser = JSON.parse(storedUser) as LoggedUser;
     this.isAdmin = this.currentUser.role === 'admin';
+  }
+
+  logout() {
+    this.userService.logout().subscribe({
+      next: () => this.clearSession(),
+      error: () => this.clearSession(),
+    });
+  }
+
+  clearSession() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refresh');
+    localStorage.removeItem('user');
+    this.router.navigate(['/login']);
   }
 }
