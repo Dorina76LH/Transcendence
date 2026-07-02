@@ -55,6 +55,8 @@ from django.urls import path
 # - TokenObtainPairView: Handles LOGIN (takes credentials, returns Access & Refresh tokens)
 # - TokenRefreshView: Handles TOKEN RENEWAL (takes Refresh token, returns a new Access token)
 from rest_framework_simplejwt.views import TokenRefreshView
+from django.conf import settings
+from django.conf.urls.static import static
 
 # 3. Your custom views from the local views.py file:
 # - RegisterView: Handles NEW USER creation
@@ -100,7 +102,7 @@ urlpatterns = [
     # DELETE /api/auth/me/ -> Delete my account (RGPD right to be gorgotten)
     # GET    /api/auth/me/export/ -> Export my GDPR data (JSON portability)
     # -------------------------------------------------------------------------
-    path('me/', MeView.as_view(), name='user_me'),
+    path('me/', MeView.as_view(), name='user_me')+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
     path('me/export/', UserExportView.as_view(), name='user_gdrp_export'),
 
     # -------------------------------------------------------------------------

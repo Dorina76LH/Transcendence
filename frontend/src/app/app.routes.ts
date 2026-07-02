@@ -14,6 +14,8 @@ import { AboutComponent } from './about/about.component';
 import { ContactComponent } from './contact/contact.component';
 import { PPTSComponent } from './ppts/ppts.component';
 import { AdminComponent } from './admin/admin.component';
+import { ProfileSettingsComponent } from './profile-settings/profile.settings';
+import { authInterceptor } from './auth.interceptor';
 
 export const routes: Routes = [
 	{path: '', component: HomeComponent},
@@ -29,5 +31,6 @@ export const routes: Routes = [
 	{path : 'contact', component: ContactComponent},
 	{path : 'about', component: AboutComponent},
 	{path : 'ppts', component: PPTSComponent},
-	{path : 'admin-panel', component: AdminComponent, canActivate: [AuthGuard]}
+	{path : 'admin-panel', component: AdminComponent, canActivate: [AuthGuard]},
+	{path : 'profile-settings', component: ProfileSettingsComponent, canActivate: [AuthGuard]}
 ];

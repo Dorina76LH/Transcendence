@@ -182,6 +182,7 @@ from apps.friends.models import Friendship, FriendRequest
 from apps.friends.serializer import FriendshipSerializer, FriendRequestSerializer
 from apps.chat.models import Conversation, Message
 from apps.chat.serializers import ConversationSerializer, MessageSerializer
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 # 10. User model for get_or_create
 from django.contrib.auth import get_user_model
@@ -274,6 +275,7 @@ class MeView(generics.RetrieveUpdateDestroyAPIView):
 
     # Translation: The Serializer that maps Model fields to JSON
     serializer_class = UserSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_object(self):
         """

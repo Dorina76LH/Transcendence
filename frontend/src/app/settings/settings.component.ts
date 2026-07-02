@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../user.service';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +7,7 @@ import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
 	selector: 'user-settings',
-	imports: [CommonModule, NavbarComponent, FormsModule],
+	imports: [CommonModule, NavbarComponent, FormsModule, RouterLink],
 	template: `
 	<app-navbar></app-navbar>
 	<main class="Settings">
@@ -51,7 +51,9 @@ import { NavbarComponent } from '../navbar/navbar.component';
 				</div>
 				<div *ngIf="activeTab === 'account'">
 					<h4 class="mb-3">Account</h4>
-					<p class="">Account settings coming soon...</p>
+					<button class="btn btn-primary">
+						<a routerLink="/profile-settings" class="nav-link">User profile settings</a>
+					</button>
 				</div>
 				<div *ngIf="activeTab == '2fa'">
 					<!-- 2FA SECTION -->
