@@ -24,7 +24,7 @@ interface UserProfile {
 	<h5 class="mb-4">Profile Settings</h5>
 	<div class="text-center mb-4">
 		<div class="position-relative d-inline-block">
-			<img src="{{MEDIA_URL}}/avatars/kekw.jpg"
+			<img [src]="previewUrl || user.avatar_url || 'Zoliac.png'"
 				class="rounded-circle border border-secondary"
 				style="width:100px; height:100px; object-fit: cover;">
 			<button class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle"
@@ -127,9 +127,13 @@ export class ProfileSettingsComponent implements OnInit {
 
 		this.userService.updateProfile(formData).subscribe({
 			next: (data: any) => {
+				this.user.email			= data.email ?? this.user.email;
+				this.user.first_name	= data.first_name ?? this.user.first_name;
+				this.user.last_name		= data.last_name ?? this.user.last_name;
 				this.user.avatar_url	= data.avatar_url ?? this.user.avatar_url;
 				this.previewUrl			= '';
 				this.selectedFile		= null;
+				localStorage.setItem('user', JSON.stringify(data));
 				this.success			= true;
 				this.loading			= false;
 				setTimeout(() => this.success = false, 3000);
