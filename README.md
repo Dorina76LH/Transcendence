@@ -16,7 +16,7 @@
     * **OAuth 2.0 Integration:** Secure and seamless third-party authentication via Google and 42 Intra.
     * **Two-Factor Authentication (2FA):** Enhanced account protection layer to secure user identities.
     * **GDPR Compliance:** Dedicated privacy controls allowing immediate profile data export (JSON format) and permanent account erasure ("Right to be Forgotten").
-* **Social, Gaming & Interactive Features:**
+* **Socia & Interactive Features:**
     * **Social Graph System:** Full-featured friendship network allowing users to send requests, track friends, and block profiles with strict real-time status isolation.
     * **Interactive Chat & Sound Alerts:** Real-time messaging platform equipped with immediate audio notifications (custom "plouf" sound effects) to enhance user engagement.
     * **Admin Dashboard:** Dedicated administrative control panel enabling authorized profiles to manage global system metrics, user data, and site statistics.
