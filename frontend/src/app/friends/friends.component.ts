@@ -272,9 +272,9 @@ export class FriendsComponent implements OnInit {
 	cancelRequest(req: FriendRequest) {
 		this.userService.cancelFriendRequest(req.id).subscribe({
 			next: () => {
+				const toUserId = req.to_user?.id;
 				this.sentRequests = this.sentRequests.filter(r => r.id !== req.id);
-				const req_id = this.sentRequests.find(r => r.id === req.id)?.to_user?.id;
-				if (req_id) delete this.requestSent[req_id];
+				if (toUserId) delete this.requestSent[toUserId];
 			},
 			error: (err : any) => console.error(err)
 		});
