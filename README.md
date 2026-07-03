@@ -75,15 +75,18 @@ The platform uses **PostgreSQL** as its primary data store. The schema is manage
 ---
 
 ## 👥 Team Information & Roles
-| Member | Role | Key Responsibilities |
+
+| Member | Role | Responsibilities |
 | :--- | :--- | :--- |
-| **Léo** (`llan`) | **Product Owner (PO) & Developer** | Defines the product vision, prioritizes features, maintains the product backlog, and makes final decisions on user stories and validation. |
-| **Dorina** (`doberes`) | **Project Manager (PM) & Developer** | Facilitates team coordination, organizes meetings/sprints, tracks overall progress against deadlines, and resolves technical or organizational blockers. |
-| **Jeffrey** (`jvega`) | **Technical Lead / Architect & Developer** | Supervises overall architecture design, enforces coding best practices, leads technology choices, and drives critical code reviews. |
-| **Ada** (`aeudes`) | **Developer / DevOps** | Implements backend architecture, handles containerized service workflows, network isolation features, and software hardening. |
-| **Lény** (`lpatin`) | **Developer / Fullstack Specialist** | Implements robust features, participates in frontend layout/component interactivity, and drives core codebase integration. |
+| **[aeudes]** | Developer / Backend | OAuth 2.0 (Google & 42) (backend + frontend), Two-Factor Authentication (2FA) (backend + frontend), Friends system (backend), Logout, Navbar centralization. |
+| **[doberes]** | PM / Developer | Core Django setup, Custom User Model, REST Auth API (Register, Login, Me), GDPR Compliance (backend + frontend), Admin Panel localization & layout theme, Trello agile workflow setup & card monitoring. |
+| **[llan]** | PO / Infrastructure & Dev | Multi-network containerized environment isolation (`gateway` & `internal`), Nginx Reverse Proxy routing (HTTPS/TLS), automated OpenSSL certificate script, WSS reverse proxy configuration, and Chat frontend components (Angular). |
+| **[jvega]** | Tech Lead / Developer Fullstack | Technical stack selection, global module architecture design, chat (backend), dashboard (backend + frontend), taskforce frontend. |
+| **[lpatin]** | Frontend Developer | Global UI initialization (theme, page layouts, reusable design system components), and core backend API integration/wiring. |
+
 
 > 💡 **Shared Developer Responsibilities:** Every team member actively participated in writing code for assigned features, performing thorough peer reviews on active Pull Requests, conducting baseline runtime testing, and logging issues on Trello.
+
 
 ### 📊 Git Contribution & Verification
 To ensure complete transparency and verify the active contribution of each team member, you can run the following standard Git command at the root of the repository to display the commit count per contributor:
@@ -126,82 +129,96 @@ We followed a strict **"1 Trello card = 1 branch = 1 PR"** policy to ensure code
 ### 🧱 Major Modules (2pts each)
 
 #### 1. Integrated Fullstack Frameworks (IV.1)
-* **Team Members:** 
-* **How it was Implemented:** Designed a multi-container ecosystem using **Angular** for reactive standalone components on the frontend, and **Django REST Framework (DRF)** to serve securely routed APIs behind an Nginx gateway.
-
 #### 2. Real-time Features using WebSockets (IV.1)
-* **Team Members:** 
-* **How it was Implemented:** Built utilizing full HTML5 WebSockets pipelines. The chat system and game loop run on asynchronous channels providing real-time updates and connection handling.
-
 #### 3. Allow Users to Interact with Other Users (IV.1)
-* **Team Members:** 
-* **How it was Implemented:** Developed a backend relational system tracking direct friendship records, online/offline status toggles, and a basic chat system to send/receive messages between users alongside profile viewing.
-
 #### 4. Standard User Management & Authentication Suite (IV.3)
-* **Team Members:** 
-* **How it was Implemented:** Integrated secure profile updating, traditional credentials management, and unique user identifiers linked to our backend storage.
-
 #### 5. Advanced Permissions System (IV.3)
-* **Team Members:** 
-* **How it was Implemented:** Created a server-side Role-Based Access Control (RBAC) authorization middleware that dynamically validates token payloads, restricting specific views and endpoints based on user roles.
-
 #### 6. Backend as Microservices (IV.7)
-* **Team Members:** 
-* **How it was Implemented:** Split the platform into decoupled containerized environments separating core logic (Authentication, Chat, Matchmaking). Services communicate via isolated internal Docker networks.
-
 #### 7. Advanced Analytics Dashboard with Data Visualization (IV.8)
-* **Team Members:** 
-* **How it was Implemented:** Designed and deployed an interactive administration control panel featuring rich data visualization charts (line, bar, pie), real-time internal database counters, and customizable date range filters.
 
 ---
 
 ### ⚙️ Minor Modules (1pt each)
 
 #### 1. ORM Database Management (IV.1)
-* **Team Members:** 
-* **How it was Implemented:** Leveraged Django ORM for strict database abstraction and schema generation inside a PostgreSQL container, coupled with a dedicated `pgAdmin` panel on port 5050 for team tracking.
-
 #### 2. Custom-Made Design System (IV.1)
-* **Team Members:** 
-* **How it was Implemented:** Crafted a custom standalone component architecture entirely from scratch using Angular, providing at least 10 reusable and styled graphical interface components.
-
 #### 3. Support for Additional Browsers (IV.2)
-* **Team Members:** 
-* **How it was Implemented:** Conducted cross-browser styling audits and layout adjustments to ensure uniform UI/UX compatibility across Google Chrome, Mozilla Firefox, and Apple Safari.
-
 #### 4. Remote Authentication with OAuth 2.0 (IV.3)
-* **Team Members:**
-* **How it was Implemented:** Integrated secure Google and 42 Intra OAuth 2.0 third-party authentication protocols to provide one-click remote logins.
-
 #### 5. Two-Factor Authentication (IV.3)
-* **Team Members:** 
-* **How it was Implemented:** Secured user account validation using a functional Time-based One-Time Password (TOTP) 2FA layer, scanning a secure QR code layout upon login.
-
 #### 6. User Activity Analytics and Insights Dashboard (IV.3)
-* **Team Members:** 
-* **How it was Implemented:** Built automated tracking fields capturing registration timestamps, connection frequencies, and user statistics to feed data counters on the admin dashboard.
-
 #### 7. GDPR Compliance Features (IV.8)
-* **Team Members:** 
-* **How it was Implemented:** Programmed dedicated account utilities enabling immediate operational data download (structured JSON format) and permanent account erasure ("Right to be Forgotten").
-
 #### 8. Health Check and Status Page System (IV.7)
-* **Team Members:** 
-* **How it was Implemented:** Deployed automated container health checks monitoring the environment status and database connectivity alongside manual configuration restoration routines.
 
 ---
 
 ## 💡 Individual Contributions
 
-### 1. The Microservices Architecture Conception vs. Framework Learning Curve
-* **The Challenge:** Our team planned a decoupled Microservices infrastructure from Day 1. However, we hit a structural bottleneck when implementation began: while the infrastructure team was ready to isolate environments, the backend team had to simultaneously learn the inner workings of Django and dissect the dense core features demanded by the subject (real-time chat loops, multi-level friendship systems, and user profiles). Each developer initially prototyped their logic in separate standalone environments to "clear the path" and understand the framework. This slowed down infrastructure integration since the DevOps track had to wait for these exploratory backend components to stabilize before finalizing Docker network definitions and routing rules.
-* **How it was Overcome:** We ran collaborative integration workshops where we audited the pathfinding code written by the backend team, synchronized our understanding of Django's modular app structure, and smoothly migrated the isolated logic into a clean, orchestrated multi-container architecture.
-* **Lesson Learned:** For complex framework learning curves, it is highly efficient to implement a unified minimalistic skeleton on Day 1. This gives developers a shared playground to test and understand features directly within the targeted microservices infrastructure, avoiding downstream migration friction.
+### 👩‍💻 [aeudes] — Ada
 
-### 2. Underestimating the Front-End Workload
-* **The Challenge:** Because basic static frontend components render rapidly in the browser, our team initially underestimated the total workload required for the user interface. We quickly realized that building a responsive Single Page Application (SPA) entirely from scratch using Angular—handling dynamic component states, standard token-based authentication protection, and fluid real-time data streaming simultaneously—required far more architectural design and development hours than anticipated.
-* **How it was Overcome:** We decoupled our development pipeline. We refocused our workflows by pairing up team members through peer programming sessions to complete the modular Angular component system while strictly prioritizing essential interactive views.
-* **Lesson Learned:** Visual progress does not equal structural completion. Future front-end timelines must be estimated with the same algorithmic complexity as backend microservices.
+* **🌿 Branches:** feature/backend-users-auth, feature/backend-friends-auth, feature/backend-oauth, feature/backend-2fa, feature/frontend-oauth, feature/frontend-add-friend, feature/frontend-2fa
+* **🛠️ Contributions:**
+  * **Logout:** Logout endpoint.
+  * **OAuth 2.0 (backend + frontend):** Google and 42 intra login integration — backend OAuth views with CSRF state validation, and frontend redirect handling, callback processing, and OAuth login buttons.
+  * **Two-Factor Authentication (2FA) (backend + frontend):** TOTP setup endpoint with QR code generation (pyotp), OTP verification, enable/disable endpoints. Pre-auth token gate: users with 2FA enabled receive a temporary pre_auth_token and must complete OTP before a real JWT is issued. Frontend: QR code display, OTP input form, and 2FA enable/disable UI.
+  * **Friends system (backend):** Complete FriendRequest CRUD (send, accept, reject, cancel), Friendship creation on acceptance, filtered list endpoints (sent / received / all). Add-friend button Angular component.
+  * **Navbar:** Centralized all navigation into a single NavbarComponent, eliminating duplicated code across pages.
+* **🧠 Challenges:**
+  * **Pre-auth 2FA gate:** Needed to block JWT issuance mid-login without breaking the request flow. Solved by issuing a short-lived pre_auth_token exchanged for a real JWT only after the user submits a valid OTP.
+  * **OAuth CSRF protection:** Each OAuth redirect generates a random state parameter verified server-side before processing the authorization code.
+
+### 🦺 [llan] — Léo
+
+* **🔒 Infrastructure & Security:** The project is built upon a containerized architecture secured by an Nginx reverse proxy, ensuring component isolation and encrypted traffic.
+* **🌐 Network Architecture & Isolation:** The infrastructure utilizes two distinct Docker networks to enforce the principle of least privilege:
+  * **`gateway` network (Public):** Connects only the `nginx`, `frontend`, and `backend` containers. This is the only network exposed to the outside world.
+  * **`internal` network (Private):** Isolates critical services (`backend`, `redis`, `postgresql`). These services remain entirely invisible to the outside; communication between the backend, database, and cache occurs within this non-encrypted private network.
+  * > **Note:** No direct access (e.g., port 8000 for Django or 5432 for Postgres) is exposed to the host machine. All traffic must pass through Nginx.
+* **🔑 HTTPS & TLS Implementation:** Encryption is centralized at the `transcendence_nginx` container, acting as the unique TLS/SSL termination point.
+  * **Certificate Management:** Upon container startup, the `./tools/setup_ssl.sh` script (utilizing `openssl`) automatically generates private keys and self-signed certificates.
+  * **Security:** Certificates are mounted via an internal volume at `/etc/nginx/ssl/`.
+  * **Protocol:** The service listens on port **8443** (HTTPS) and enforces TLS v1.2/1.3 protocols.
+* **🔀 Reverse Proxy Configuration:** Nginx handles intelligent routing between services:
+  * **Frontend (Angular):** Routes the root `/` with HTTP/1.1 support.
+  * **API & Admin (Django/Daphne):** Transparent routing for `/api/` and `/admin/` paths.
+  * **WebSockets (WSS):** The `/ws/` block is configured to manage asynchronous chat traffic by injecting `Upgrade` and `Connection` headers, enabling secure communication via `wss://`.
+  * **Static Files:** Direct access to assets via a shared volume (`static_volume`), bypassing the backend to optimize performance.
+* **✅ Validation Procedure (Check-list):** Before launching the infrastructure, ensure the following validations are met:
+
+| Step | Action | Expected Outcome |
+| :--- | :--- | :--- |
+| **Prerequisites** | Run the control script | No conflicts on ports 8080/8443 |
+| **HTTPS** | Access `https://localhost:8443` | Frontend loads with a valid (self-signed) certificate |
+| **Isolation** | Attempt direct access `http://localhost:8000` | Connection failure (Port hidden) |
+| **Database** | Attempt direct access `localhost:5432` | Connection failure (Isolated in internal network) |
+
+* **🛠️ Maintenance Notes:**
+  * **Persistence:** Database data is persisted via the `postgres_data` volume.
+  * **Security:** Private keys are excluded from version control via `.gitignore`.
+
+### 🛠️ [doberes] — Dorina
+
+* **🌿 Branches:** `readme/dorina`, `backend/init-django`, `backend/core-setup`, `feature/backend-rgpd`, `feature/migration-chat-core`, `backend/feat-send-gdpr-export-by-mail`, `feature/backend-i18n-admin-panel`
+* **🛠️ Contributions:**
+  * **Core Setup & Project Architecture:** Initialized the primary Django framework configuration, created the `users` and migrated the `chat` application, and driven the core branch fusion with Jeffrey before hand-off to infrastructure.
+  * **User Account Lifecycle (`apps/users/`):** Implemented the custom PostgreSQL User Model from scratch and co-developed the base RESTful authentication funnel (routing architecture, serializers, and views for Register, Login, Me, and Refresh) with Ada.
+  * **Profile CRUD & Dynamic Avatars:** Built the generic `MeView` (`GET`, `PATCH`, `DELETE`) for profile adjustments and hooked the Dicebear API to generate default vector avatars using username seeds.
+  * **GDPR Compliance:** Built a centralized `UserExportView` (APIView) compiling multi-app data into a single JSON payload and integrated an automated confirmation email upon account deletion and data export.
+  * **Admin Panel Customization & Localization:** Configured the global visual theme, applied custom layouts and filters for the User model, and implemented internal translations (`gettext_lazy`, `i18n`).
+  * **Project Management & QA Habits:** Created and maintained the global Trello workspace boards. Initiated development quality standards by self-imposing detailed PR logs.
+* **🧠 Challenges:**
+  * **Blank-Slate Framework Architecture:** Orchestrating an optimal fullstack boilerplate architecture from scratch without prior framework exposure.
+  * *Lesson Learned:* Starting with an ultra-minimal setup and integrating application dependencies iteratively prevents structural overhead.
+
+### 💻 [jvega] — Jeffrey
+
+* **🌿 Branches:** `fix/dashboardAdmin`, `feature/dashboardv2`, `feat/merge_friends`, `feature/dashboard`, `feature/migration-chat-core-v2`, `test/chat-websocket-page`, `init/backend_chat`, `feature/migration-chat-core`   
+* **🛠️ Contributions:**
+  * **Core Setup & Installations:** Prepared base Django installation, PostgreSQL database hooks, Redis, and WebSockets environment configuration. Handed over Docker configurations to Leo for a unified multi-network container integration.
+  * **Real-time Chat Engine (`backend/apps/chat/`):** Designed and developed the entire chat application. Implemented `Conversation` and `Message` models, REST serializers, views (listing/creating rooms and messages), and WebSocket routing using Django Channels consumers. Added strict access control ensuring only authenticated chat participants can fetch histories or establish real-time socket sessions. Registered all systems under Django Admin.
+  * **Advanced Analytics Dashboard Backend (`backend/apps/analytics/`):** Created custom administrative endpoints (`/api/analytics/admin-dashboard/`) secured under a custom role-based permission system (`IsAdminRole`). Implemented date range queries (`start_date`, `end_date`) and aggregate pipelines compiling key site-wide telemetry data.
+  * **Admin UI & Visualization (`frontend/src/app/admin-dashboard/`):** Built the complete responsive frontend dashboard from scratch. Added visual metric cards, multi-axis data graphs (messages by day, top 5 active users, online/offline status splits), and auto-refresh intervals every 10 seconds. Protected the view layer with an Angular `AuthGuard` ensuring automated dashboard redirection upon administrative JWT detection, while serving access-denied warnings for standard profiles.
+  * **Data Export Utilities:** Implemented automated native client-side data exporters including Excel-ready structural CSV generation, and custom CSS print stylesheets designed for beautiful A4 PDF compilation.
+  * **Avatar File Upload Management:** Engineered local user avatar upload pipelines (Commit `f921027e`). Built frontend preview components, updated profile persistence payloads using `FormData`, configured Django media handler structures (`MEDIA_URL`/`MEDIA_ROOT`), and set up the shared Docker `media_volume` mounted directly under Nginx `/media/` paths.
 
 ---
 
