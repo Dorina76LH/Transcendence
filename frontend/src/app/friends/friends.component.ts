@@ -44,21 +44,23 @@ interface SearchUser {
 			<div class="d-flex flex-wrap flex-column gap-2" *ngIf="!loading && !error">
 				<div *ngFor="let friendship of friends" class="mb-2">
 					<div class="d-flex flex-column border border-secondary rounded p-3">
-						<div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2">
-							<div class="d-flex align-items-center" (click)="toggleMenu(friendship)" style="cursor: pointer;">
+						<div class="friend-row">
+							<div class="friend-summary" (click)="toggleMenu(friendship)">
 								<img [src]="friendship.friend.avatar_url || 'Zoliac.png'" 
 									class="rounded-circle border border-secondary me-3 flex-shrink-0" 
 									style="width:40px; height:40px; object-fit: cover;">
-								<span class="fw-semibold">{{ friendship.friend.username }}</span>
+								<span class="friend-name fw-semibold">{{ friendship.friend.username }}</span>
 							</div>
-							<button *ngIf="selectedFriend?.id !== friendship.id" 
-									class="btn btn-sm btn-outline-secondary w-100 w-sm-auto" 
+							<button *ngIf="selectedFriend?.id !== friendship.id"
+									type="button"
+									class="btn btn-sm btn-outline-secondary friend-action-toggle"
 									(click)="toggleMenu(friendship)">
-								⚙️ Actions
+								<span class="friend-action-icon" aria-hidden="true">⚙️</span>
+								<span class="friend-action-label">Actions</span>
 							</button>
 						</div>
 						<div *ngIf="selectedFriend?.id === friendship.id" 
-							class="d-flex gap-2 mt-2 justify-content-end flex-sm-row flex-column">
+							class="friend-actions">
 							<button class="btn btn-sm btn-outline-primary" (click)="action('chat', friendship)">💬 Chat</button>
 							<button class="btn btn-sm btn-outline-danger" (click)="action('remove', friendship)">❌ Remove</button>
 						</div>
