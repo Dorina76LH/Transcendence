@@ -19,8 +19,8 @@ interface UserProfile {
 	imports: [FormsModule, CommonModule, NavbarComponent],
 	template: `
 <app-navbar></app-navbar>
-<main class="d-flex justify-content-center py-5" style="min-height: calc(100vh - 56px);">
-<div class="card border-secondary p-4" style="width: 450px;">
+<main class="d-flex justify-content-center py-5 px-3" style="min-height: calc(100vh - 56px);">
+<div class="card border-secondary p-4 w-100" style="max-width: 540px;">
 	<h5 class="mb-4">Profile Settings</h5>
 	<div class="text-center mb-4">
 		<div class="position-relative d-inline-block">

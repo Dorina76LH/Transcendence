@@ -36,29 +36,32 @@ interface SearchUser {
 	imports: [CommonModule, NavbarComponent, FormsModule],
 	template: `
 <app-navbar></app-navbar>
-	<main class="d-flex justify-content-center py-5" style="min-height: calc(100vh - 56px);">
+	<main class="d-flex justify-content-center py-5 px-3" style="min-height: calc(100vh - 56px);">
 		<div class="card border-secondary p-4 w-100" style="max-width: 1000px;">
 			<h4 class="mb-3">Friend list</h4>
 			<div *ngIf="loading">Loading...</div>
 			<div *ngIf="error" class="text-danger">{{ error }}</div>
-			<div class="d-flex flex-column gap-2" *ngIf="!loading && !error">
+			<div class="d-flex flex-wrap flex-column gap-2" *ngIf="!loading && !error">
 				<div *ngFor="let friendship of friends" class="mb-2">
-					<div class="d-flex align-items-center w-100 border border-secondary rounded p-2">
-						<div class="d-flex align-items-center flex-grow-1" (click)="toggleMenu(friendship)" style="cursor: pointer;">
-							
-							<img [src]="friendship.friend.avatar_url || 'Zoliac.png'" 
-								 class="rounded-circle border border-secondary me-3 flex-shrink-0" 
-								 style="width:40px; height:40px; object-fit: cover;">
-							
-							<span class="fw-semibold">{{ friendship.friend.username }}</span>
+					<div class="d-flex flex-column border border-secondary rounded p-3">
+						<div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2">
+							<div class="d-flex align-items-center" (click)="toggleMenu(friendship)" style="cursor: pointer;">
+								<img [src]="friendship.friend.avatar_url || 'Zoliac.png'" 
+									class="rounded-circle border border-secondary me-3 flex-shrink-0" 
+									style="width:40px; height:40px; object-fit: cover;">
+								<span class="fw-semibold">{{ friendship.friend.username }}</span>
+							</div>
+							<button *ngIf="selectedFriend?.id !== friendship.id" 
+									class="btn btn-sm btn-outline-secondary w-100 w-sm-auto" 
+									(click)="toggleMenu(friendship)">
+								⚙️ Actions
+							</button>
 						</div>
-						<div *ngIf="selectedFriend?.id === friendship.id" class="d-flex gap-1 align-items-center animate__animated animate__fadeIn">
+						<div *ngIf="selectedFriend?.id === friendship.id" 
+							class="d-flex gap-2 mt-2 justify-content-end flex-sm-row flex-column">
 							<button class="btn btn-sm btn-outline-primary" (click)="action('chat', friendship)">💬 Chat</button>
 							<button class="btn btn-sm btn-outline-danger" (click)="action('remove', friendship)">❌ Remove</button>
 						</div>
-						<button *ngIf="selectedFriend?.id !== friendship.id" class="btn btn-sm btn-outline-secondary" (click)="toggleMenu(friendship)">
-							⚙️ Actions
-						</button>
 					</div>
 				</div>
 				<div *ngIf="friends.length === 0">You don't have any friends right now.</div>
@@ -68,7 +71,7 @@ interface SearchUser {
 			
 			<h4 class="mb-3">Add a friend</h4>
 			<div class="section">
-				<div class="search-row">
+				<div class="d-flex flex-column flex-sm-row gap-2">
 					<input
 						class="search-input"
 						[(ngModel)]="searchQuery"
@@ -81,10 +84,10 @@ interface SearchUser {
 				</div>
 				<div *ngIf="searchError" class="search-error">{{ searchError }}</div>
 				<div *ngIf="searchResults.length > 0" class="search-results">
-					<div *ngFor="let user of searchResults" class="result-item">
+					<div *ngFor="let user of searchResults" class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between border border-secondary rounded p-2 mb-2 gap-2">
 						
 						<img [src]="user.avatar_url || 'Zoliac.png'" 
-							 class="rounded-circle border border-secondary me-2" 
+							 class="rounded-circle border border-secondary me-2 flex-shrink-0" 
 							 style="width:40px; height:40px; object-fit: cover;">
 						
 						<span class="user-name">{{ user.username }}</span>
@@ -112,14 +115,14 @@ interface SearchUser {
 					<div class="d-flex align-items-center">
 						
 						<img [src]="req.from_user.avatar_url || 'Zoliac.png'" 
-							 class="rounded-circle border border-secondary me-3" 
+							 class="rounded-circle border border-secondary me-3 flex-shrink-0" 
 							 style="width:40px; height:40px; object-fit: cover;">
 						
 						<span class="fw-semibold">{{ req.from_user.username }}</span>
 					</div>
-					<div class="d-flex gap-2">
-						<button class="btn btn-sm btn-outline-success" (click)="acceptRequest(req)">✓ Accept</button>
-						<button class="btn btn-sm btn-outline-danger" (click)="declineRequest(req)">✗ Decline</button>
+					<div class="d-flex gap-2 w-100 w-sm-auto justify-content-end">
+						<button class="btn btn-sm btn-outline-success flex-grow-1 flex-sm-grow-0" (click)="acceptRequest(req)">✓ Accept</button>
+						<button class="btn btn-sm btn-outline-danger flex-grow-1 flex-sm-grow-0" (click)="declineRequest(req)">✗ Decline</button>
 					</div>
 				</div>
 			</div>
@@ -139,7 +142,7 @@ interface SearchUser {
 						
 						<span class="fw-semibold">{{ req.to_user.username }}</span>
 					</div>
-					<button class="btn btn-sm btn-outline-secondary" (click)="cancelRequest(req)">✗ Cancel</button>
+					<button class="btn btn-sm btn-outline-secondary w-100 w-sm-auto" (click)="cancelRequest(req)">✗ Cancel</button>
 				</div>
 			</div>
 		</div>

@@ -12,7 +12,7 @@ import { environment } from '../../environments/environment';
 template: `
 <app-navbar></app-navbar>
 <main class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 56px);">
-	<div class="card border-secondary p-4" style="width: 450px;">
+	<div class="card border-secondary p-4 w-100" style="max-width: 450px;">
 
 		<ng-container *ngIf="!requires2fa">
 		<h2 class="text-center mb-4">Login</h2>

@@ -36,7 +36,7 @@ interface ChatMessage {
 <app-navbar></app-navbar>
 
 <main class="main">
-  <div class="content w-100 px-4">
+  <div class="content px-4">
 	<div class="container-fluid h-100">
 	  <div class="row h-100">
 
@@ -44,10 +44,10 @@ interface ChatMessage {
 			 [class.hide-on-mobile]="selectedFriend !== null">
 		  <h5 class="text-white mb-4 px-2 tracking-wider">Mes Amis</h5>
 
-		  <div class="d-flex flex-column gap-1 list-box" style="overflow-y: auto; height: 430px;">
+		  <div class="d-flex flex-column gap-1 list-box" style="overflow-y: auto; max-height: 430px;">
 
 			<button *ngFor="let friend of friends"
-					class="btn d-flex align-items-center w-100 text-start text-white conversation-item position-relative p-2 rounded-3"
+					class="btn d-flex align-items-center text-start text-white conversation-item position-relative p-2 rounded-3"
 					[class.active-room]="selectedFriend?.id === friend.id"
 					(click)="selectFriend(friend)">
 
@@ -97,7 +97,7 @@ interface ChatMessage {
 			  <p class="small">Sélectionnez un de vos amis à gauche pour lancer la connexion sécurisée.</p>
 			</div>
 
-			<div *ngFor="let msg of messages" class="mb-3 d-flex flex-column w-100"
+			<div *ngFor="let msg of messages" class="mb-3 d-flex flex-column"
 				 [class.align-items-end]="isMe(msg.sender)"
 				 [class.align-items-start]="!isMe(msg.sender)">
 

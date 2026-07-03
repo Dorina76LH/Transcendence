@@ -1,14 +1,12 @@
-:host {
-	display: flex;
-	min-height: 100vh;
-	flex-direction: column;
+@media (min-width: 768px) {
+  .style-sidebar {
+    width: 220px !important;
+    min-width: 220px !important;
+  }
 }
 
-main.Settings {
-	width: 100%;
-	flex: 1;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 1rem;
+@media (max-width: 767.98px) {
+  .border-md-end {
+    border-right: none !important;
+  }
 }

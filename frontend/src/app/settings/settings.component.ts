@@ -9,117 +9,124 @@ import { NavbarComponent } from '../navbar/navbar.component';
 	selector: 'user-settings',
 	imports: [CommonModule, NavbarComponent, FormsModule, RouterLink],
 	template: `
-	<app-navbar></app-navbar>
-	<main class="Settings">
-		<div class="d-flex" style="min-height: calc(100vh - 56px);">
-			<div class="pe-3 pt-3" style="width: 200px; min-width: 220px;">
-				<h6 class="text-uppercase mb-3" style="font-size: 0.75rem; letter-spacing: 0.1em;">Settings</h6>
-				<ul class="nav flex-column gap-1 border-end border-secondary pe-3">
-					<li class="nav-item">
-						<button class="btn btn-sm w-100 text-start" 
-							[class.btn-secondary]="activeTab === 'appearance'"
-							[class.btn-outline-secondary]="activeTab !== 'appearance'"
-							(click)="activeTab = 'appearance'">🌙 Appearance</button>
-					</li>
-					<li class="nav-item">
-						<button class="btn btn-sm w-100 text-start"
-							[class.btn-secondary]="activeTab === 'account'"
-							[class.btn-outline-secondary]="activeTab !== 'account'"
-							(click)="activeTab = 'account'">👤 Account</button>
-					</li>
-					<li class="nav-item">
-						<button class="btn btn-sm w-100 text-start"
-							[class.btn-secondary]="activeTab == '2fa'"
-							[class.btn-outline-secondary]="activeTab !== '2fa'"
-							(click)="activeTab = '2fa'">📝​ 2fa</button>
-					</li>
-				</ul>
-			</div>
-			<div class="p-4 flex-grow-1">
-				<div *ngIf="activeTab === 'appearance'">
-					<h4 class="mb-3">Appearance</h4>
-					<div class="d-flex align-items-center gap-3">
-						<span>Dark mode</span>
-						<button class="btn btn-secondary" (click)="toggleDarkMode()">
-							{{ isDarkMode ? '☀️ Light' : '🌙 Dark' }}
-						</button>
-					</div>
-				</div>
-				<div *ngIf="activeTab === 'language'">
-				  <h4 class="mb-3">Language</h4>
-				  <a routerLink="/languages" class="btn btn-secondary">🇪🇸 / 🇫🇷 / 🇬🇧</a>
-				</div>
-				<div *ngIf="activeTab === 'account'">
-					<h4 class="mb-3">Account</h4>
-					<button class="btn btn-primary">
-						<a routerLink="/profile-settings" class="nav-link">User profile settings</a>
+<app-navbar></app-navbar>
+<main class="Settings">
+	<div class="d-flex flex-column flex-md-row" style="min-height: calc(100vh - 56px);">
+		
+		<div class="p-3 w-100 style-sidebar" style="max-width: 100%;">
+			<h6 class="text-uppercase mb-3 d-none d-md-block" style="font-size: 0.75rem; letter-spacing: 0.1em;">Settings</h6>
+			
+			<ul class="nav flex-row flex-md-column gap-1 pb-3 pb-md-0 border-bottom border-md-bottom-0 border-md-end border-secondary pe-0 pe-md-3 overflow-x-auto flex-nowrap">
+				<li class="nav-item flex-grow-1 flex-md-grow-0">
+					<button class="btn btn-sm w-100 text-start text-md-start text-center" 
+						[class.btn-secondary]="activeTab === 'appearance'"
+						[class.btn-outline-secondary]="activeTab !== 'appearance'"
+						(click)="activeTab = 'appearance'">🌙<span class="d-none d-sm-inline"> Appearance</span></button>
+				</li>
+				<li class="nav-item flex-grow-1 flex-md-grow-0">
+					<button class="btn btn-sm w-100 text-start text-md-start text-center"
+						[class.btn-secondary]="activeTab === 'account'"
+						[class.btn-outline-secondary]="activeTab !== 'account'"
+						(click)="activeTab = 'account'">👤<span class="d-none d-sm-inline"> Account</span></button>
+				</li>
+				<li class="nav-item flex-grow-1 flex-md-grow-0">
+					<button class="btn btn-sm w-100 text-start text-md-start text-center"
+						[class.btn-secondary]="activeTab == '2fa'"
+						[class.btn-outline-secondary]="activeTab !== '2fa'"
+						(click)="activeTab = '2fa'">📝​<span class="d-none d-sm-inline"> 2fa</span></button>
+				</li>
+			</ul>
+		</div>
+		
+		<div class="p-4 flex-grow-1">
+			<div *ngIf="activeTab === 'appearance'">
+				<h4 class="mb-3">Appearance</h4>
+				<div class="d-flex align-items-center gap-3">
+					<span>Dark mode</span>
+					<button class="btn btn-secondary" (click)="toggleDarkMode()">
+						{{ isDarkMode ? '☀️ Light' : '🌙 Dark' }}
 					</button>
 				</div>
-				<div *ngIf="activeTab == '2fa'">
-					<!-- 2FA SECTION -->
-					<div class="twofa-section">
-						<h2>Two-Factor Authentication (2FA)</h2>
+			</div>
+			
+			<div *ngIf="activeTab === 'language'">
+			  <h4 class="mb-3">Language</h4>
+			  <a routerLink="/languages" class="btn btn-secondary">🇪🇸 / 🇫🇷 / 🇬🇧</a>
+			</div>
+			
+			<div *ngIf="activeTab === 'account'">
+				<h4 class="mb-3">Account</h4>
+				<a routerLink="/profile-settings" class="btn btn-primary">User profile settings</a>
+			</div>
+			
+			<div *ngIf="activeTab == '2fa'">
+				<div class="twofa-section">
+					<h2>Two-Factor Authentication (2FA)</h2>
 
-						<span *ngIf="profileLoading" class="spinner-border spinner-border-sm me-2"></span>
+					<span *ngIf="profileLoading" class="spinner-border spinner-border-sm me-2"></span>
 
-						<p *ngIf="twoFaMessage" class="text-success">{{ twoFaMessage }}</p>
-						<p *ngIf="twoFaError" class="text-danger">{{ twoFaError }}</p>
+					<p *ngIf="twoFaMessage" class="text-success">{{ twoFaMessage }}</p>
+					<p *ngIf="twoFaError" class="text-danger">{{ twoFaError }}</p>
 
-						<ng-container *ngIf="!profileLoading && !is2faEnabled">
-							<ng-container *ngIf="!qrCode">
-								<button class="btn btn-primary" [disabled]="setupLoading" (click)="startTwoFaSetup()">
-									<span *ngIf="setupLoading" class="spinner-border spinner-border-sm me-2"></span>
-									Enable 2FA
-								</button>
-							</ng-container>
-
-							<ng-container *ngIf="qrCode">
-								<p>Scan this QR code with Google Authenticator :</p>
-								<img [src]="qrCode" alt="QR Code 2FA" width="200" />
-
-								<div class="mt-3">
-									<input
-										type="text"
-										inputmode="numeric"
-										[(ngModel)]="otpCode"
-										placeholder="Enter 6-digit code"
-										maxlength="6"
-										class="form-control w-auto d-inline-block me-2"
-										(input)="filterDigits($event)"
-									/>
-									<button class="btn btn-success" [disabled]="confirmLoading" (click)="confirmEnableTwoFa()">
-										Confirm
-									</button>
-								</div>
-								<small [class]="totpSeconds <= 5 ? 'text-danger' : 'text-secondary'">
-									Code expires in {{ totpSeconds }}s
-								</small>
-							</ng-container>
+					<ng-container *ngIf="!profileLoading && !is2faEnabled">
+						<ng-container *ngIf="!qrCode">
+							<button class="btn btn-primary" [disabled]="setupLoading" (click)="startTwoFaSetup()">
+								<span *ngIf="setupLoading" class="spinner-border spinner-border-sm me-2"></span>
+								Enable 2FA
+							</button>
 						</ng-container>
 
-						<ng-container *ngIf="!profileLoading && is2faEnabled">
-							<p class="text-success">2FA is currently active on your account.</p>
-							<div class="mt-2">
+						<ng-container *ngIf="qrCode">
+							<p>Scan this QR code with Google Authenticator :</p>
+							<img [src]="qrCode" alt="QR Code 2FA" class="img-fluid mb-2" style="max-width: 200px;" />
+
+							<div class="mt-3 d-flex flex-column flex-sm-row gap-2 align-items-stretch align-items-sm-center">
 								<input
 									type="text"
 									inputmode="numeric"
 									[(ngModel)]="otpCode"
-									placeholder="Enter 6-digit code to disable"
+									placeholder="Enter 6-digit code"
 									maxlength="6"
-									class="form-control w-auto d-inline-block me-2"
+									class="form-control w-100 w-sm-auto"
 									(input)="filterDigits($event)"
 								/>
-								<button class="btn btn-danger" (click)="confirmDisableTwoFa()">
-									Disable 2FA
+								<button class="btn btn-success w-100 w-sm-auto" [disabled]="confirmLoading" (click)="confirmEnableTwoFa()">
+									Confirm
 								</button>
 							</div>
+							<div class="mt-1">
+								<small [class]="totpSeconds <= 5 ? 'text-danger' : 'text-secondary'">
+									Code expires in {{ totpSeconds }}s
+								</small>
+							</div>
+						</ng-container>
+					</ng-container>
+
+					<ng-container *ngIf="!profileLoading && is2faEnabled">
+						<p class="text-success">2FA is currently active on your account.</p>
+						<div class="mt-2 d-flex flex-column flex-sm-row gap-2 align-items-stretch align-items-sm-center">
+							<input
+								type="text"
+								inputmode="numeric"
+								[(ngModel)]="otpCode"
+								placeholder="Enter 6-digit code to disable"
+								maxlength="6"
+								class="form-control w-100 w-sm-auto"
+								(input)="filterDigits($event)"
+							/>
+							<button class="btn btn-danger w-100 w-sm-auto" (click)="confirmDisableTwoFa()">
+								Disable 2FA
+							</button>
+						</div>
+						<div class="mt-1">
 							<small [class]="totpSeconds <= 5 ? 'text-danger' : 'text-secondary'">
 								Code expires in {{ totpSeconds }}s
 							</small>
-						</ng-container>
-					</div>
+						</div>
+					</ng-container>
 				</div>
 			</div>
+		</div>
 	</div>
 </main>`,
 styleUrl: './settings.css',
