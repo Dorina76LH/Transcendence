@@ -26,7 +26,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
 	return next(authReq).pipe(
 		catchError((error) => {
-		console.log('catchError triggered, status:', error.status);
+		//console.log('catchError triggered, status:', error.status);
 		if (error.status !== 401) {
 				return throwError(() => error);
 			}
@@ -40,7 +40,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 				return throwError(() => error);
 			}
 			const refresh = localStorage.getItem('refresh');
-			console.log('attempting refresh with:', refresh);
+			//console.log('attempting refresh with:', refresh);
 			if (!refresh) {
 				return throwError(() => error);
 			}
@@ -55,7 +55,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 				return next(retryReq);
 				}),
 					catchError((refreshError) => {
-					console.log('refresh failed:', refreshError);
+					//console.log('refresh failed:', refreshError);
 					localStorage.removeItem('token');
 					localStorage.removeItem('refresh');
 					window.location.href = '/login';

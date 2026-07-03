@@ -56,7 +56,7 @@ export class GDPRComponent {
     }
 
 	onDeleteAccount() {
-		console.log('Delete button clicked');
+		//console.log('Delete button clicked');
 
         const firstConfirm = confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.");
         if (!firstConfirm) return;

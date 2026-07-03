@@ -73,7 +73,7 @@ export class RegisterComponent {
 				this.router.navigate(['/profile']);
 			},
 			error: (err: any) => {
-				console.log('register error:', err.error);
+				//console.log('register error:', err.error);
 				this.errorMessage = 'Registration failed. Please try again.';
 			}
 		});
