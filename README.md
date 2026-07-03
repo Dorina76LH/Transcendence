@@ -82,7 +82,7 @@ The platform uses **PostgreSQL** as its primary data store. The schema is manage
 | **[doberes]** | PM / Developer | Core Django setup, Custom User Model, REST Auth API (Register, Login, Me), GDPR Compliance (backend + frontend), Admin Panel localization & layout theme, Trello agile workflow setup & card monitoring. |
 | **[llan]** | PO / Infrastructure & Dev | Multi-network containerized environment isolation (`gateway` & `internal`), Nginx Reverse Proxy routing (HTTPS/TLS), automated OpenSSL certificate script, WSS reverse proxy configuration, and Chat frontend components (Angular). |
 | **[jvega]** | Tech Lead / Developer Fullstack | Technical stack selection, global module architecture design, chat (backend), dashboard (backend + frontend), taskforce frontend. |
-| **[lpatin]** | Frontend Developer | Global UI initialization (theme, page layouts, reusable design system components), and core backend API integration/wiring. |
+| **[lpatin]** | Frontend Developer | Angular SPA architecture & core layout initialization (11 pages, Bootstrap 5), robust HTTP JWT Interceptor (automatic refresh, RxJS race condition queue), interactive Friends UI system, and FormData/multipart profile upload integration. |
 
 
 > 💡 **Shared Developer Responsibilities:** Every team member actively participated in writing code for assigned features, performing thorough peer reviews on active Pull Requests, conducting baseline runtime testing, and logging issues on Trello.
@@ -219,6 +219,14 @@ We followed a strict **"1 Trello card = 1 branch = 1 PR"** policy to ensure code
   * **Admin UI & Visualization (`frontend/src/app/admin-dashboard/`):** Built the complete responsive frontend dashboard from scratch. Added visual metric cards, multi-axis data graphs (messages by day, top 5 active users, online/offline status splits), and auto-refresh intervals every 10 seconds. Protected the view layer with an Angular `AuthGuard` ensuring automated dashboard redirection upon administrative JWT detection, while serving access-denied warnings for standard profiles.
   * **Data Export Utilities:** Implemented automated native client-side data exporters including Excel-ready structural CSV generation, and custom CSS print stylesheets designed for beautiful A4 PDF compilation.
   * **Avatar File Upload Management:** Engineered local user avatar upload pipelines (Commit `f921027e`). Built frontend preview components, updated profile persistence payloads using `FormData`, configured Django media handler structures (`MEDIA_URL`/`MEDIA_ROOT`), and set up the shared Docker `media_volume` mounted directly under Nginx `/media/` paths.
+
+### 🎨 [lpatin] — Lény
+
+* **🌿 Branches:** `feature/frontend-init`, `feature/frontend-design-system`, `feature/frontend-core-wiring`
+* **🛠️ Contributions:**
+  * **Global UI Initialization:** Designed and initialized the entire frontend boilerplate, establishing structural layouts, global dark/light visual style guidelines, and root typography rules.
+  * **Custom Design System:** Built a library of modular, highly reusable component architectures (buttons, input handlers, container cards, form validation modules, and notification overlays) guaranteeing user interface visual cohesion across all microservice pages.
+  * **Core API Integration:** Integrated basic UI structures directly onto core backend API route pipelines, configuring data bindings and interceptors to parse model objects back into interactive Angular views.
 
 ---
 
