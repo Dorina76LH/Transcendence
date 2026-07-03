@@ -163,8 +163,12 @@ export class ChatComponent implements OnInit, OnDestroy {
 	constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
 	ngOnInit() {
-		this.localUsername = localStorage.getItem('username');
+		const userJson = localStorage.getItem('user');
+		if (userJson) {
+			this.localUsername = JSON.parse(userJson).username;
+		}
 		this.initChatDashboard();
+
 		this.pollingInterval = setInterval(() => {
 			this.checkForNewConversations();
 		}, 3000);
