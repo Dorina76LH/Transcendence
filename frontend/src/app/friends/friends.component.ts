@@ -100,7 +100,7 @@ interface SearchUser {
 						</button>
 					</div>
 				</div>
-				<div *ngIf="searchResults.length === 0 && searched && searchQuery.length >= 2" class="no-results">
+				<div *ngIf="searchResults.length === 0 && searched && searchQuery.length >= 1" class="no-results">
 					No users found.
 				</div>
 			</div>
