@@ -106,7 +106,6 @@ INSTALLED_APPS = [
 
     # personnal apps
     "apps.users",
-    "apps.api",
     "apps.friends",
 	"apps.analytics.apps.AnalyticsConfig"
     #"apps.chat",
@@ -375,3 +374,16 @@ FORTYTWO_CLIENT_ID     = os.environ.get('FORTYTWO_CLIENT_ID')
 FORTYTWO_CLIENT_SECRET = os.environ.get('FORTYTWO_CLIENT_SECRET')
 
 OAUTH_REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI')
+
+
+#? ----------------------------------------------------------------------------
+#? GDPR - mail sending configuration
+#? ----------------------------------------------------------------------------
+#& for production, use SMTP backend to send real emails
+#& EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+#& for development, use console backend to print emails to the console
+#& Use the Console Backend to safely print all outgoing emails to the terminal.
+#& This prevents mail delivery errors with fictional test user profiles (e.g., test@test.com).
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@transcendence.com'

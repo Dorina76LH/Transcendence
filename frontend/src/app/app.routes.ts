@@ -16,11 +16,13 @@ import { PPTSComponent } from './ppts/ppts.component';
 import { AdminComponent } from './admin/admin.component';
 import { ProfileSettingsComponent } from './profile-settings/profile.settings';
 import { authInterceptor } from './auth.interceptor';
+import { OAuthCallbackComponent } from './auth-callback/auth-callback.component';
 
 export const routes: Routes = [
 	{path: '', component: HomeComponent},
 	{path: 'login', component:LoginComponent},
 	{path: 'register', component:RegisterComponent},
+	{path: 'auth/callback', component: OAuthCallbackComponent},
 	{path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]},
 	{path: 'settings', component: SettingsComponent, canActivate: [AuthGuard]},
 	{path: 'languages', component: LanguageComponent},

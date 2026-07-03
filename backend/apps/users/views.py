@@ -188,6 +188,8 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
+# 11. Email sending
+from django.core.mail import send_mail
 
 
 #* ----------------------------------------------------------------------------
@@ -283,6 +285,45 @@ class MeView(generics.RetrieveUpdateDestroyAPIView):
         is ALWAYS the current logged-in user."
         """
         return self.request.user
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Instead of deleting the user immediately, we can add extra logic here if needed.
+        """
+
+        #? STEP 1 : get the user object
+        user = self.get_object()
+
+        #? STEP 2 : Save username and email before deletion for mailing
+        user_email = user.email
+        user_name = user.username
+
+        #? STEP 3 : Execute the deletion
+        response = super().destroy(request, *args, **kwargs)
+
+        #? STEP 4 : Send a confirmation email after deletion
+        #& Sent as a legal proof/receipt that all personal data has been completely wiped out.
+        try :
+            send_mail(
+                subject='[GDPR] - Security Alert: Confirmation of your account deletion request',
+                message=(
+                    f"Hello {user_name},\n\n"
+                    "In compliance with your request regarding your GDPR Right to Erasure, "
+                    "we confirm that your account and all associated personal history records "
+                    "have been permanently deleted from our application databases.\n\n"
+                    "We are sorry to see you go, and we thank you for the time you spent with us.\n\n"
+                    "Sincerely,\n"
+                    "The Transcendence Team."
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL, #& The email address that will appear in the 'From' field of the email.
+                recipient_list=[user_email],            #& The email address of the user who requested the data export.
+                fail_silently=True,                     #& Prevents the application from crashing if the email fails to send. Instead, it will log the error.
+            )
+        except Exception as e:
+            # Log the error for debugging purposes, but do not interrupt the export process.
+            print(f"Failed to send GDPR deletion email to {user_email}: {e}")
+
+        return response
 
 
 # NOTE : suggestion to complete the header above with more context ?
@@ -751,6 +792,11 @@ class UserSearchView(generics.ListAPIView):
 
 
 class UserExportView(APIView):
+    """
+    GET /api/auth/me/export/
+    Fulfills GDPR compliance by returning a structured JSON payload 
+    directly to the user, and triggers a confirmation notification email.
+    """
 
     # STEP 1: Permission check
     permission_classes = [IsAuthenticated]
@@ -786,6 +832,29 @@ class UserExportView(APIView):
             'conversations_joined': conversations_serializer.data,
             'messages_sent': messages_serializer.data
         }
+
+        # STEP 11: GDPR Notification Email for Personal Data Export Request
+
+        #& Text email to notify the user that their personal data export request has been received.
+        try :
+            send_mail(
+                subject='[GDPR] - Security Alert: Personal Data Export Request',
+                message=(
+                    f"Hello {user.username},\n\n"
+                    "We have received a request to export your personal data from our platform. "
+                    "This is a security measure to ensure that you are aware of this action.\n\n"
+                    "If you did not initiate this request, please contact our support team immediately.\n\n"
+                    "Thank you for using our service.\n"
+                    "Sincerely,\n"
+                    "The Transcendence Team."
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL, #& The email address that will appear in the 'From' field of the email.
+                recipient_list=[user.email],            #& The email address of the user who requested the data export.
+                fail_silently=True,                     #& Prevents the application from crashing if the email fails to send. Instead, it will log the error.
+            )
+        except Exception as e:
+            # Log the error for debugging purposes, but do not interrupt the export process.
+            print(f"Failed to send GDPR export notification email to {user.email}: {e}")
 
         # STEP 6: Return the final multi-app compiled JSON (200 OK)
         return Response(export_data, status=status.HTTP_200_OK)

@@ -22,7 +22,7 @@ export class UserService {
 			password
 		});
 	}
-	
+
 	getProfile() {
 		return this.http.get(`${this.url}/auth/me/`);
 	}
@@ -87,15 +87,34 @@ export class UserService {
 	verify2FA(preAuthToken: string, otpCode: string) {
 		return this.http.post(`${this.url}/auth/2fa/verify/`, { pre_auth_token: preAuthToken, otp_code: otpCode });
 	}
+
 	refreshToken() {
 		const refresh = localStorage.getItem('refresh');
 		return this.http.post(`${this.url}/auth/token/refresh/`, { refresh });
 	}
+
 	exportGdprData() {
 		return this.http.get(`${this.url}/auth/me/export/`);
 	}
+
 	deleteAccount() {
 		return this.http.delete(`${this.url}/auth/me/`);
 	}
 
+}
+	searchUsers(query: string) {
+		return this.http.get<{id: number, username: string}[]>(`${this.url}/auth/users/?search=${encodeURIComponent(query)}`);
+	}
+
+	sendFriendRequest(toUserId: number) {
+		return this.http.post(`${this.url}/friends/friend-requests/`, { to_user_id: toUserId });
+	}
+
+	getSentFriendRequests() {
+		return this.http.get<any[]>(`${this.url}/friends/friend-requests/sent/`);
+	}
+
+	socialLogin(provider: string, code: string) {
+		return this.http.post(`${this.url}/auth/social/`, { provider, code });
+	}
 }
