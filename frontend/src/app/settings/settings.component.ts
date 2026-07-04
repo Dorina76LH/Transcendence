@@ -89,6 +89,7 @@ import { NavbarComponent } from '../navbar/navbar.component';
 									maxlength="6"
 									class="form-control w-100 w-sm-auto"
 									(input)="filterDigits($event)"
+									(keyup.enter)="confirmEnableTwoFa()"
 								/>
 								<button class="btn btn-success w-100 w-sm-auto" [disabled]="confirmLoading" (click)="confirmEnableTwoFa()">
 									Confirm
@@ -113,6 +114,7 @@ import { NavbarComponent } from '../navbar/navbar.component';
 								maxlength="6"
 								class="form-control w-100 w-sm-auto"
 								(input)="filterDigits($event)"
+								(keyup.enter)="confirmDisableTwoFa()"
 							/>
 							<button class="btn btn-danger w-100 w-sm-auto" (click)="confirmDisableTwoFa()">
 								Disable 2FA
