@@ -1,6 +1,7 @@
 infra/nginx/ssl/*.crt
 infra/nginx/ssl/*.key
 infra/nginx/ssl/*.csr
+infra/backups
 .env
 .env.*
 !.env.example
@@ -17,7 +18,7 @@ env/
 .ruff_cache/
 
 # --- CONFIGURATION & SECRETS ---
-# Never commit the .env file to Git! 
+# Never commit the .env file to Git!
 # It contains passwords and secret keys.
 .env
 .env.local

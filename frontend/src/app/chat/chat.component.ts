@@ -40,42 +40,29 @@ interface ChatMessage {
   <div class="content w-100 px-4">
 	<div class="container-fluid h-100">
 	  <div class="row h-100">
-
 		<div class="col-12 col-md-3 border-end border-secondary py-3 text-start list-container"
 			 [class.hide-on-mobile]="selectedFriend !== null">
 		  <h5 class="text-white mb-4 px-2 tracking-wider">My Friends</h5>
-
 		  <div class="d-flex flex-column gap-1 list-box" style="overflow-y: auto; height: 430px;">
-
 			<button *ngFor="let friend of friends"
 					class="btn d-flex align-items-center w-100 text-start text-white conversation-item position-relative p-2 rounded-3"
 					[class.active-room]="selectedFriend?.id === friend.id"
 					(click)="selectFriend(friend)">
-
-			  <div class="active-indicator"></div>
-
 			  <div class="avatar-circle me-3 bg-gradient d-flex align-items-center justify-content-center shadow-sm fw-bold position-relative"
 				   style="width: 40px; height: 40px; min-width: 40px; border-radius: 50%;">
-
 				<img *ngIf="friend.avatar" [src]="friend.avatar" alt="avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
 				<span *ngIf="!friend.avatar">{{ friend.username.charAt(0).toUpperCase() }}</span>
-
 				<span *ngIf="friend.is_online"
 					  class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-dark rounded-circle online-badge">
 				</span>
 			  </div>
-
 			  <div class="flex-grow-1 overflow-hidden me-2">
-				<h6 class="mb-0 text-truncate fw-semibold text-white">
-				  {{ friend.username }}
-				</h6>
+				<h6 class="mb-0 text-truncate fw-semibold text-white">{{ friend.username }}</h6>
 				<small class="text-white-50 text-truncate d-block" style="font-size: 0.75rem;">
 				  {{ friend.conversation_id ? '💬 Active chat' : '✉️ New chat' }}
 				</small>
 			  </div>
-
 			</button>
-
 			<div *ngIf="friends.length === 0" class="text-center text-white-50 py-4">
 			  <i class="bi bi-people-fill d-block fs-3 mb-2"></i>
 			  <small>No friends in your list.</small>
@@ -85,58 +72,35 @@ interface ChatMessage {
 
 		<div class="col-12 col-md-9 d-flex flex-column py-3 px-3 chat-main-container"
 			 [class.hide-on-mobile]="selectedFriend === null">
-
 		  <h5 class="border-bottom border-secondary pb-2 text-white text-start d-flex align-items-center justify-content-between gap-2">
 			<div class="d-flex align-items-center overflow-hidden w-100">
 			  <button class="btn back-button-mobile" (click)="closeChatMobile()">←</button>
-			  <i class="bi bi-chat-right-text text-primary-emphasis d-none d-md-inline me-2"></i>
 			  <span class="text-truncate">{{ selectedFriend ? selectedFriend.username : 'Select a friend' }}</span>
 			</div>
 		  </h5>
-
 		  <div #scrollContainer class="flex-grow-1 overflow-auto mb-3 p-3 rounded shadow-inner chat-window-box">
-
 			<div *ngIf="selectedFriend === null" class="m-auto text-center py-5 text-muted">
-			  <div class="bg-dark bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-				<i class="bi bi-chat-square-quote fs-1 text-secondary"></i>
-			  </div>
 			  <h5>Your Live Messages</h5>
-			  <p class="small">Select one of your friends on the left to start a secure connection.</p>
 			</div>
-
 			<div *ngFor="let msg of messages" class="mb-3 d-flex flex-column w-100"
 				 [class.align-items-end]="isMe(msg.sender)"
 				 [class.align-items-start]="!isMe(msg.sender)">
-
-			  <small class="text-white-50 mb-1 px-2" style="font-size: 0.75rem; font-weight: 500;">
-				{{ msg.sender.username || msg.sender }} • {{ msg.created_at | date:'shortTime' }}
+			  <small class="text-white-50 mb-1 px-2" style="font-size: 0.75rem;">
+				{{ msg.sender.username }} • {{ msg.created_at | date:'shortTime' }}
 			  </small>
-
 			  <div class="p-2 px-3 rounded-4 shadow-sm message-bubble border text-start"
-				   [ngClass]="{
-					 'bubble-other': !isMe(msg.sender),
-					 'bubble-me': isMe(msg.sender)
-				   }">
+				   [ngClass]="{'bubble-other': !isMe(msg.sender), 'bubble-me': isMe(msg.sender)}">
 				{{ msg.content }}
 			  </div>
 			</div>
 		  </div>
-
 		  <div class="d-flex gap-2 p-1 bg-dark bg-opacity-25 rounded-pill shadow-inner">
-			<input
-			  class="form-control border-0 text-dark bg-white rounded-pill px-4 py-2"
-			  [(ngModel)]="inputMessage"
-			  (keyup.enter)="sendMessage()"
-			  [disabled]="selectedFriend === null">
-			<button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center p-0"
-					[disabled]="selectedFriend === null || !inputMessage.trim()"
-					(click)="sendMessage()"
-					style="width: 40px; height: 40px; min-width: 40px;">
-			  <i class="bi bi-send-fill text-white" style="font-size: 1rem; margin-left: 2px;"></i>
+			<input class="form-control border-0 text-dark bg-white rounded-pill px-4 py-2" [(ngModel)]="inputMessage" (keyup.enter)="sendMessage()" [disabled]="selectedFriend === null">
+			<button type="button" class="btn btn-primary rounded-circle" [disabled]="selectedFriend === null || !inputMessage.trim()" (click)="sendMessage()" style="width: 40px; height: 40px;">
+			  <i class="bi bi-send-fill text-white"></i>
 			</button>
 		  </div>
 		</div>
-
 	  </div>
 	</div>
   </div>
@@ -153,6 +117,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 	private detectedMyUsername: string | null = null;
 	private localUsername: string | null = null;
 	private activeSockets: { [key: number]: WebSocket } = {};
+	private statusSocket!: WebSocket;
 	private scrollContainer!: ElementRef;
 	private pollingInterval: any;
 
@@ -168,10 +133,27 @@ export class ChatComponent implements OnInit, OnDestroy {
 			this.localUsername = JSON.parse(userJson).username;
 		}
 		this.initChatDashboard();
+		this.connectToGlobalStatus();
 
 		this.pollingInterval = setInterval(() => {
 			this.checkForNewConversations();
 		}, 3000);
+	}
+
+	private connectToGlobalStatus() {
+		const token = localStorage.getItem('token') || '';
+		this.statusSocket = new WebSocket(`wss://localhost:8443/ws/status/?token=${token}`);
+
+		this.statusSocket.onmessage = (event) => {
+			const data = JSON.parse(event.data);
+			if (data.type === 'status_change') {
+				const friend = this.friends.find(f => f.id === data.user_id);
+				if (friend) {
+					friend.is_online = data.is_online;
+					this.cdr.detectChanges();
+				}
+			}
+		};
 	}
 
 	isMe(sender: any): boolean {
@@ -192,41 +174,23 @@ export class ChatComponent implements OnInit, OnDestroy {
 					is_online: f.friend.is_online || false,
 					conversation_id: null
 				}));
-
 				this.http.get<Conversation[]>('https://localhost:8443/api/chat/conversations/').subscribe({
-					next: (convsData) => {
-						this.mapFriendsToConversations(convsData);
-						this.cdr.detectChanges();
-					},
-					error: (err) => console.error('Error loading conversations:', err)
+					next: (convsData) => this.mapFriendsToConversations(convsData)
 				});
-			},
-			error: (err) => console.error('Error loading friends from backend:', err)
+			}
 		});
 	}
 
 	checkForNewConversations() {
 		this.http.get<Conversation[]>('https://localhost:8443/api/chat/conversations/').subscribe({
-			next: (convsData) => {
-				this.mapFriendsToConversations(convsData);
-				this.cdr.detectChanges();
-			}
+			next: (convsData) => this.mapFriendsToConversations(convsData)
 		});
 	}
 
 	mapFriendsToConversations(conversations: Conversation[]) {
-		if (conversations.length > 0 && !this.detectedMyUsername) {
-			const firstConv = conversations[0];
-			const foundMe = firstConv.participants.find(p => !this.friends.some(f => f.id === p.id));
-			if (foundMe) {
-				this.detectedMyUsername = foundMe.username;
-			}
-		}
-
 		conversations.forEach(conv => {
 			const currentUsername = this.localUsername || this.detectedMyUsername;
 			const friendPart = conv.participants.find(p => p.username !== currentUsername);
-
 			if (friendPart) {
 				const friendInList = this.friends.find(f => f.id === friendPart.id);
 				if (friendInList) {
@@ -240,30 +204,15 @@ export class ChatComponent implements OnInit, OnDestroy {
 	selectFriend(friend: Friend) {
 		this.selectedFriend = friend;
 		this.messages = [];
-
-		if (friend.conversation_id) {
-			this.fetchMessages(friend.conversation_id);
-		} else {
-			this.http.get<Conversation[]>('https://localhost:8443/api/chat/conversations/').subscribe({
-				next: (convsData) => {
-					this.mapFriendsToConversations(convsData);
-					if (this.selectedFriend && this.selectedFriend.conversation_id) {
-						this.fetchMessages(this.selectedFriend.conversation_id);
-					}
-				}
-			});
-		}
+		if (friend.conversation_id) this.fetchMessages(friend.conversation_id);
 	}
 
 	private fetchMessages(convId: number) {
 		this.http.get<ChatMessage[]>(`https://localhost:8443/api/chat/conversations/${convId}/messages/`)
-			.subscribe({
-				next: (history) => {
-					this.messages = history;
-					this.cdr.detectChanges();
-					this.scrollToBottom();
-				},
-				error: (err) => console.error('Erreur historique:', err)
+			.subscribe(history => {
+				this.messages = history;
+				this.cdr.detectChanges();
+				this.scrollToBottom();
 			});
 	}
 
@@ -271,33 +220,38 @@ export class ChatComponent implements OnInit, OnDestroy {
 		const messageToSend = this.inputMessage.trim();
 		if (!messageToSend || !this.selectedFriend) return;
 
-		if (!this.selectedFriend.conversation_id) {
-			this.http.post<Conversation>('https://localhost:8443/api/chat/conversations/create/', { participant_id: this.selectedFriend.id })
-				.subscribe({
-					next: (newConv) => {
-						if (this.selectedFriend) {
-							this.selectedFriend.conversation_id = newConv.id;
-							const friendInList = this.friends.find(f => f.id === this.selectedFriend!.id);
-							if (friendInList) {
-								friendInList.conversation_id = newConv.id;
-							}
-							this.connectToWebSocket(newConv.id);
-							const checkSocketAndSend = setInterval(() => {
-								const socket = this.activeSockets[newConv.id];
-								if (socket && socket.readyState === WebSocket.OPEN) {
-									this.sendViaSocket(newConv.id, messageToSend);
-									clearInterval(checkSocketAndSend);
-								}
-							}, 50);
+		this.inputMessage = '';
+		this.cdr.detectChanges();
 
-							this.cdr.detectChanges();
-						}
-					},
-					error: (err) => console.error('Error automatic discussion creation:', err)
-				});
-		} else {
+		if (this.selectedFriend.conversation_id) {
 			this.sendViaSocket(this.selectedFriend.conversation_id, messageToSend);
+			return;
 		}
+
+		this.http.post<Conversation>('https://localhost:8443/api/chat/conversations/create/', {
+			participant_id: this.selectedFriend.id
+		}).subscribe({
+			next: (newConv) => {
+				if (this.selectedFriend) {
+					this.selectedFriend.conversation_id = newConv.id;
+					const friendInList = this.friends.find(f => f.id === this.selectedFriend!.id);
+					if (friendInList) friendInList.conversation_id = newConv.id;
+					this.connectToWebSocket(newConv.id);
+					const interval = setInterval(() => {
+						const socket = this.activeSockets[newConv.id];
+						if (socket && socket.readyState === WebSocket.OPEN) {
+							clearInterval(interval);
+							this.sendViaSocket(newConv.id, messageToSend);
+						}
+					}, 50);
+				}
+			},
+			error: (err) => {
+				console.error('Erreur:', err);
+				this.inputMessage = messageToSend;
+				this.cdr.detectChanges();
+			}
+		});
 	}
 
 	private sendViaSocket(convId: number, text: string) {
@@ -306,8 +260,6 @@ export class ChatComponent implements OnInit, OnDestroy {
 			socket.send(JSON.stringify({ message: text }));
 			this.inputMessage = '';
 			this.cdr.detectChanges();
-		} else {
-			console.error('WebSocket is not ready or disconnected for conversation:', convId);
 		}
 	}
 
@@ -319,57 +271,37 @@ export class ChatComponent implements OnInit, OnDestroy {
 
 	connectToWebSocket(conversationId: number) {
 		if (this.activeSockets[conversationId]) return;
-
 		const token = localStorage.getItem('token') || '';
 		const socket = new WebSocket(`wss://localhost:8443/ws/chat/conversations/${conversationId}/?token=${token}`);
 		this.activeSockets[conversationId] = socket;
 
 		socket.onmessage = (event) => {
 			const data = JSON.parse(event.data);
-
-			if (data.type === 'status_change') {
-				const targetFriend = this.friends.find(f => f.id === data.user_id);
-				if (targetFriend) {
-					targetFriend.is_online = data.is_online;
-					this.cdr.detectChanges();
-				}
-				return;
-			}
-
-			const extractedUsername = data.username || data.sender?.username || 'Friend';
-
-			const formattedMessage: ChatMessage = {
-				content: data.content || data.message || '',
-				created_at: data.created_at || new Date().toISOString(),
-				sender: { username: extractedUsername }
-			};
-
 			if (this.selectedFriend && this.selectedFriend.conversation_id === conversationId) {
-				this.messages.push(formattedMessage);
+				 const newMessage: ChatMessage = {
+					content: data.message,
+					created_at: data.created_at,
+				 	sender: { username: data.username }
+				};
+
+				this.messages = [...this.messages, newMessage];
 				this.scrollToBottom();
+				this.cdr.detectChanges();
+			} else {
+				console.log("Message reçu pour une autre conversation, ignoré.");
 			}
-
-			this.cdr.detectChanges();
 		};
-
-		socket.onerror = (err) => console.error(`WebSocket Error:`, err);
-		socket.onclose = () => { delete this.activeSockets[conversationId]; };
 	}
 
 	private scrollToBottom(): void {
 		if (this.scrollContainer?.nativeElement) {
-			Promise.resolve().then(() => {
-				this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
-			});
+			Promise.resolve().then(() => this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight);
 		}
 	}
 
 	ngOnDestroy() {
-		if (this.pollingInterval) {
-			clearInterval(this.pollingInterval);
-		}
-		Object.keys(this.activeSockets).forEach(key => {
-			this.activeSockets[Number(key)].close();
-		});
+		if (this.pollingInterval) clearInterval(this.pollingInterval);
+		if (this.statusSocket) this.statusSocket.close();
+		Object.keys(this.activeSockets).forEach(key => this.activeSockets[Number(key)].close());
 	}
 }
