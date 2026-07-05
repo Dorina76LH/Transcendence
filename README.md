@@ -191,6 +191,44 @@ We followed a strict **"1 Trello card = 1 branch = 1 PR"** policy to ensure code
 | **Isolation** | Attempt direct access `http://localhost:8000` | Connection failure (Port hidden) |
 | **Database** | Attempt direct access `localhost:5432` | Connection failure (Isolated in internal network) |
 
+## 🛡️ Health Check & Backups
+
+The system is engineered for maximum uptime and reliability, featuring automated health monitoring, robust data persistence, and a proven "Zero-Loss" disaster recovery workflow.
+
+### 1. Health Monitoring & Service Orchestration
+To prevent cascading failures during startup, the infrastructure employs a strict service-dependency protocol:
+
+* **Docker Native Healthcheck:** The database container performs a `pg_isready` check every 5 seconds. The `backend` service is configured to depend on this healthy state before attempting to initialize.
+* **Entrypoint Guard:** An automated `netcat` (`nc -z db 5432`) loop in the `entrypoint.sh` script halts database migrations until the SQL port is fully open and responsive, ensuring a stable database connection from the very first millisecond.
+* **Visual Status Dashboard:** **PGAdmin 4** is integrated into the stack (accessible via port **5050**), serving as a real-time monitoring dashboard to track database load, memory usage, and active connections.
+
+### 2. Data Integrity & Persistence
+Data is shielded from the volatile lifecycle of containers through strict isolation:
+
+* **Isolated Persistence:** All critical data resides in named Docker volumes (`postgres_data`). This ensures that even if containers are destroyed or updated, the database content remains intact on the host storage.
+* **Snapshot-Ready Backups:** Using `make backup`, the system triggers an industry-standard `pg_dump` of the live database, allowing for consistent, "hot" snapshots without interrupting user sessions or the chat service.
+
+### 3. Disaster Recovery Plan (The "Zero-Loss" Protocol)
+In the event of a catastrophic system failure, the architecture supports a rapid, two-step restoration process:
+
+1. **Cold Reconstruction:** Use `docker compose up -d` to rebuild the entire containerized environment from scratch.
+2. **Automated Injection:** Run `make restore` to automatically detect the latest snapshot and inject it into the fresh database instance.
+
+| Feature | Tool / Command | Purpose |
+| :--- | :--- | :--- |
+| **Health Check** | `pg_isready` | Ensures DB availability before backend starts |
+| **Status Page** | PGAdmin 4 (Port 5050) | Real-time monitoring of DB load and health |
+| **Backup** | `make backup` | Automated, non-disruptive hot snapshots |
+| **Recovery** | `make restore` | Instant data re-injection for full system recovery |
+
+---
+
+### 💡 Resilience Best Practice
+* **Routine Maintenance:** It is recommended to run `make backup` periodically or before any major structural code changes.
+
+
+---
+
 * **🛠️ Maintenance Notes:**
   * **Persistence:** Database data is persisted via the `postgres_data` volume.
   * **Security:** Private keys are excluded from version control via `.gitignore`.
