@@ -242,6 +242,7 @@ Note: All fields are optional. Content-Type must be multipart/form-data if an av
   "detail": "Successfully disconnected."
 }
 ```
+</details>
 
 ---
 
@@ -251,7 +252,34 @@ Note: All fields are optional. Content-Type must be multipart/form-data if an av
 
 ## 👥 3. Friends & Relations Module
 
+### 📋 Endpoints Overview
 
+| Method | Endpoint | Auth Required? | Payload (Expected JSON) | Success HTTP | Usage |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **GET** | `api/friends/` | ✅ Yes | *None* | `200` | List all accepted friends of the current user |
+| **GET** | `api/friends/friend-requests/` | ✅ Yes | *None* | `200` | List all friend requests (sent + received) |
+| **POST** | `api/friends/friend-requests/` | ✅ Yes | `to_user` (user id) | `201` | Send a friend request |
+| **GET** | `api/friends/friend-requests/received/` | ✅ Yes | *None* | `200` | List pending requests received |
+| **GET** | `api/friends/friend-requests/sent/` | ✅ Yes | *None* | `200` | List pending requests sent |
+| **PATCH** | `api/friends/friend-requests/<id>/accept/` | ✅ Yes | *None* | `200` | Accept a received request |
+| **PATCH** | `api/friends/friend-requests/<id>/reject/` | ✅ Yes | *None* | `200` | Reject a received request |
+| **DELETE** | `api/friends/friend-requests/<id>/cancel/` | ✅ Yes | *None* | `200` | Cancel a sent request (soft: sets status to `CANCELED`, row kept) |
+| **DELETE** | `api/friends/<friend_id>/` | ✅ Yes | *None* | `204` | Remove an accepted friend (hard delete of the Friendship row) |
+
+### 🔍 Backend Implementation Mapping (Friends & Relations)
+
+> 🔒 **Global Policy:** `permission_classes = [IsAuthenticated]` is mandatory across this entire module.
+
+| Endpoint | Django View Class | DRF Generic Class | Active HTTP Verbs | Custom Guards & Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `api/friends/` | `FriendListView` | `ListAPIView` | **GET** | Filters `Friendship` rows where the current user is on either side (`user_id` or `friend_user_id`). |
+| `api/friends/friend-requests/` | `FriendRequestView` | `ListCreateAPIView` | **GET** / **POST** | GET returns all requests where current user is sender or receiver. POST validates and creates a new request. |
+| `api/friends/friend-requests/received/` | `FriendRequestReceivedView` | `ListAPIView` | **GET** | Filters requests where `to_user == request.user` and `status == PENDING`. |
+| `api/friends/friend-requests/sent/` | `FriendRequestSentView` | `ListAPIView` | **GET** | Filters requests where `from_user == request.user` and `status == PENDING`. |
+| `api/friends/friend-requests/<id>/accept/` | `FriendRequestAcceptView` | `UpdateAPIView` | **PUT** / **PATCH** | **Guard:** `IsReceiverOfRequest`. Calls `friend_request.accept()` which updates status and creates a `Friendship` row atomically. |
+| `api/friends/friend-requests/<id>/reject/` | `FriendRequestRejectView` | `UpdateAPIView` | **PUT** / **PATCH** | **Guard:** `IsReceiverOfRequest`. Sets `status = REJECTED`. Only works on `PENDING` requests. |
+| `api/friends/friend-requests/<id>/cancel/` | `FriendRequestCancelView` | `DestroyAPIView` | **DELETE** | **Guard:** `IsSenderOfRequest`. Overrides `destroy()` — does **not** delete the row, sets `status = CANCELED`. Only works on `PENDING` requests. |
+| `api/friends/<friend_id>/` | `FriendUnfriendView` | `DestroyAPIView` | **DELETE** | No extra guard. Finds the `Friendship` row by both user IDs (order-independent) and hard-deletes it. Returns `204`. |
 
 ---
 
