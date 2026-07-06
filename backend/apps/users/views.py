@@ -146,7 +146,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 #    - RefreshToken: To manipulate tokens (like blacklisting them for Logout).
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 # 5. Local Experts (Custom Serializers)
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, PreAuthToken, UserExportSerializer
@@ -172,6 +172,7 @@ import requests
 
 # 7. Django settings to read client_id / client_secret from .env
 from django.conf import settings
+from django.contrib.auth import login as django_login, logout as django_logout
 
 # 8. SocialAccount model to store provider + uid links
 from .models import SocialAccount
@@ -245,9 +246,48 @@ class RegisterView(generics.CreateAPIView):
 # We override the default SimpleJWT view to use our LoginSerializer, 
 # which includes extra logic (like checking if the user is_active).
 # -----------------------------------------------------------------------------
+def login_django_admin_session(request, user):
+    """
+    Create a Django session only for users that are allowed to enter /admin/.
+    Angular keeps using JWT, but Django Admin needs the sessionid cookie.
+    """
+    if (
+        user
+        and user.is_active
+        and user.is_staff
+        and user.is_superuser
+        and user.role == User.Role.ADMIN
+    ):
+        django_login(
+            request,
+            user,
+            backend='django.contrib.auth.backends.ModelBackend',
+        )
+        return True
+    return False
+
+
 class LoginView(TokenObtainPairView):
     # Swap the default serializer with our custom one
     serializer_class = LoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        user = getattr(serializer, 'user', None)
+        data = serializer.validated_data
+
+        # If 2FA is enabled, wait until the OTP is verified before opening
+        # the Django Admin session.
+        if not data.get('requires_2fa'):
+            login_django_admin_session(request, user)
+
+        return Response(data, status=status.HTTP_200_OK)
 
 
 
@@ -384,6 +424,7 @@ class LogoutView(APIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
             token.blacklist()
+            django_logout(request)
 
             # Build the response and delete any auth cookies if present
             response = Response(
@@ -594,6 +635,7 @@ class TwoFAVerifyView(APIView):
         # All checks passed → mark online and issue real JWT tokens
         user.is_online = True
         user.save(update_fields=['is_online'])
+        login_django_admin_session(request, user)
 
         refresh = RefreshToken.for_user(user)
         return Response({
