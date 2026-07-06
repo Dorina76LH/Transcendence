@@ -49,7 +49,7 @@ class UserSimpleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'avatar_url']
+        fields = ['id', 'username', 'email', 'avatar_url', 'is_online']
 
     def get_avatar_url(self, obj):
         return obj.avatar_url

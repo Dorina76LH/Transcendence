@@ -111,3 +111,10 @@ body {
     border: none;
   }
 }
+
+.online-badge {
+    width: 11px;
+    height: 11px;
+    transform: translate(10%, 10%);
+    z-index: 2;
+}
