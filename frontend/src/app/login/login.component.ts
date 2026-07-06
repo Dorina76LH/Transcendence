@@ -9,14 +9,15 @@ import { environment } from '../../environments/environment';
 @Component({
 	selector: 'user-login',
 	imports: [FormsModule, CommonModule, NavbarComponent],
-	template: `
+template: `
 <app-navbar></app-navbar>
 <main class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 56px);">
-	<div class="card border-secondary p-4" style="width: 450px;">
+	<div class="card border-secondary p-4 w-100" style="max-width: 450px;">
 
 		<ng-container *ngIf="!requires2fa">
 		<h2 class="text-center mb-4">Login</h2>
-		<form>
+		
+		<form (ngSubmit)="login()">
 			<div class="mb-3">
 				<label class="form-label">Email</label>
 				<input class="form-control border-secondary rounded-pill"
@@ -33,10 +34,12 @@ import { environment } from '../../environments/environment';
 			</div>
 			<p class="text-danger text-center" *ngIf="errorMessage">{{ errorMessage }}</p>
 			<div class="d-grid mt-4">
-				<button type="button" class="btn btn-primary rounded-pill" [disabled]="loading" (click)="login()">
+				
+				<button type="submit" class="btn btn-primary rounded-pill" [disabled]="loading">
 					<span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
 					Login
 				</button>
+				
 			</div>
 		</form>
 
@@ -59,7 +62,8 @@ import { environment } from '../../environments/environment';
 		<ng-container *ngIf="requires2fa">
 			<h2 class="text-center mb-2">Two-Factor Authentication</h2>
 			<p class="text-center text-secondary mb-4" style="font-size: 0.9rem;">Enter the 6-digit code from your authenticator app.</p>
-			<form>
+			
+			<form (ngSubmit)="verify2FA()">
 				<div class="mb-3">
 					<label class="form-label">Authentication code</label>
 					<input id="otpInput"
@@ -69,9 +73,7 @@ import { environment } from '../../environments/environment';
 							placeholder="000000"
 							maxlength="6"
 							[(ngModel)]="otpCode" name="otpCode"
-							(input)="filterDigits($event)"
-							(keyup.enter)="verify2FA()">
-					<div class="text-center mt-2">
+							(input)="filterDigits($event)"> <div class="text-center mt-2">
 						<small [class]="totpSeconds <= 5 ? 'text-danger' : 'text-secondary'">
 							Code expires in {{ totpSeconds }}s
 						</small>
@@ -79,7 +81,7 @@ import { environment } from '../../environments/environment';
 				</div>
 				<p class="text-danger text-center" *ngIf="errorMessage">{{ errorMessage }}</p>
 				<div class="d-grid mt-4">
-					<button type="button" class="btn btn-primary rounded-pill" [disabled]="loading" (click)="verify2FA()">
+					<button type="submit" class="btn btn-primary rounded-pill" [disabled]="loading">
 						<span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
 						Verify
 					</button>

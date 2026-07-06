@@ -9,8 +9,8 @@ import { NavbarComponent } from '../navbar/navbar.component';
 	imports: [CommonModule, NavbarComponent],
 	template: `
 <app-navbar></app-navbar>
-<main class="Profile">
-	<div class="card border-secondary p-4" style="width: 450px;">
+<main class="Profile px-3">
+	<div class="card border-secondary p-4 w-100" style="max-width: 450px;">
 		<h2 class="text-center mb-4">Profile overview</h2>
 		<div class="text-center mb-4">
 			<img [src]="profile?.avatar_url || 'Zoliac.png'" class="rounded-circle border border-secondary" style="width:100px; height:100px; object-fit: cover;">

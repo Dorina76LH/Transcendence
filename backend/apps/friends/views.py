@@ -198,5 +198,10 @@ class FriendUnfriendView(generics.DestroyAPIView):
 		user = request.user
 		if friendship.user_id_id != user.id and friendship.friend_user_id_id != user.id:
 			raise Http404
+		friend_id = friendship.friend_user_id_id if friendship.user_id_id == user.id else friendship.user_id_id
+		FriendRequest.objects.filter(
+			Q(from_user_id=user.id, to_user_id=friend_id) |
+			Q(from_user_id=friend_id, to_user_id=user.id)
+		).delete()
 		friendship.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)

@@ -87,13 +87,13 @@ body {
   display: none !important;
 }
 
-@media (max-width: 767.98px) {
+@media (width: 767.98px) {
   .hide-on-mobile {
     display: none !important;
   }
 
   .list-container, .chat-main-container {
-    width: 100% !important;
+    max-width: 100% !important;
     max-width: 100% !important;
   }
 

@@ -37,15 +37,15 @@ interface ChatMessage {
 <app-navbar></app-navbar>
 
 <main class="main">
-  <div class="content w-100 px-4">
+  <div class="content px-4">
 	<div class="container-fluid h-100">
 	  <div class="row h-100">
 		<div class="col-12 col-md-3 border-end border-secondary py-3 text-start list-container"
 			 [class.hide-on-mobile]="selectedFriend !== null">
 		  <h5 class="text-white mb-4 px-2 tracking-wider">My Friends</h5>
-		  <div class="d-flex flex-column gap-1 list-box" style="overflow-y: auto; height: 430px;">
+		  <div class="d-flex flex-column gap-1 list-box" style="overflow-y: auto; max-height: 430px;">
 			<button *ngFor="let friend of friends"
-					class="btn d-flex align-items-center w-100 text-start text-white conversation-item position-relative p-2 rounded-3"
+					class="btn d-flex align-items-center text-start text-white conversation-item position-relative p-2 rounded-3"
 					[class.active-room]="selectedFriend?.id === friend.id"
 					(click)="selectFriend(friend)">
 			  <div class="avatar-circle me-3 bg-gradient d-flex align-items-center justify-content-center shadow-sm fw-bold position-relative"
@@ -82,7 +82,8 @@ interface ChatMessage {
 			<div *ngIf="selectedFriend === null" class="m-auto text-center py-5 text-muted">
 			  <h5>Your Live Messages</h5>
 			</div>
-			<div *ngFor="let msg of messages" class="mb-3 d-flex flex-column w-100"
+
+			<div *ngFor="let msg of messages" class="mb-3 d-flex flex-column"
 				 [class.align-items-end]="isMe(msg.sender)"
 				 [class.align-items-start]="!isMe(msg.sender)">
 			  <small class="text-white-50 mb-1 px-2" style="font-size: 0.75rem;">
@@ -165,7 +166,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 	}
 
 	initChatDashboard() {
-		this.http.get<any[]>('https://localhost:8443/api/friends/friends').subscribe({
+		this.http.get<any[]>('https://localhost:8443/api/friends/').subscribe({
 			next: (friendships) => {
 				this.friends = friendships.map(f => ({
 					id: f.friend.id,

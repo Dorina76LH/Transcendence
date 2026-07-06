@@ -15,8 +15,12 @@ export class UserService {
 		return this.http.post(`${this.url}/auth/login/`, { email, password });
 	}
 
-	register(firstName: string, surname: string, email: string, password: string) {
-		return this.http.post(`${this.url}/auth/register/`, { firstName, surname, email, password });
+	register(username: string, email: string, password: string) {
+		return this.http.post(`${this.url}/auth/register/`, {
+			username,
+			email,
+			password
+		});
 	}
 
 	getProfile() {
@@ -29,6 +33,26 @@ export class UserService {
 
 	getUserFriends() {
 		return this.http.get(`${this.url}/friends/`);
+	}
+
+	getReceivedFriendRequests() {
+		return this.http.get(`${this.url}/friends/friend-requests/received/`);
+	}
+
+	acceptFriendRequest(requestId: number) {
+		return this.http.patch(`${this.url}/friends/friend-requests/${requestId}/accept/`, {});
+	}
+
+	declineFriendRequest(requestId: number) {
+		return this.http.patch(`${this.url}/friends/friend-requests/${requestId}/reject/`, {});
+	}
+
+	cancelFriendRequest(requestId: number) {
+		return this.http.delete(`${this.url}/friends/friend-requests/${requestId}/cancel/`);
+	}
+
+	removeFriend(friendUserId: number) {
+		return this.http.delete(`${this.url}/friends/${friendUserId}/`);
 	}
 
 	logout() {

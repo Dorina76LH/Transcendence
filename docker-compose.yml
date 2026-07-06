@@ -9,6 +9,7 @@ services:
     volumes:
       - ./infra/nginx/conf.d:/etc/nginx/conf.d
       - static_volume:/etc/nginx/static
+      - media_volume:/etc/nginx/media
       #- ./infra/nginx/ssl:/etc/nginx/ssl
     networks:
       - gateway
@@ -40,6 +41,7 @@ services:
     volumes:
       - ./backend:/usr/src/app
       - static_volume:/usr/src/app/static
+      - media_volume:/usr/src/app/media
     networks:
       - gateway
       - internal
@@ -99,3 +101,4 @@ volumes:
   postgres_data:
   pgadmin_data:
   static_volume:
+  media_volume:

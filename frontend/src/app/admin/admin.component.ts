@@ -41,7 +41,7 @@ interface LoggedUser {
     <ng-template #accessDenied>
       <main class="AdminPageAccess">
         <div class="card border-secondary p-4">
-          <h1>Acess denied</h1>
+          <h1>Access denied</h1>
           <p>This page is reserved for admin users.</p>
           <a routerLink="/" class="btn btn-primary">Back home</a>
         </div>
@@ -54,7 +54,10 @@ export class AdminComponent implements OnInit {
   currentUser: LoggedUser | null = null;
   isAdmin = false;
 
-  constructor(private userService: UserService, private router: Router) {}
+  constructor(
+    private userService: UserService,
+    private router: Router,
+  ) {}
 
   ngOnInit() {
     this.loadCurrentUser();
