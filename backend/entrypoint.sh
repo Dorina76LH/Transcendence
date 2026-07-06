@@ -21,6 +21,32 @@ if echo "$@" | grep -qE "runserver|daphne"; then
 
     echo "Checking/Creating Superuser..."
     python manage.py createsuperuser --noinput || true
+
+    echo "Assigning admin role to superuser..."
+    python manage.py shell -c "
+import os
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
+username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+
+if email:
+    user = User.objects.filter(email=email).first()
+elif username:
+    user = User.objects.filter(username=username).first()
+else:
+    user = None
+
+if user:
+    user.role = User.Role.ADMIN
+    user.is_staff = True
+    user.is_superuser = True
+    user.save(update_fields=['role', 'is_staff', 'is_superuser'])
+    print(f'Superuser {user.email or user.username} has role admin')
+else:
+    print('No superuser found to assign admin role')
+" || true
 fi
 
 echo "Executing command: $@"
