@@ -70,6 +70,7 @@ export class RegisterComponent {
 			next: (response: any) => {
 				localStorage.setItem('token', response.access);
 				localStorage.setItem('refresh', response.refresh);
+				localStorage.setItem('user', JSON.stringify(response.user));
 				this.router.navigate(['/profile']);
 			},
 			error: (err: any) => {
