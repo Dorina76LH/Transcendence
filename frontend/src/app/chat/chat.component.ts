@@ -182,10 +182,42 @@ export class ChatComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.loadCurrentUser();
+  }
+
+  private loadCurrentUser() {
+    if (this.loadCurrentUserFromStorage()) {
+      this.startChat();
+      return;
+    }
+
+    this.http.get<any>('/api/auth/me/').subscribe({
+      next: (user) => {
+        this.localUsername = user?.username || null;
+        if (user) {
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+        this.startChat();
+      },
+      error: () => this.startChat(),
+    });
+  }
+
+  private loadCurrentUserFromStorage(): boolean {
     const userJson = localStorage.getItem('user');
     if (userJson) {
-      this.localUsername = JSON.parse(userJson).username;
+      try {
+        this.localUsername = JSON.parse(userJson).username || null;
+      } catch {
+        localStorage.removeItem('user');
+        this.localUsername = null;
+      }
     }
+
+    return !!this.localUsername;
+  }
+
+  private startChat() {
     this.initChatDashboard();
     this.connectToGlobalStatus();
 

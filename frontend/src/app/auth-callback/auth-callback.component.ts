@@ -31,15 +31,15 @@ export class OAuthCallbackComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
-		if (localStorage.getItem('token')) {
-			this.router.navigate(['/']);
-			return;
-		}
-
 		const params = this.route.snapshot.queryParamMap;
 		const code     = params.get('code');
 		const state    = params.get('state');
 		const provider = params.get('provider') ?? sessionStorage.getItem('oauth_provider');
+
+		if (localStorage.getItem('token') && !code) {
+			this.router.navigate(['/']);
+			return;
+		}
 
 		const savedState = sessionStorage.getItem('oauth_state');
 		sessionStorage.removeItem('oauth_state');
@@ -59,7 +59,10 @@ export class OAuthCallbackComponent implements OnInit {
 			next: (response: any) => {
 				localStorage.setItem('token', response.access);
 				localStorage.setItem('refresh', response.refresh);
-				this.router.navigate(['/']);
+				if (response.user) {
+					localStorage.setItem('user', JSON.stringify(response.user));
+				}
+				this.router.navigate([response.user?.role === 'admin' ? '/admin-panel' : '/']);
 			},
 			error: () => {
 				this.error = 'Authentication failed. Please try again.';

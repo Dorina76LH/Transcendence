@@ -714,12 +714,15 @@ class SocialAuthView(APIView):
 
         # STEP 3 — Upsert = update+insert user in PostgreSQL
         user = self._upsert_user(provider, profile)
+        user.is_online = True
+        user.save(update_fields=['is_online'])
 
         # STEP 4 — Generate Django JWT and return it to Angular
         refresh = RefreshToken.for_user(user)
         return Response({
             'access':  str(refresh.access_token),
             'refresh': str(refresh),
+            'user':    UserSerializer(user).data,
         }, status=status.HTTP_200_OK)
 
     # -------------------------------------------------------------------------

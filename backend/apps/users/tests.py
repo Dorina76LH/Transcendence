@@ -80,7 +80,10 @@ class SocialAuthViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('access', response.data)
         self.assertIn('refresh', response.data)
+        self.assertIn('user', response.data)
+        self.assertEqual(response.data['user']['email'], 'ada@gmail.com')
         self.assertEqual(User.objects.count(), 1)
+        self.assertTrue(User.objects.get().is_online)
         self.assertEqual(SocialAccount.objects.filter(provider='google').count(), 1)
 
     @patch('apps.users.views.requests.get')
