@@ -2,6 +2,18 @@
 
 # ft_transcendence - Advanced Web Platform
 
+## Makefile Commands
+The project Makefile provides short commands to run and maintain the Docker-based environment:
+
+| Command | Description |
+| :--- | :--- |
+| `make`| Checks required dependencies, makes the dependency script executable, then builds and starts all Docker Compose services in detached mode. |
+| `make down` | Stops and removes the Docker Compose containers and network created for the project. |
+| `make re` | Restarts the project from scratch by running `make down` followed by `make all`. |
+| `make clean` | Stops the project and removes unused Docker data with `docker system prune -af`. |
+| `make backup` | Creates a timestamped PostgreSQL database dump inside `infra/backups/`. |
+| `make restore` | Restores the PostgreSQL database from the most recent SQL backup found in `infra/backups/`. |
+
 ## 📝 Description
 **ft_transcendence** is a high-end single-page application (SPA) designed to provide a secure and scalable social environment. The project emphasizes advanced backend architecture, real-time communication, and rigorous security protocols. Users can interact through a live chat, manage their profiles with OAuth security, and navigate a platform designed for high performance and responsiveness.
 
@@ -64,6 +76,10 @@ The platform uses **PostgreSQL** as its primary data store. The schema is manage
 
 3.  **Launch with Docker:**
     docker-compose up --build -d
+
+    | or |
+
+    make
 
 4.  **Access:**
    * 8080 -> port 80  on nginx -> HTTP
