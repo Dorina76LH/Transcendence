@@ -251,31 +251,7 @@ Note: All fields are optional. Content-Type must be multipart/form-data if an av
 
 ## 👥 3. Friends & Relations Module
 
-[
-   * **ListAPIView** — used by FriendListView, FriendRequestReceivedView, FriendRequestSentView
-   * **ListCreateAPIView** — used by FriendRequestView
-   * **UpdateAPIView** — used by FriendRequestAcceptView, FriendRequestRejectView
-   * **DestroyAPIView** — used by FriendRequestCancelView (overrides destroy to cancel, not delete) and FriendUnfriendView
-   * **RetrieveUpdateDestroyAPIView** — used by MeView
-  ]
 
-<!-- 
-
-### 🔍 Backend Implementation Mapping (Friends & Relations)
-
-> 🔒 **Global Policy:** `permission_classes = [IsAuthenticated]` is mandatory across this entire module.
-
-| Endpoint | Django View Class | DRF Generic Class | Active HTTP Verbs | Custom Guards & Validation Specs |
-| :--- | :--- | :--- | :--- | :--- |
-| `api/friends/` | `FriendListView` | `ListAPIView` | **GET** | Automatically filters and returns established relationships where status is active. |
-| `api/friends/requests/received/` | `FriendRequestReceivedView` | `ListAPIView` | **GET** | Evaluates relations where `receiver == request.user` and status is pending. |
-| `api/friends/requests/sent/` | `FriendRequestSentView` | `ListAPIView` | **GET** | Evaluates relations where `sender == request.user` and status is pending. |
-| `api/friends/requests/` | `FriendRequestView` | `ListCreateAPIView` | **GET** / **POST** | Handles request dispatch. Validates that users cannot request themselves. |
-| `api/friends/requests/<id>/accept/`| `FriendRequestAcceptView` | `UpdateAPIView` | **PATCH** / **PUT** | **Guard:** `IsReceiverOfRequest`. Updates relationship state to active. |
-| `api/friends/requests/<id>/reject/`| `FriendRequestRejectView` | `UpdateAPIView` | **PATCH** / **PUT** | **Guard:** `IsReceiverOfRequest`. Updates relationship state to rejected. |
-| `api/friends/requests/<id>/cancel/`| `FriendRequestCancelView` | `DestroyAPIView` | **DELETE** | **Guard:** `IsSenderOfRequest`. Overrides destroy to apply status update (`CANCELED`). |
-| `api/friends/<id>/unfriend/` | `FriendUnfriendView` | `DestroyAPIView` | **DELETE** | Terminates the active relationship match between the two user IDs. |
- -->
 
 ---
 
